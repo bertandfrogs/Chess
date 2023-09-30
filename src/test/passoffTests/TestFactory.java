@@ -7,32 +7,37 @@ import chess.*;
  * Add in code using your classes for each method for each FIXME
  */
 public class TestFactory {
+    private static ChessGame chessGame;
+    private static ChessBoard chessBoard;
+    private static ChessPiece chessPiece;
+    private static ChessPosition chessPosition;
+    private static ChessMove chessMove;
 
     //Chess Functions
     //------------------------------------------------------------------------------------------------------------------
     public static ChessBoard getNewBoard(){
-        // FIXME
-		return null;
+        chessBoard = new ChessBoardImp();
+		return chessBoard;
     }
 
     public static ChessGame getNewGame(){
-        // FIXME
-		return null;
+        chessGame = new ChessGameImp();
+		return chessGame;
     }
 
     public static ChessPiece getNewPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type){
-        // FIXME
-		return null;
+        chessPiece = new ChessPieceImp(pieceColor, type);
+		return chessPiece;
     }
 
     public static ChessPosition getNewPosition(Integer row, Integer col){
-        // FIXME
-		return null;
+        chessPosition = new ChessPositionImp(row, col);
+		return chessPosition;
     }
 
     public static ChessMove getNewMove(ChessPosition startPosition, ChessPosition endPosition, ChessPiece.PieceType promotionPiece){
-        // FIXME
-		return null;
+        chessMove = new ChessMoveImp(startPosition, endPosition, promotionPiece);
+        return chessMove;
     }
     //------------------------------------------------------------------------------------------------------------------
 
