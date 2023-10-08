@@ -1,6 +1,10 @@
 package passoffTests.chessTests.chessPieceTests;
 
-import chess.*;
+import chess.interfaces.ChessBoard;
+import chess.interfaces.ChessGame;
+import chess.interfaces.ChessMove;
+import chess.interfaces.ChessPosition;
+import chess.interfaces.ChessPiece;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

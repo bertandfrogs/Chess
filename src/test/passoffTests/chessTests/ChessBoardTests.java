@@ -1,9 +1,9 @@
 package passoffTests.chessTests;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.interfaces.ChessBoard;
+import chess.interfaces.ChessGame;
+import chess.interfaces.ChessPiece;
+import chess.interfaces.ChessPosition;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +18,6 @@ public class ChessBoardTests {
     public void setup() {
         board = TestFactory.getNewBoard();
     }
-
 
     @Test
     @DisplayName("Add and Get Piece")

@@ -1,43 +1,41 @@
 package passoffTests;
 
 import chess.*;
+import chess.interfaces.*;
+import chess.pieces.*;
 
 /**
  * Used for testing your code
  * Add in code using your classes for each method for each FIXME
  */
 public class TestFactory {
-    private static ChessGame chessGame;
-    private static ChessBoard chessBoard;
-    private static ChessPiece chessPiece;
-    private static ChessPosition chessPosition;
-    private static ChessMove chessMove;
-
     //Chess Functions
     //------------------------------------------------------------------------------------------------------------------
     public static ChessBoard getNewBoard(){
-        chessBoard = new ChessBoardImp();
-		return chessBoard;
+        return new Board();
     }
 
-    public static ChessGame getNewGame(){
-        chessGame = new ChessGameImp();
-		return chessGame;
+    public static chess.interfaces.ChessGame getNewGame(){
+        return new Game();
     }
 
-    public static ChessPiece getNewPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type){
-        chessPiece = new ChessPieceImp(pieceColor, type);
-		return chessPiece;
+    public static ChessPiece getNewPiece(chess.interfaces.ChessGame.TeamColor pieceColor, ChessPiece.PieceType type){
+        return switch (type) {
+            case PAWN -> new Pawn(pieceColor);
+            case ROOK -> new Rook(pieceColor);
+            case KNIGHT -> new Knight(pieceColor);
+            case BISHOP -> new Bishop(pieceColor);
+            case QUEEN -> new Queen(pieceColor);
+            case KING -> new King(pieceColor);
+        };
     }
 
     public static ChessPosition getNewPosition(Integer row, Integer col){
-        chessPosition = new ChessPositionImp(row, col);
-		return chessPosition;
+        return new Position(row, col);
     }
 
     public static ChessMove getNewMove(ChessPosition startPosition, ChessPosition endPosition, ChessPiece.PieceType promotionPiece){
-        chessMove = new ChessMoveImp(startPosition, endPosition, promotionPiece);
-        return chessMove;
+        return new Move(startPosition, endPosition, promotionPiece);
     }
     //------------------------------------------------------------------------------------------------------------------
 

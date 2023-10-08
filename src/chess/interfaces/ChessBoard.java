@@ -1,4 +1,4 @@
-package chess;
+package chess.interfaces;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.

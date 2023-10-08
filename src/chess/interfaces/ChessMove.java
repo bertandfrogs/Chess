@@ -1,4 +1,4 @@
-package chess;
+package chess.interfaces;
 
 /**
  * Represents moving a chess piece on a chessboard

@@ -1,15 +1,18 @@
 package chess;
 
-public class ChessMoveImp implements ChessMove {
+import chess.interfaces.ChessPosition;
+import chess.interfaces.ChessPiece;
+
+public class Move implements chess.interfaces.ChessMove {
     ChessPosition startPosition;
     ChessPosition endPosition;
-    ChessPiece.PieceType pieceType;
+    ChessPiece.PieceType promotionPiece;
 
     // constructor
-    public ChessMoveImp(ChessPosition start, ChessPosition end, ChessPiece.PieceType type) {
+    public Move(ChessPosition start, ChessPosition end, ChessPiece.PieceType type) {
         startPosition = start;
         endPosition = end;
-        pieceType = type;
+        promotionPiece = type; // will be null most of the time
     }
 
 
@@ -25,6 +28,7 @@ public class ChessMoveImp implements ChessMove {
 
     @Override
     public ChessPiece.PieceType getPromotionPiece() {
-        return pieceType;
+        return promotionPiece;
     }
+
 }

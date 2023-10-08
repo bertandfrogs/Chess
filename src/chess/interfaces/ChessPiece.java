@@ -1,4 +1,9 @@
-package chess;
+package chess.interfaces;
+
+import chess.interfaces.ChessBoard;
+import chess.interfaces.ChessGame;
+import chess.interfaces.ChessMove;
+import chess.interfaces.ChessPosition;
 
 import java.util.Collection;
 

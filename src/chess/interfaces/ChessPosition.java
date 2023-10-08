@@ -1,4 +1,4 @@
-package chess;
+package chess.interfaces;
 
 /**
  * Represents a single square position on a chess board
@@ -18,4 +18,6 @@ public interface ChessPosition {
      *         1 codes for the left row
      */
     int getColumn();
+
+
 }

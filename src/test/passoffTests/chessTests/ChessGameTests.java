@@ -1,6 +1,11 @@
 package passoffTests.chessTests;
 
 import chess.*;
+import chess.interfaces.ChessBoard;
+import chess.interfaces.ChessGame;
+import chess.interfaces.ChessMove;
+import chess.interfaces.ChessPosition;
+import chess.interfaces.ChessPiece;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -10,7 +15,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ChessGameTests {
-
     private ChessGame game;
     private ChessBoard board;
 
@@ -207,7 +211,6 @@ public class ChessGameTests {
          */
     }
 
-    
     @Test
     @DisplayName("Invalid Make Move")
     public void invalidMoves() throws InvalidMoveException {

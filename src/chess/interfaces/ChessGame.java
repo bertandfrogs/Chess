@@ -1,4 +1,6 @@
-package chess;
+package chess.interfaces;
+
+import chess.InvalidMoveException;
 
 import java.util.Collection;
 
