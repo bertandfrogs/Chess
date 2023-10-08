@@ -27,60 +27,15 @@ public class King extends Piece {
         this.myPosition = myPosition;
 
         Collection<ChessMove> moves = new ArrayList<>();
-        // specific moveset for king.
 
-        // only able to move one space in all directions (if empty)
-        // captures enemy piece if occupying the same square
-        // DOES NOT CHECK IF KING WILL BE IN DANGER OR NOT
-
-
-        // right up
-        ChessMove newMove = getMove(1,1);
-        if(newMove != null) {
-            moves.add(newMove);
-        }
-
-        // up
-        newMove = getMove(0,1);
-        if(newMove != null) {
-            moves.add(newMove);
-        }
-
-        // left up
-        newMove = getMove(-1,1);
-        if(newMove != null) {
-            moves.add(newMove);
-        }
-
-        // left
-        newMove = getMove(-1,0);
-        if(newMove != null) {
-            moves.add(newMove);
-        }
-
-        // left down
-        newMove = getMove(-1,-1);
-        if(newMove != null) {
-            moves.add(newMove);
-        }
-
-        // down
-        newMove = getMove(0,-1);
-        if(newMove != null) {
-            moves.add(newMove);
-        }
-
-        // right down
-        newMove = getMove(1,-1);
-        if(newMove != null) {
-            moves.add(newMove);
-        }
-
-        // right
-        newMove = getMove(1,0);
-        if(newMove != null) {
-            moves.add(newMove);
-        }
+        addNewMoveIfPossible(moves,1,1);    // right up
+        addNewMoveIfPossible(moves,0,1);    // up
+        addNewMoveIfPossible(moves,-1,1);   // left up
+        addNewMoveIfPossible(moves,-1,0);   // left
+        addNewMoveIfPossible(moves,-1,-1);  // left down
+        addNewMoveIfPossible(moves,0,-1);   // down
+        addNewMoveIfPossible(moves,1,-1);   // right down
+        addNewMoveIfPossible(moves,1,0);    // right
 
         return moves;
     }
@@ -101,6 +56,13 @@ public class King extends Piece {
         }
         else {
             return new Move(myPosition, newPosition, null);
+        }
+    }
+
+    private void addNewMoveIfPossible(Collection<ChessMove> moves, int directionX, int directionY) {
+        ChessMove newMove = getMove(directionX,directionY);
+        if(newMove != null) {
+            moves.add(newMove);
         }
     }
 }
