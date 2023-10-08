@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class RookMoveTests {
-
     private ChessBoard board;
     private ChessPiece rook;
     private ChessPosition position;

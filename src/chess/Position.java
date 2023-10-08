@@ -27,7 +27,7 @@ public class Position implements chess.interfaces.ChessPosition {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Position position = (Position) o;
-        return row == position.row && column == position.column;
+        return hashCode() == position.hashCode() && row == position.row && column == position.column;
     }
 
     @Override

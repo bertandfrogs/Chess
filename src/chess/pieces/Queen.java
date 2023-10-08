@@ -5,6 +5,7 @@ import chess.interfaces.ChessGame;
 import chess.interfaces.ChessMove;
 import chess.interfaces.ChessPosition;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static chess.interfaces.ChessPiece.PieceType.QUEEN;
@@ -17,11 +18,60 @@ public class Queen extends Piece {
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        // specific moveset for queen.
+        super.setBoard(board);
+        super.setMyPosition(myPosition);
 
-        // able to move as many spaces in all directions if empty space
+        Collection<ChessMove> moves = new ArrayList<>();
 
-        return null;
+        // right up
+        Collection<ChessMove> newMoves = getPieceMoveRecursive(moves, myPosition, 1,1);
+        if(newMoves != null) {
+            moves.addAll(newMoves);
+        }
+
+        // up
+        newMoves = getPieceMoveRecursive(moves, myPosition, 0,1);
+        if(newMoves != null) {
+            moves.addAll(newMoves);
+        }
+
+        // left up
+        newMoves = getPieceMoveRecursive(moves, myPosition, -1,1);
+        if(newMoves != null) {
+            moves.addAll(newMoves);
+        }
+
+        // left
+        newMoves = getPieceMoveRecursive(moves, myPosition, -1,0);
+        if(newMoves != null) {
+            moves.addAll(newMoves);
+        }
+
+        // left down
+        newMoves = getPieceMoveRecursive(moves, myPosition, -1,-1);
+        if(newMoves != null) {
+            moves.addAll(newMoves);
+        }
+
+        // down
+        newMoves = getPieceMoveRecursive(moves, myPosition, 0,-1);
+        if(newMoves != null) {
+            moves.addAll(newMoves);
+        }
+
+        // right down
+        newMoves = getPieceMoveRecursive(moves, myPosition, 1,-1);
+        if(newMoves != null) {
+            moves.addAll(newMoves);
+        }
+
+        // right
+        newMoves = getPieceMoveRecursive(moves, myPosition, 1,0);
+        if(newMoves != null) {
+            moves.addAll(newMoves);
+        }
+        
+        return moves;
     }
 
 }

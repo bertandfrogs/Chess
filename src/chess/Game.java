@@ -7,7 +7,6 @@ import chess.interfaces.ChessPiece;
 import chess.pieces.Piece;
 
 import java.util.Collection;
-import java.util.Map;
 
 // This class is the top-level management of the chess game.
 
@@ -25,55 +24,42 @@ public class Game implements chess.interfaces.ChessGame {
         teamTurn = team;
     }
 
+    public void nextTeamTurn() {
+        if(teamTurn == TeamColor.BLACK) {
+            setTeamTurn(TeamColor.WHITE);
+        }
+        else {
+            setTeamTurn(TeamColor.BLACK);
+        }
+    }
+
     @Override
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        return null;
+        Piece piece = chessBoard.getPiece(startPosition);
+        if(piece == null){
+            return null;
+        }
+        else {
+            return piece.pieceMoves(chessBoard, startPosition);
+        }
     }
 
     @Override
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        // TODO: check move logic - is in check, team color, right kind of piece movement, etc
-        /*
-        Position startPosition = (Position) move.getStartPosition();
-        Position endPosition = (Position) move.getEndPosition();
-        Piece movingPiece = getPiece(startPosition);
-
-        // check bounds of position
-        int startRow = startPosition.getRow();
-        int endRow = endPosition.getRow();
-        int startCol = startPosition.getColumn();
-        int endCol = endPosition.getColumn();
-
-        if(startRow < 1 || endRow < 1 || startCol < 1 || endCol < 1
-            || startRow > 8 || endRow > 8 || startCol > 8 || endCol > 8){
-            throw new InvalidMoveException("Position out of bounds");
+        Piece movingPiece = chessBoard.getPiece(move.getStartPosition());
+        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
+        if(movingPiece == null){
+            throw new InvalidMoveException("No piece located at starting position");
+        }
+        else if(movingPiece.getTeamColor() != getTeamTurn()){
+            throw new InvalidMoveException("Piece at starting position is not the current team's color");
+        }
+        else if(validMoves != null && !validMoves.contains(move)){ //TODO: remove the null check once all pieces have valid moves
+            throw new InvalidMoveException("Not a valid move");
         }
 
-        if(movingPiece != null) {
-            if(movingPiece.getTeamColor() != currentTeamColor){
-                throw new InvalidMoveException("Piece being moved is the wrong team color");
-            }
-            Piece pieceAtEndPosition = getPiece(endPosition);
-            if(pieceAtEndPosition != null){
-                if(movingPiece.getTeamColor() != pieceAtEndPosition.getTeamColor()) {
-                    // moving piece captures enemy piece
-
-                }
-                else {
-                    // illegal move
-                    throw new InvalidMoveException("Piece tried to capture a piece of the same color");
-                }
-            }
-            else {
-                // the piece moves to the empty space
-            }
-        }
-        else {
-            throw new InvalidMoveException("No piece found at start position");
-        }
-
-         */
         chessBoard.movePiece(move);
+        nextTeamTurn();
     }
 
     @Override
