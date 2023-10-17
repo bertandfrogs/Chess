@@ -50,30 +50,6 @@ public abstract class Piece implements chess.interfaces.ChessPiece {
             result = result.toLowerCase();
         }
 
-        String ANSI_BLACK_TXT = "\u001B[30m";
-
-        return ANSI_BLACK_TXT + result;
-    }
-
-    public String getPieceAsUnicode() {
-        String result;
-        String ANSI_RED_TXT = "\u001B[31m";
-        String ANSI_WHITE_TXT = "\u001B[33m";
-
-        if(color == ChessGame.TeamColor.BLACK) {
-            result = ANSI_RED_TXT;
-        }
-        else {
-            result = ANSI_WHITE_TXT;
-        }
-        result += switch (type) {
-            case KING -> " ♚ ";
-            case QUEEN -> " ♛ ";
-            case ROOK -> " ♜ ";
-            case BISHOP -> " ♝ ";
-            case KNIGHT -> " ♞ ";
-            case PAWN -> " ♟ ";
-        };
         return result;
     }
 

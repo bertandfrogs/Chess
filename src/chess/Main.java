@@ -28,6 +28,7 @@ public class Main {
                 case "start" -> {
                     activeGame = true;
                     game.newGame();
+                    printBoard();
                 }
                 case "info" -> {
                     if(activeGame){
@@ -114,8 +115,8 @@ public class Main {
 
     }
 
-    private void printBoard() {
-
+    private static void printBoard() {
+        System.out.println(game.getBoard().toString());
     }
 
     private void getValidMoves() {

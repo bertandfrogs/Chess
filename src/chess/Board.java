@@ -107,8 +107,8 @@ public class Board implements chess.interfaces.ChessBoard {
         addPiece(getHashFromRowAndCol(8, 8), new Rook(ChessGame.TeamColor.BLACK));
     }
 
-    @Override
-    public String toString() {
+    /*
+    public String toStringUnicode() {
         StringBuilder output = new StringBuilder();
         // variables that format the color of the console output (for tiles)
         final String ANSI_RESET = "\u001B[0m"; // to reset console output
@@ -134,6 +134,29 @@ public class Board implements chess.interfaces.ChessBoard {
                 }
 
                 output.append(ANSI_RESET);
+            }
+            output.append("\n");
+        }
+        return output.toString();
+    }
+    */
+
+    @Override
+    public String toString(){
+        StringBuilder output = new StringBuilder();
+
+        // starting from row 8 and going down (following board notation)
+        for(int row = 8; row >= 1; row--) {
+            output.append("|");
+            for(int col = 1; col <= 8; col++) {
+                Piece current = getPiece(getHashFromRowAndCol(row, col));
+                if(current != null){
+                    output.append(current.toString());
+                }
+                else {
+                    output.append("   "); // whitespace
+                }
+                output.append("|");
             }
             output.append("\n");
         }
