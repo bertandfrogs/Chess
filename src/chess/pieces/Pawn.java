@@ -3,10 +3,7 @@ package chess.pieces;
 import chess.Board;
 import chess.Move;
 import chess.Position;
-import chess.interfaces.ChessBoard;
-import chess.interfaces.ChessGame;
-import chess.interfaces.ChessMove;
-import chess.interfaces.ChessPosition;
+import chess.interfaces.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,11 +16,11 @@ public class Pawn extends Piece {
         // uses the parent constructor to set color and type
         super(c, PAWN);
     }
-
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard chessBoard, ChessPosition myChessPosition) {
-        Board board = (Board) chessBoard;
-        Position myPosition = (Position) myChessPosition;
+        super.setBoard(chessBoard);
+        super.setMyPosition(myChessPosition);
+
         int myRow = myPosition.getRow();
         Collection<ChessMove> moves = new ArrayList<>();
 
@@ -55,37 +52,33 @@ public class Pawn extends Piece {
 
         // move one space forward, if possible
         Collection<ChessMove> moveForward = getForwardMovement(board, myPosition, moveDirection, promotionRow);
-        if (moveForward != null){
+        if (!moveForward.isEmpty()){
             moves.addAll(moveForward);
         }
 
         // move diagonally to the right, if possible
-        Collection<ChessMove> moveRight = getDiagonalMovement(board, myPosition, moveDirection, 1, promotionRow);
-        if (moveRight != null){
+        Collection<ChessMove> moveRight = getCaptureMovement(board, myPosition, moveDirection, 1, promotionRow);
+        if (!moveRight.isEmpty()){
             moves.addAll(moveRight);
         }
 
         // move diagonally to the left, if possible
-        Collection<ChessMove> moveLeft = getDiagonalMovement(board, myPosition, moveDirection, -1, promotionRow);
-        if (moveLeft != null){
+        Collection<ChessMove> moveLeft = getCaptureMovement(board, myPosition, moveDirection, -1, promotionRow);
+        if (!moveLeft.isEmpty()){
             moves.addAll(moveLeft);
         }
 
         return moves;
     }
 
-    private Collection<ChessMove> getForwardMovement(Board board, Position startingPosition, int moveDirection, int promotionRow) {
+    private Collection<ChessMove> getForwardMovement(ChessBoard board, ChessPosition startingPosition, int moveDirection, int promotionRow) {
         Collection<ChessMove> newMoves = new ArrayList<>();
         int row = startingPosition.getRow();
         int col = startingPosition.getColumn();
 
-        if(row+moveDirection > 8 || row+moveDirection < 1){
-            return null; // out of bounds
-        }
+        ChessPosition endPosition = new Position(row+moveDirection, col);
 
-        Position endPosition = new Position(row+moveDirection, col);
-
-        if(board.getPiece(endPosition.hashCode()) == null){
+        if(!endPosition.isOutOfBounds() && board.getPiece(endPosition) == null){
             if(row+moveDirection == promotionRow) {
                 newMoves.add(new Move(startingPosition, endPosition, QUEEN));
                 newMoves.add(new Move(startingPosition, endPosition, ROOK));
@@ -99,33 +92,33 @@ public class Pawn extends Piece {
         return newMoves;
     }
 
-    private ChessMove getDoubleForwardMovement(Board board, Position startingPosition, int moveDirection) {
-        Position endPosition = new Position(startingPosition.getRow()+moveDirection, startingPosition.getColumn());
+    private ChessMove getDoubleForwardMovement(ChessBoard board, ChessPosition startingPosition, int moveDirection) {
+        ChessPosition endPosition = new Position(startingPosition.getRow()+moveDirection, startingPosition.getColumn());
 
-        if(board.getPiece(endPosition.hashCode()) == null){
+        if(!endPosition.isOutOfBounds() && board.getPiece(endPosition) == null){
             Position newEndPosition = new Position(endPosition.getRow()+moveDirection, endPosition.getColumn());
-            if(board.getPiece(newEndPosition.hashCode()) == null) {
+
+            if(!newEndPosition.isOutOfBounds() && board.getPiece(newEndPosition) == null) {
                 return new Move(startingPosition, newEndPosition, null);
             }
         }
         return null;
     }
 
-    private Collection<ChessMove> getDiagonalMovement(Board board, Position startingPosition, int moveDirectionY, int moveDirectionX, int promotionRow) {
+    private Collection<ChessMove> getCaptureMovement(ChessBoard board, ChessPosition startingPosition, int moveDirectionY, int moveDirectionX, int promotionRow) {
         Collection<ChessMove> newMoves = new ArrayList<>();
 
         int row = startingPosition.getRow();
         int col = startingPosition.getColumn();
 
-        if(col+moveDirectionX > 8 || col+moveDirectionX < 1 || row+moveDirectionY > 8 || row+moveDirectionY < 1){
-            return null; // out of bounds
-        }
-
         Position endPosition = new Position(row+moveDirectionY, col+moveDirectionX);
-        Piece endPiece = board.getPiece(endPosition.hashCode());
+        if(endPosition.isOutOfBounds()){
+            return newMoves; // empty array
+        }
+        ChessPiece endPiece = board.getPiece(endPosition);
 
         if(endPiece == null || endPiece.getTeamColor() == color){
-            return null;
+            return newMoves; // empty array
         }
         else {
             if(endPosition.getRow() == promotionRow) {

@@ -25,29 +25,10 @@ public class Bishop extends Piece {
 
         Collection<ChessMove> moves = new ArrayList<>();
 
-        // right up
-        Collection<ChessMove> newMoves = getPieceMoveRecursive(moves, myPosition, 1,1);
-        if(newMoves != null) {
-            moves.addAll(newMoves);
-        }
-
-        // left up
-        newMoves = getPieceMoveRecursive(moves, myPosition, -1,1);
-        if(newMoves != null) {
-            moves.addAll(newMoves);
-        }
-
-        // left down
-        newMoves = getPieceMoveRecursive(moves, myPosition, -1,-1);
-        if(newMoves != null) {
-            moves.addAll(newMoves);
-        }
-
-        // right down
-        newMoves = getPieceMoveRecursive(moves, myPosition, 1,-1);
-        if(newMoves != null) {
-            moves.addAll(newMoves);
-        }
+        addNewMovesInLineOfSight(moves, 1,1);   // right up
+        addNewMovesInLineOfSight(moves, -1,1);  // left up
+        addNewMovesInLineOfSight(moves, -1,-1); // left down
+        addNewMovesInLineOfSight(moves, 1,-1);  // right down
 
         return moves;
     }

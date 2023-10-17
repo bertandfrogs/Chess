@@ -17,13 +17,10 @@ public class Knight extends Piece {
         super(c, KNIGHT);
     }
 
-    ChessBoard board;
-    ChessPosition myPosition;
-
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        this.board = board;
-        this.myPosition = myPosition;
+        super.setBoard(board);
+        super.setMyPosition(myPosition);
 
         Collection<ChessMove> moves = new ArrayList<>();
 

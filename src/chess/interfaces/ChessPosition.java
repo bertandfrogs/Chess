@@ -19,5 +19,5 @@ public interface ChessPosition {
      */
     int getColumn();
 
-
+    boolean isOutOfBounds();
 }

@@ -14,8 +14,8 @@ public abstract class Piece implements chess.interfaces.ChessPiece {
 
     ChessGame.TeamColor color;
     PieceType type;
-    private ChessBoard board;
-    private ChessPosition myPosition;
+    protected ChessBoard board;
+    protected ChessPosition myPosition;
 
     // constructor is used by children constructors
     Piece(ChessGame.TeamColor c, PieceType t) {
@@ -85,10 +85,13 @@ public abstract class Piece implements chess.interfaces.ChessPiece {
         myPosition = myPos;
     }
 
+    public ChessPosition getMyPosition() {
+        return myPosition;
+    }
+
     // method used for Rook, Bishop, and Queen -
     // takes directionX and directionY to move in a straight line as long as it can
-    // returns a collection of all valid moves
-    public Collection<ChessMove> getPieceMoveRecursive(Collection<ChessMove> moves, ChessPosition currentPosition, int directionX, int directionY) {
+    public Collection<ChessMove> getMovesInLineOfSight(Collection<ChessMove> moves, ChessPosition currentPosition, int directionX, int directionY) {
         ChessPosition newPosition = new Position(currentPosition.getRow()+directionY, currentPosition.getColumn()+directionX);
 
         // out of bounds check
@@ -106,8 +109,16 @@ public abstract class Piece implements chess.interfaces.ChessPiece {
         else {
             // add to the list and recurse
             moves.add(new Move(myPosition, newPosition, null));
-            moves = getPieceMoveRecursive(moves, newPosition, directionX, directionY);
+            moves = getMovesInLineOfSight(moves, newPosition, directionX, directionY);
         }
         return moves;
     }
+
+    public void addNewMovesInLineOfSight(Collection<ChessMove> moves, int directionX, int directionY) {
+        Collection<ChessMove> newMoves = getMovesInLineOfSight(moves, myPosition, directionX, directionY);
+        if(!newMoves.isEmpty()) {
+            moves.addAll(newMoves);
+        }
+    }
 }
+

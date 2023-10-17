@@ -23,6 +23,11 @@ public class Position implements chess.interfaces.ChessPosition {
     }
 
     @Override
+    public boolean isOutOfBounds() {
+        return (row > 8 || row < 1 || column > 8 || column < 1);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

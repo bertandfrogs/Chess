@@ -24,29 +24,10 @@ public class Rook extends Piece {
 
         Collection<ChessMove> moves = new ArrayList<>();
 
-        // right
-        Collection<ChessMove> newMoves = getPieceMoveRecursive(moves, myPosition, 1,0);
-        if(newMoves != null) {
-            moves.addAll(newMoves);
-        }
-
-        // left
-        newMoves = getPieceMoveRecursive(moves, myPosition, -1,0);
-        if(newMoves != null) {
-            moves.addAll(newMoves);
-        }
-
-        // up
-        newMoves = getPieceMoveRecursive(moves, myPosition, 0,1);
-        if(newMoves != null) {
-            moves.addAll(newMoves);
-        }
-
-        // down
-        newMoves = getPieceMoveRecursive(moves, myPosition, 0,-1);
-        if(newMoves != null) {
-            moves.addAll(newMoves);
-        }
+        addNewMovesInLineOfSight(moves,1,0);    // right
+        addNewMovesInLineOfSight(moves,-1,0);   // left
+        addNewMovesInLineOfSight(moves,0,1);    // up
+        addNewMovesInLineOfSight(moves,0,-1);   // down
 
         return moves;
     }
