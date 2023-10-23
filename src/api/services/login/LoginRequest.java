@@ -2,14 +2,18 @@ package api.services.login;
 
 import api.services.base.Request;
 
+/**
+ * The LoginRequest sent to the server, containing the user's username and password.
+ */
 public class LoginRequest extends Request {
     String username;
     String password;
 
     /**
      * Initializes new LoginRequest object
-     * @param username - username entered by user trying to log in
-     * @param password - password entered by user trying to log in
+     * Constructor uses the parent class's constructor to set the HTTP method and the url.
+     * @param username Username entered by user trying to log in.
+     * @param password Password entered by user trying to log in.
      */
     LoginRequest(String username, String password){
         super("POST", "/session");

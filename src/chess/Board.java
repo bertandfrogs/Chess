@@ -107,7 +107,6 @@ public class Board implements chess.interfaces.ChessBoard {
         addPiece(getHashFromRowAndCol(8, 8), new Rook(ChessGame.TeamColor.BLACK));
     }
 
-    /*
     public String toStringUnicode() {
         StringBuilder output = new StringBuilder();
         // variables that format the color of the console output (for tiles)
@@ -127,7 +126,7 @@ public class Board implements chess.interfaces.ChessBoard {
 
                 Piece current = getPiece(getHashFromRowAndCol(row, col));
                 if(current != null){
-                    output.append(current.getPieceAsUnicode());
+                    output.append(current.toStringUnicode());
                 }
                 else {
                     output.append(" \u2003 "); // whitespace
@@ -139,7 +138,6 @@ public class Board implements chess.interfaces.ChessBoard {
         }
         return output.toString();
     }
-    */
 
     @Override
     public String toString(){

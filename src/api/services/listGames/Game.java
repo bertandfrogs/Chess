@@ -7,6 +7,13 @@ package api.services.listGames;
 public class Game {
     public String gameID, whiteUsername, blackUsername, gameName;
 
+    /**
+     * Constructor sets the class properties in the order of the JSON properties sent from the server.
+     * @param gameID The specific ID of the game.
+     * @param whiteUsername The username of the player who's playing as white.
+     * @param blackUsername The username of the player who's playing as black.
+     * @param gameName The name that was set by the user.
+     */
     Game(String gameID, String whiteUsername, String blackUsername, String gameName){
         this.gameID = gameID;
         this.whiteUsername = whiteUsername;

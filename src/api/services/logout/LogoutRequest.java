@@ -3,6 +3,9 @@ package api.services.logout;
 import api.services.base.Request;
 import api.models.AuthToken;
 
+/**
+ * The LogoutRequest to be sent to the server. Contains the user's AuthToken.
+ */
 public class LogoutRequest extends Request {
     AuthToken authToken;
 

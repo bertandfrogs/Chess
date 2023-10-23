@@ -9,8 +9,8 @@ import api.services.base.Service;
  */
 public class ClearApplicationService extends Service {
     /**
-     * @param request - a specific clearApplicationRequest object.
-     * @return response - the response from the server (clearApplicationResponse)
+     * @param request A specific clearApplicationRequest object.
+     * @return response The response from the server (clearApplicationResponse)
      */
     public ClearApplicationResponse clearApplication(ClearApplicationRequest request){
         return null;

@@ -8,17 +8,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Memory representation of @DataAccessInterface
+ * In-memory representation of @DataAccessInterface. Creates, reads, updates, and deletes data stored in memory.
  */
 public class DataAccess implements DataAccessInterface {
+    /**
+     * A map containing all the users. Key: Username. Value: UserData object.
+     */
     final private Map<String, UserData> users = new HashMap<>();
+
+    /**
+     * A map containing all the AuthTokens. Key: authToken (String). Value: AuthToken object.
+     */
     final private Map<String, AuthToken> authTokens = new HashMap<>();
+
+    /**
+     * A map containing all the games. Key: gameID. Value: GameData object.
+     */
     final private Map<String, GameData> games = new HashMap<>();
 
     /**
      * Clears all stored data in the database by calling clear() on all the maps.
      * Will not be available outside of testing.
-     * @throws DataAccessException if it's not able to clear the database for some reason.
+     * @throws DataAccessException Throws an error if it's not able to clear the database for some reason.
      */
     @Override
     public void clear() throws DataAccessException {
@@ -30,17 +41,18 @@ public class DataAccess implements DataAccessInterface {
     /**
      * Creates a new user and stores it in the users map. If the user or username already exist, don't add them again.
      * @param user The new user's data.
-     * @return the new user
+     * @return The new UserData object.
+     * @throws DataAccessException Throw an error if something goes wrong (i.e. the user already exists in the database)
      */
     @Override
-    public UserData createUser(UserData user) {
+    public UserData createUser(UserData user) throws DataAccessException {
         return null;
     }
 
     /**
      * Gets a user from the users map and returns it.
      * @param username The username we're looking for.
-     * @return The user if found in the database, returns null if not found.
+     * @return The UserData object if found in the database, returns null if not found.
      */
     @Override
     public UserData findUser(String username) {
@@ -51,7 +63,7 @@ public class DataAccess implements DataAccessInterface {
      * Updates a user's information in the users map.
      * @param user The user's updated information (As a UserData object).
      * @return The updated UserData object.
-     * @throws DataAccessException if not able to perform operation.
+     * @throws DataAccessException Throws an error if not able to perform operation.
      */
     @Override
     public UserData updateUser(UserData user) throws DataAccessException {
@@ -68,17 +80,18 @@ public class DataAccess implements DataAccessInterface {
 
     /**
      * Creates a new game and stores it in the database. If the gameID already exists, don't add the game.
-     * @param game The new game. (As a GameData object).
+     * @param game The new game (as a GameData object).
      * @return The GameData object that was stored in the database.
+     * @throws DataAccessException Throw an error if something goes wrong (i.e. the game already exists in the database)
      */
     @Override
-    public GameData createGame(GameData game) {
+    public GameData createGame(GameData game) throws DataAccessException {
         return null;
     }
 
     /**
-     * Gets a game from the games map and returns it
-     * @param gameID The ID of the game we're looking for
+     * Gets a game from the games map and returns it.
+     * @param gameID The ID of the game we're looking for.
      * @return The requested game if found in the database; null if not found.
      */
     @Override
@@ -97,9 +110,9 @@ public class DataAccess implements DataAccessInterface {
 
     /**
      * Updates a game in the games map.
-     * @param game The new game data (As a GameData object)
-     * @return The updated GameData object
-     * @throws DataAccessException if not able to update game
+     * @param game The updated game (As a GameData object).
+     * @return The updated GameData object.
+     * @throws DataAccessException Throw an error if it's not able to update game.
      */
     @Override
     public GameData updateGame(GameData game) throws DataAccessException {
@@ -109,7 +122,7 @@ public class DataAccess implements DataAccessInterface {
     /**
      * Deletes a game from the games map.
      * @param game The game to delete (As a GameData object)
-     * @throws DataAccessException Throws an error if not possible to delete
+     * @throws DataAccessException Throws an error if not possible to delete.
      */
     @Override
     public void deleteGame(GameData game) throws DataAccessException {}
@@ -118,9 +131,10 @@ public class DataAccess implements DataAccessInterface {
      * Generates a new AuthToken and stores it in the authTokens map.
      * @param username The username connected to new token.
      * @return the new AuthToken
+     * @throws DataAccessException Throw an error if something goes wrong (i.e. the AuthToken already exists in the database)
      */
     @Override
-    public AuthToken createAuthToken(String username) {
+    public AuthToken createAuthToken(String username) throws DataAccessException {
         return null;
     }
 

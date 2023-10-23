@@ -8,7 +8,7 @@ import api.services.base.Response;
  */
 public class JoinGameResponse extends Response {
     /**
-     * Success response constructor.
+     * Success response constructor. Sets a status code of 200.
      */
     JoinGameResponse(){
         super(200);

@@ -7,6 +7,9 @@ import api.services.base.Response;
  * On success, return [200] and the new gameID, otherwise return an error code and a message.
  */
 public class CreateGameResponse extends Response {
+    /**
+     * The unique id of the game that was just created.
+     */
     String gameID;
 
     /**
@@ -19,9 +22,9 @@ public class CreateGameResponse extends Response {
     }
 
     /**
-     * Constructor for a fail response (uses base class implementation)
+     * Constructor for a fail response (uses base class implementation).
      * @param code Error code.
-     * @param description Optional - a specific error description (error code 500)
+     * @param description Optional - a specific error description (error code 500).
      */
     CreateGameResponse(int code, String description){
         super(code,description);

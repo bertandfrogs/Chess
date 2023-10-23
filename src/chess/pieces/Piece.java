@@ -53,6 +53,25 @@ public abstract class Piece implements chess.interfaces.ChessPiece {
         return result;
     }
 
+    public String toStringUnicode() {
+        String result = "";
+        String ANSI_RED_TXT = "\u001B[31m";
+
+        if(color == ChessGame.TeamColor.BLACK) {
+            result = ANSI_RED_TXT;
+        }
+        result += switch (type) {
+            case KING -> " \u265A ";
+            case QUEEN -> " \u265B ";
+            case ROOK -> " \u265C ";
+            case BISHOP -> " \u265D ";
+            case KNIGHT -> " \u265E ";
+            case PAWN -> " \u265F ";
+        };
+
+        return result;
+    }
+
     public void setBoard(ChessBoard b) {
         board = b;
     }

@@ -82,10 +82,6 @@ public class Game implements chess.interfaces.ChessGame {
 
         chessBoard.movePiece(move);
         nextTeamTurn();
-
-        System.out.println();
-        System.out.println("Board after move: " + chessBoard.hashToChessNotation(move.getStartPosition().hashCode()) + " to " + chessBoard.hashToChessNotation(move.getEndPosition().hashCode()));
-        System.out.println(chessBoard.toString());
     }
 
     @Override

@@ -23,8 +23,9 @@ public interface DataAccessInterface {
      * Creates a new user and stores it in the database. If the user or username already exist, don't add them again.
      * @param user The new user's data (As a UserData object).
      * @return The new UserData object.
+     * @throws DataAccessException Throw an error if something goes wrong (i.e. the user already exists in the database)
      */
-    UserData createUser(UserData user);
+    UserData createUser(UserData user) throws DataAccessException;
 
     /**
      * Gets a user from the database and returns it.
@@ -37,14 +38,14 @@ public interface DataAccessInterface {
      * Updates a user's information in the database.
      * @param user The user's updated information (As a UserData object).
      * @return The updated UserData object.
-     * @throws DataAccessException Throws an error if not able to perform operation.
+     * @throws DataAccessException Throws an error if not able to update user (i.e. user doesn't exist in database)
      */
     UserData updateUser(UserData user) throws DataAccessException;
 
     /**
      * Deletes a user from the database.
-     * @param user The UserData object to be updated.
-     * @throws DataAccessException Throws an error if not possible to delete
+     * @param user The UserData object to be deleted.
+     * @throws DataAccessException Throws an error if not possible to delete (i.e. the user doesn't exist, etc.)
      */
     void deleteUser(UserData user) throws DataAccessException;
 
@@ -53,8 +54,9 @@ public interface DataAccessInterface {
      * Creates a new game and stores it in the database. If the gameID already exists, don't add the game.
      * @param game The new GameData object.
      * @return The new GameData object
+     * @throws DataAccessException Throw an error if something goes wrong (i.e. game already exists, etc.)
      */
-    GameData createGame(GameData game);
+    GameData createGame(GameData game) throws DataAccessException;
 
     /**
      * Gets a game from the database and returns it.
@@ -88,8 +90,9 @@ public interface DataAccessInterface {
      * Creates a new AuthToken and stores it in the database.
      * @param username The username connected to new token.
      * @return the new AuthToken.
+     * @throws DataAccessException Throws an error if something goes wrong (user already has AuthToken, etc.)
      */
-    AuthToken createAuthToken(String username);
+    AuthToken createAuthToken(String username) throws DataAccessException;
 
     /**
      * Finds an AuthToken in the database.
@@ -109,7 +112,7 @@ public interface DataAccessInterface {
     /**
      * Deletes an AuthToken from the database.
      * @param token the AuthToken to delete.
-     * @throws DataAccessException Throws an error if something goes wrong.
+     * @throws DataAccessException Throws an error if something goes wrong (i.e. the token doesn't exist in database).
      */
     void deleteAuthToken(AuthToken token) throws DataAccessException;
 }

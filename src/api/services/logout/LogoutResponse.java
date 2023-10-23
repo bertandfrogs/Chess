@@ -2,6 +2,9 @@ package api.services.logout;
 
 import api.services.base.Response;
 
+/**
+ * The LogoutResponse from the server. Doesn't return anything besides status code or error code and message.
+ */
 public class LogoutResponse extends Response {
     /**
      * Constructor for a success response, doesn't need anything besides the status code

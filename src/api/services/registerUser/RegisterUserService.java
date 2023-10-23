@@ -6,6 +6,10 @@ package api.services.registerUser;
  * Receives a RegisterUserRequest, parses it, and returns a RegisterUserResponse.
  */
 public class RegisterUserService {
+    /**
+     * @param request A RegisterUserRequest object to be sent to the server.
+     * @return The RegisterUserResponse from the server.
+     */
     public RegisterUserResponse registerUser(RegisterUserRequest request) {
         return null;
     }

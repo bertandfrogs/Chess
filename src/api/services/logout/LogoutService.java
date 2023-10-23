@@ -8,6 +8,10 @@ import api.services.base.Service;
  * Receives a LogoutRequest, parses it, and returns a LogoutResponse.
  */
 public class LogoutService extends Service {
+    /**
+     * @param request A LogoutRequest object to be sent to the server.
+     * @return The LogoutResponse from the server.
+     */
     LogoutResponse logout(LogoutRequest request) {
         return null;
     }

@@ -9,6 +9,10 @@ import api.services.base.Service;
  * If no color is specified the user is joined as an observer. This request is idempotent.
  */
 public class JoinGameService extends Service {
+    /**
+     * @param request A JoinGameRequest object containing the authToken, gameID, and playerColor.
+     * @return The JoinGameResponse from the server.
+     */
     JoinGameResponse joinGame(JoinGameRequest request){
         return null;
     }

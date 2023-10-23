@@ -3,7 +3,7 @@ package api.services.registerUser;
 import api.services.base.Request;
 
 /**
- * The RegisterUserRequest to the server
+ * The RegisterUserRequest to the server, containing the user's information.
  */
 public class RegisterUserRequest extends Request {
     String username;

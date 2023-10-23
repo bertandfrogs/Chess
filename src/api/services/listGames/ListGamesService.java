@@ -8,6 +8,10 @@ import api.services.base.Service;
  * Receives a ListGamesRequest, parses it, and returns a ListGamesResponse.
  */
 public class ListGamesService extends Service {
+    /**
+     * @param request A ListGamesRequest object to be sent to the server.
+     * @return The ListGamesResponse from the server.
+     */
     ListGamesResponse listGames(ListGamesRequest request){
         return null;
     }

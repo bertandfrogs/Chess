@@ -9,7 +9,14 @@ import api.models.AuthToken;
  * If registration fails, returns an error message.
  */
 public class RegisterUserResponse extends Response {
+    /**
+     * The new user's username
+     */
     private String username;
+
+    /**
+     * The user's authToken that the server just generated.
+     */
     private AuthToken authToken;
 
     /**

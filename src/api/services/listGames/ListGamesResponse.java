@@ -8,6 +8,9 @@ import java.util.ArrayList;
  * The Response object of the ListGamesService. Should return a list of all games, if not, returns an error and an error message.
  */
 public class ListGamesResponse extends Response {
+    /**
+     * The array of games that will be turned into a JSON object.
+     */
     ArrayList<Game> games = new ArrayList<>();
 
     /**
