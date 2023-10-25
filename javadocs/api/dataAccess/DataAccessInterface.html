@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="dc.created" content="2023-10-17">
-<meta name="description" content="declaration: package: api.dataAccess, interface: DataAccessInterface">
+<meta name="description" content="declaration: package: server.dataAccess, interface: DataAccessInterface">
 <meta name="generator" content="javadoc/ClassWriterImpl">
 <link rel="stylesheet" type="text/css" href="../../stylesheet.css" title="Style">
 <link rel="stylesheet" type="text/css" href="../../script-dir/jquery-ui.min.css" title="Style">
@@ -68,13 +68,13 @@ loadScripts(document, 'script');</script>
 <main role="main">
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">api.dataAccess</a></div>
+<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">server.dataAccess</a></div>
 <h1 title="Interface DataAccessInterface" class="title">Interface DataAccessInterface</h1>
 </div>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Known Implementing Classes:</dt>
-<dd><code><a href="DataAccess.html" title="class in api.dataAccess">DataAccess</a></code></dd>
+<dd><code><a href="DataAccess.html" title="class in server.dataAccess">DataAccess</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">DataAccessInterface</span></div>
@@ -99,68 +99,68 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Clears all stored data in the database: users, games, authTokens.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/AuthToken.html" title="class in api.models">AuthToken</a></code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/AuthToken.html" title="class in server.models">AuthToken</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#createAuthToken(java.lang.String)" class="member-name-link">createAuthToken</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;username)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Creates a new AuthToken and stores it in the database.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/GameData.html" title="class in api.models">GameData</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#createGame(api.models.GameData)" class="member-name-link">createGame</a><wbr>(<a href="../models/GameData.html" title="class in api.models">GameData</a>&nbsp;game)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/GameData.html" title="class in server.models">GameData</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#createGame(api.models.GameData)" class="member-name-link">createGame</a><wbr>(<a href="../models/GameData.html" title="class in server.models">GameData</a>&nbsp;game)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Creates a new game and stores it in the database.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/UserData.html" title="class in api.models">UserData</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#createUser(api.models.UserData)" class="member-name-link">createUser</a><wbr>(<a href="../models/UserData.html" title="class in api.models">UserData</a>&nbsp;user)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/UserData.html" title="class in server.models">UserData</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#createUser(api.models.UserData)" class="member-name-link">createUser</a><wbr>(<a href="../models/UserData.html" title="class in server.models">UserData</a>&nbsp;user)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Creates a new user and stores it in the database.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#deleteAuthToken(api.models.AuthToken)" class="member-name-link">deleteAuthToken</a><wbr>(<a href="../models/AuthToken.html" title="class in api.models">AuthToken</a>&nbsp;token)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#deleteAuthToken(api.models.AuthToken)" class="member-name-link">deleteAuthToken</a><wbr>(<a href="../models/AuthToken.html" title="class in server.models">AuthToken</a>&nbsp;token)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Deletes an AuthToken from the database.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#deleteGame(api.models.GameData)" class="member-name-link">deleteGame</a><wbr>(<a href="../models/GameData.html" title="class in api.models">GameData</a>&nbsp;game)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#deleteGame(api.models.GameData)" class="member-name-link">deleteGame</a><wbr>(<a href="../models/GameData.html" title="class in server.models">GameData</a>&nbsp;game)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Deletes a game from the database.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#deleteUser(api.models.UserData)" class="member-name-link">deleteUser</a><wbr>(<a href="../models/UserData.html" title="class in api.models">UserData</a>&nbsp;user)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#deleteUser(api.models.UserData)" class="member-name-link">deleteUser</a><wbr>(<a href="../models/UserData.html" title="class in server.models">UserData</a>&nbsp;user)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Deletes a user from the database.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/AuthToken.html" title="class in api.models">AuthToken</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findAuthToken(api.models.AuthToken)" class="member-name-link">findAuthToken</a><wbr>(<a href="../models/AuthToken.html" title="class in api.models">AuthToken</a>&nbsp;token)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/AuthToken.html" title="class in server.models">AuthToken</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findAuthToken(api.models.AuthToken)" class="member-name-link">findAuthToken</a><wbr>(<a href="../models/AuthToken.html" title="class in server.models">AuthToken</a>&nbsp;token)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Finds an AuthToken in the database.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/GameData.html" title="class in api.models">GameData</a></code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/GameData.html" title="class in server.models">GameData</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findGame(java.lang.String)" class="member-name-link">findGame</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;gameID)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Gets a game from the database and returns it.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/UserData.html" title="class in api.models">UserData</a></code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/UserData.html" title="class in server.models">UserData</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findUser(java.lang.String)" class="member-name-link">findUser</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;username)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Gets a user from the database and returns it.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="../models/GameData.html" title="class in api.models">GameData</a>&gt;</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="../models/GameData.html" title="class in server.models">GameData</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#listGames()" class="member-name-link">listGames</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Finds and returns all games in the database.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/AuthToken.html" title="class in api.models">AuthToken</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#updateAuthToken(api.models.AuthToken)" class="member-name-link">updateAuthToken</a><wbr>(<a href="../models/AuthToken.html" title="class in api.models">AuthToken</a>&nbsp;token)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/AuthToken.html" title="class in server.models">AuthToken</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#updateAuthToken(api.models.AuthToken)" class="member-name-link">updateAuthToken</a><wbr>(<a href="../models/AuthToken.html" title="class in server.models">AuthToken</a>&nbsp;token)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Updates an AuthToken in the database.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/GameData.html" title="class in api.models">GameData</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#updateGame(api.models.GameData)" class="member-name-link">updateGame</a><wbr>(<a href="../models/GameData.html" title="class in api.models">GameData</a>&nbsp;game)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/GameData.html" title="class in server.models">GameData</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#updateGame(api.models.GameData)" class="member-name-link">updateGame</a><wbr>(<a href="../models/GameData.html" title="class in server.models">GameData</a>&nbsp;game)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Updates a game in the database.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/UserData.html" title="class in api.models">UserData</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#updateUser(api.models.UserData)" class="member-name-link">updateUser</a><wbr>(<a href="../models/UserData.html" title="class in api.models">UserData</a>&nbsp;user)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../models/UserData.html" title="class in server.models">UserData</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#updateUser(api.models.UserData)" class="member-name-link">updateUser</a><wbr>(<a href="../models/UserData.html" title="class in server.models">UserData</a>&nbsp;user)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Updates a user's information in the database.</div>
 </div>
@@ -182,20 +182,20 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="clear()">
 <h3>clear</h3>
 <div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">clear</span>()
-    throws <span class="exceptions"><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></span></div>
+    throws <span class="exceptions"><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></span></div>
 <div class="block">Clears all stored data in the database: users, games, authTokens.
  Will not be available outside of testing.</div>
 <dl class="notes">
 <dt>Throws:</dt>
-<dd><code><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></code> - Throws an error if it's not able to clear the database for some reason.</dd>
+<dd><code><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></code> - Throws an error if it's not able to clear the database for some reason.</dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="createUser(api.models.UserData)">
 <h3>createUser</h3>
-<div class="member-signature"><span class="return-type"><a href="../models/UserData.html" title="class in api.models">UserData</a></span>&nbsp;<span class="element-name">createUser</span><wbr><span class="parameters">(<a href="../models/UserData.html" title="class in api.models">UserData</a>&nbsp;user)</span>
-             throws <span class="exceptions"><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></span></div>
+<div class="member-signature"><span class="return-type"><a href="../models/UserData.html" title="class in server.models">UserData</a></span>&nbsp;<span class="element-name">createUser</span><wbr><span class="parameters">(<a href="../models/UserData.html" title="class in server.models">UserData</a>&nbsp;user)</span>
+             throws <span class="exceptions"><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></span></div>
 <div class="block">Creates a new user and stores it in the database. If the user or username already exist, don't add them again.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -203,14 +203,14 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd>The new UserData object.</dd>
 <dt>Throws:</dt>
-<dd><code><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></code> - Throw an error if something goes wrong (i.e. the user already exists in the database)</dd>
+<dd><code><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></code> - Throw an error if something goes wrong (i.e. the user already exists in the database)</dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="findUser(java.lang.String)">
 <h3>findUser</h3>
-<div class="member-signature"><span class="return-type"><a href="../models/UserData.html" title="class in api.models">UserData</a></span>&nbsp;<span class="element-name">findUser</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;username)</span></div>
+<div class="member-signature"><span class="return-type"><a href="../models/UserData.html" title="class in server.models">UserData</a></span>&nbsp;<span class="element-name">findUser</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;username)</span></div>
 <div class="block">Gets a user from the database and returns it.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -223,8 +223,8 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="updateUser(api.models.UserData)">
 <h3>updateUser</h3>
-<div class="member-signature"><span class="return-type"><a href="../models/UserData.html" title="class in api.models">UserData</a></span>&nbsp;<span class="element-name">updateUser</span><wbr><span class="parameters">(<a href="../models/UserData.html" title="class in api.models">UserData</a>&nbsp;user)</span>
-             throws <span class="exceptions"><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></span></div>
+<div class="member-signature"><span class="return-type"><a href="../models/UserData.html" title="class in server.models">UserData</a></span>&nbsp;<span class="element-name">updateUser</span><wbr><span class="parameters">(<a href="../models/UserData.html" title="class in server.models">UserData</a>&nbsp;user)</span>
+             throws <span class="exceptions"><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></span></div>
 <div class="block">Updates a user's information in the database.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -232,29 +232,29 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd>The updated UserData object.</dd>
 <dt>Throws:</dt>
-<dd><code><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></code> - Throws an error if not able to update user (i.e. user doesn't exist in database)</dd>
+<dd><code><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></code> - Throws an error if not able to update user (i.e. user doesn't exist in database)</dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="deleteUser(api.models.UserData)">
 <h3>deleteUser</h3>
-<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">deleteUser</span><wbr><span class="parameters">(<a href="../models/UserData.html" title="class in api.models">UserData</a>&nbsp;user)</span>
-         throws <span class="exceptions"><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></span></div>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">deleteUser</span><wbr><span class="parameters">(<a href="../models/UserData.html" title="class in server.models">UserData</a>&nbsp;user)</span>
+         throws <span class="exceptions"><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></span></div>
 <div class="block">Deletes a user from the database.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>user</code> - The UserData object to be deleted.</dd>
 <dt>Throws:</dt>
-<dd><code><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></code> - Throws an error if not possible to delete (i.e. the user doesn't exist, etc.)</dd>
+<dd><code><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></code> - Throws an error if not possible to delete (i.e. the user doesn't exist, etc.)</dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="createGame(api.models.GameData)">
 <h3>createGame</h3>
-<div class="member-signature"><span class="return-type"><a href="../models/GameData.html" title="class in api.models">GameData</a></span>&nbsp;<span class="element-name">createGame</span><wbr><span class="parameters">(<a href="../models/GameData.html" title="class in api.models">GameData</a>&nbsp;game)</span>
-             throws <span class="exceptions"><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></span></div>
+<div class="member-signature"><span class="return-type"><a href="../models/GameData.html" title="class in server.models">GameData</a></span>&nbsp;<span class="element-name">createGame</span><wbr><span class="parameters">(<a href="../models/GameData.html" title="class in server.models">GameData</a>&nbsp;game)</span>
+             throws <span class="exceptions"><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></span></div>
 <div class="block">Creates a new game and stores it in the database. If the gameID already exists, don't add the game.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -262,14 +262,14 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd>The new GameData object</dd>
 <dt>Throws:</dt>
-<dd><code><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></code> - Throw an error if something goes wrong (i.e. game already exists, etc.)</dd>
+<dd><code><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></code> - Throw an error if something goes wrong (i.e. game already exists, etc.)</dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="findGame(java.lang.String)">
 <h3>findGame</h3>
-<div class="member-signature"><span class="return-type"><a href="../models/GameData.html" title="class in api.models">GameData</a></span>&nbsp;<span class="element-name">findGame</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;gameID)</span></div>
+<div class="member-signature"><span class="return-type"><a href="../models/GameData.html" title="class in server.models">GameData</a></span>&nbsp;<span class="element-name">findGame</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;gameID)</span></div>
 <div class="block">Gets a game from the database and returns it.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -282,7 +282,7 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="listGames()">
 <h3>listGames</h3>
-<div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="../models/GameData.html" title="class in api.models">GameData</a>&gt;</span>&nbsp;<span class="element-name">listGames</span>()</div>
+<div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="../models/GameData.html" title="class in server.models">GameData</a>&gt;</span>&nbsp;<span class="element-name">listGames</span>()</div>
 <div class="block">Finds and returns all games in the database.</div>
 <dl class="notes">
 <dt>Returns:</dt>
@@ -293,8 +293,8 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="updateGame(api.models.GameData)">
 <h3>updateGame</h3>
-<div class="member-signature"><span class="return-type"><a href="../models/GameData.html" title="class in api.models">GameData</a></span>&nbsp;<span class="element-name">updateGame</span><wbr><span class="parameters">(<a href="../models/GameData.html" title="class in api.models">GameData</a>&nbsp;game)</span>
-             throws <span class="exceptions"><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></span></div>
+<div class="member-signature"><span class="return-type"><a href="../models/GameData.html" title="class in server.models">GameData</a></span>&nbsp;<span class="element-name">updateGame</span><wbr><span class="parameters">(<a href="../models/GameData.html" title="class in server.models">GameData</a>&nbsp;game)</span>
+             throws <span class="exceptions"><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></span></div>
 <div class="block">Updates a game in the database.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -302,29 +302,29 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd>The game that was updated.</dd>
 <dt>Throws:</dt>
-<dd><code><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></code> - Throws an error if not able to update game.</dd>
+<dd><code><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></code> - Throws an error if not able to update game.</dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="deleteGame(api.models.GameData)">
 <h3>deleteGame</h3>
-<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">deleteGame</span><wbr><span class="parameters">(<a href="../models/GameData.html" title="class in api.models">GameData</a>&nbsp;game)</span>
-         throws <span class="exceptions"><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></span></div>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">deleteGame</span><wbr><span class="parameters">(<a href="../models/GameData.html" title="class in server.models">GameData</a>&nbsp;game)</span>
+         throws <span class="exceptions"><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></span></div>
 <div class="block">Deletes a game from the database.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>game</code> - The GameData object to delete.</dd>
 <dt>Throws:</dt>
-<dd><code><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></code> - Throws an error if not possible to delete.</dd>
+<dd><code><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></code> - Throws an error if not possible to delete.</dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="createAuthToken(java.lang.String)">
 <h3>createAuthToken</h3>
-<div class="member-signature"><span class="return-type"><a href="../models/AuthToken.html" title="class in api.models">AuthToken</a></span>&nbsp;<span class="element-name">createAuthToken</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;username)</span>
-                   throws <span class="exceptions"><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></span></div>
+<div class="member-signature"><span class="return-type"><a href="../models/AuthToken.html" title="class in server.models">AuthToken</a></span>&nbsp;<span class="element-name">createAuthToken</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;username)</span>
+                   throws <span class="exceptions"><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></span></div>
 <div class="block">Creates a new AuthToken and stores it in the database.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -332,14 +332,14 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd>the new AuthToken.</dd>
 <dt>Throws:</dt>
-<dd><code><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></code> - Throws an error if something goes wrong (user already has AuthToken, etc.)</dd>
+<dd><code><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></code> - Throws an error if something goes wrong (user already has AuthToken, etc.)</dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="findAuthToken(api.models.AuthToken)">
 <h3>findAuthToken</h3>
-<div class="member-signature"><span class="return-type"><a href="../models/AuthToken.html" title="class in api.models">AuthToken</a></span>&nbsp;<span class="element-name">findAuthToken</span><wbr><span class="parameters">(<a href="../models/AuthToken.html" title="class in api.models">AuthToken</a>&nbsp;token)</span></div>
+<div class="member-signature"><span class="return-type"><a href="../models/AuthToken.html" title="class in server.models">AuthToken</a></span>&nbsp;<span class="element-name">findAuthToken</span><wbr><span class="parameters">(<a href="../models/AuthToken.html" title="class in server.models">AuthToken</a>&nbsp;token)</span></div>
 <div class="block">Finds an AuthToken in the database.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -352,8 +352,8 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="updateAuthToken(api.models.AuthToken)">
 <h3>updateAuthToken</h3>
-<div class="member-signature"><span class="return-type"><a href="../models/AuthToken.html" title="class in api.models">AuthToken</a></span>&nbsp;<span class="element-name">updateAuthToken</span><wbr><span class="parameters">(<a href="../models/AuthToken.html" title="class in api.models">AuthToken</a>&nbsp;token)</span>
-                   throws <span class="exceptions"><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></span></div>
+<div class="member-signature"><span class="return-type"><a href="../models/AuthToken.html" title="class in server.models">AuthToken</a></span>&nbsp;<span class="element-name">updateAuthToken</span><wbr><span class="parameters">(<a href="../models/AuthToken.html" title="class in server.models">AuthToken</a>&nbsp;token)</span>
+                   throws <span class="exceptions"><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></span></div>
 <div class="block">Updates an AuthToken in the database.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -361,21 +361,21 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd>The updated AuthToken.</dd>
 <dt>Throws:</dt>
-<dd><code><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></code> - Throws an error if not possible to update token.</dd>
+<dd><code><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></code> - Throws an error if not possible to update token.</dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="deleteAuthToken(api.models.AuthToken)">
 <h3>deleteAuthToken</h3>
-<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">deleteAuthToken</span><wbr><span class="parameters">(<a href="../models/AuthToken.html" title="class in api.models">AuthToken</a>&nbsp;token)</span>
-              throws <span class="exceptions"><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></span></div>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">deleteAuthToken</span><wbr><span class="parameters">(<a href="../models/AuthToken.html" title="class in server.models">AuthToken</a>&nbsp;token)</span>
+              throws <span class="exceptions"><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></span></div>
 <div class="block">Deletes an AuthToken from the database.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>token</code> - the AuthToken to delete.</dd>
 <dt>Throws:</dt>
-<dd><code><a href="DataAccessException.html" title="class in api.dataAccess">DataAccessException</a></code> - Throws an error if something goes wrong (i.e. the token doesn't exist in database).</dd>
+<dd><code><a href="DataAccessException.html" title="class in server.dataAccess">DataAccessException</a></code> - Throws an error if something goes wrong (i.e. the token doesn't exist in database).</dd>
 </dl>
 </section>
 </li>

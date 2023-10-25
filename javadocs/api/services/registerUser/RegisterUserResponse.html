@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="dc.created" content="2023-10-17">
-<meta name="description" content="declaration: package: api.services.registerUser, class: RegisterUserResponse">
+<meta name="description" content="declaration: package: server.services.registerUser, class: RegisterUserResponse">
 <meta name="generator" content="javadoc/ClassWriterImpl">
 <link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
 <link rel="stylesheet" type="text/css" href="../../../script-dir/jquery-ui.min.css" title="Style">
@@ -68,18 +68,18 @@ loadScripts(document, 'script');</script>
 <main role="main">
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">api.services.registerUser</a></div>
+<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">server.services.registerUser</a></div>
 <h1 title="Class RegisterUserResponse" class="title">Class RegisterUserResponse</h1>
 </div>
 <div class="inheritance" title="Inheritance Tree"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">java.lang.Object</a>
-<div class="inheritance"><a href="../base/Response.html" title="class in api.services.base">api.services.base.Response</a>
-<div class="inheritance">api.services.registerUser.RegisterUserResponse</div>
+<div class="inheritance"><a href="../base/Response.html" title="class in server.services.base">server.services.old.base.Response</a>
+<div class="inheritance">server.services.old.registerUser.RegisterUserResponse</div>
 </div>
 </div>
 <section class="class-description" id="class-description">
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">RegisterUserResponse</span>
-<span class="extends-implements">extends <a href="../base/Response.html" title="class in api.services.base">Response</a></span></div>
+<span class="extends-implements">extends <a href="../base/Response.html" title="class in server.services.base">Response</a></span></div>
 <div class="block">The RegisterUserResponse from the server.
  If successful, returns the new user's username and their new authToken.
  If registration fails, returns an error message.</div>
@@ -95,7 +95,7 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Field</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color"><code>private <a href="../../models/AuthToken.html" title="class in api.models">AuthToken</a></code></div>
+<div class="col-first even-row-color"><code>private <a href="../../models/AuthToken.html" title="class in server.models">AuthToken</a></code></div>
 <div class="col-second even-row-color"><code><a href="#authToken" class="member-name-link">authToken</a></code></div>
 <div class="col-last even-row-color">
 <div class="block">The user's authToken that the server just generated.</div>
@@ -122,7 +122,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Constructor for a fail response (uses base class implementation)</div>
 </div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.lang.String,api.models.AuthToken)" class="member-name-link">RegisterUserResponse</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;username,
- <a href="../../models/AuthToken.html" title="class in api.models">AuthToken</a>&nbsp;authToken)</code></div>
+ <a href="../../models/AuthToken.html" title="class in server.models">AuthToken</a>&nbsp;authToken)</code></div>
 <div class="col-last odd-row-color">
 <div class="block">Constructor for a success response.</div>
 </div>
@@ -140,14 +140,14 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../models/AuthToken.html" title="class in api.models">AuthToken</a></code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../models/AuthToken.html" title="class in server.models">AuthToken</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAuthToken()" class="member-name-link">getAuthToken</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getUsername()" class="member-name-link">getUsername</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAuthToken(api.models.AuthToken)" class="member-name-link">setAuthToken</a><wbr>(<a href="../../models/AuthToken.html" title="class in api.models">AuthToken</a>&nbsp;authToken)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAuthToken(api.models.AuthToken)" class="member-name-link">setAuthToken</a><wbr>(<a href="../../models/AuthToken.html" title="class in server.models">AuthToken</a>&nbsp;authToken)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setUsername(java.lang.String)" class="member-name-link">setUsername</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;username)</code></div>
@@ -156,7 +156,7 @@ loadScripts(document, 'script');</script>
 </div>
 </div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-api.services.base.Response">Methods inherited from class&nbsp;api.services.base.<a href="../base/Response.html" title="class in api.services.base">Response</a></h3>
+<h3 id="methods-inherited-from-class-api.services.base.Response">Methods inherited from class&nbsp;server.services.base.<a href="../base/Response.html" title="class in server.services.base">Response</a></h3>
 <code><a href="../base/Response.html#getCode()">getCode</a>, <a href="../base/Response.html#getErrorMessage(int,java.lang.String)">getErrorMessage</a>, <a href="../base/Response.html#getMessage()">getMessage</a>, <a href="../base/Response.html#setCode(int)">setCode</a>, <a href="../base/Response.html#setMessage(java.lang.String)">setMessage</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></h3>
@@ -182,7 +182,7 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="authToken">
 <h3>authToken</h3>
-<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="../../models/AuthToken.html" title="class in api.models">AuthToken</a></span>&nbsp;<span class="element-name">authToken</span></div>
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="../../models/AuthToken.html" title="class in server.models">AuthToken</a></span>&nbsp;<span class="element-name">authToken</span></div>
 <div class="block">The user's authToken that the server just generated.</div>
 </section>
 </li>
@@ -198,7 +198,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="&lt;init&gt;(java.lang.String,api.models.AuthToken)">
 <h3>RegisterUserResponse</h3>
 <div class="member-signature"><span class="element-name">RegisterUserResponse</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;username,
- <a href="../../models/AuthToken.html" title="class in api.models">AuthToken</a>&nbsp;authToken)</span></div>
+ <a href="../../models/AuthToken.html" title="class in server.models">AuthToken</a>&nbsp;authToken)</span></div>
 <div class="block">Constructor for a success response.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -243,13 +243,13 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="getAuthToken()">
 <h3>getAuthToken</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../models/AuthToken.html" title="class in api.models">AuthToken</a></span>&nbsp;<span class="element-name">getAuthToken</span>()</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../models/AuthToken.html" title="class in server.models">AuthToken</a></span>&nbsp;<span class="element-name">getAuthToken</span>()</div>
 </section>
 </li>
 <li>
 <section class="detail" id="setAuthToken(api.models.AuthToken)">
 <h3>setAuthToken</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setAuthToken</span><wbr><span class="parameters">(<a href="../../models/AuthToken.html" title="class in api.models">AuthToken</a>&nbsp;authToken)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setAuthToken</span><wbr><span class="parameters">(<a href="../../models/AuthToken.html" title="class in server.models">AuthToken</a>&nbsp;authToken)</span></div>
 </section>
 </li>
 </ul>
