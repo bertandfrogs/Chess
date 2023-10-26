@@ -1,8 +1,11 @@
 package passoffTests;
 
-import chess.*;
 import chess.interfaces.*;
 import chess.pieces.*;
+import chess.Board;
+import chess.Game;
+import chess.Move;
+import chess.Position;
 
 /**
  * Used for testing your code

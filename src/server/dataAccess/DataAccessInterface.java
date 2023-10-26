@@ -63,13 +63,13 @@ public interface DataAccessInterface {
      * @param gameID The ID of the game we're looking for.
      * @return the GameData object if found in the database, returns null if not found.
      */
-    GameData findGame(String gameID);
+    GameData findGame(int gameID);
 
     /**
      * Finds and returns all games in the database.
      * @return All games as a Map, the key is the gameID and value is the GameData.
      */
-    Map<String, GameData> listGames();
+    Map<Integer, GameData> listGames();
 
     /**
      * Updates a game in the database.
@@ -87,7 +87,7 @@ public interface DataAccessInterface {
     void deleteGame(GameData game) throws DataAccessException;
 
     /**
-     * Creates a new AuthToken and stores it in the database.
+     * Creates a new AuthToken for a given user and stores it in the database.
      * @param username The username connected to new token.
      * @return the new AuthToken.
      * @throws DataAccessException Throws an error if something goes wrong (user already has AuthToken, etc.)
@@ -96,23 +96,15 @@ public interface DataAccessInterface {
 
     /**
      * Finds an AuthToken in the database.
-     * @param token The AuthToken to find.
+     * @param authToken The String AuthToken to find.
      * @return The AuthToken if found; returns null if not found.
      */
-    AuthToken findAuthToken(AuthToken token);
-
-    /**
-     * Updates an AuthToken in the database.
-     * @param token The updated AuthToken to be changed in the database.
-     * @return The updated AuthToken.
-     * @throws DataAccessException Throws an error if not possible to update token.
-     */
-    AuthToken updateAuthToken(AuthToken token) throws DataAccessException;
+    AuthToken findAuthToken(String authToken);
 
     /**
      * Deletes an AuthToken from the database.
-     * @param token the AuthToken to delete.
+     * @param token the String AuthToken to delete.
      * @throws DataAccessException Throws an error if something goes wrong (i.e. the token doesn't exist in database).
      */
-    void deleteAuthToken(AuthToken token) throws DataAccessException;
+    void deleteAuthToken(String authToken) throws DataAccessException;
 }

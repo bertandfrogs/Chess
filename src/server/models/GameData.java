@@ -2,6 +2,8 @@ package server.models;
 
 import chess.Game;
 
+import java.util.Objects;
+
 /**
  * The GameData model is the way that games are stored in the database, and it contains all the information about a game that the server needs.
  */
@@ -77,5 +79,18 @@ public class GameData {
 
     public void setGame(Game game) {
         this.game = game;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GameData gameData = (GameData) o;
+        return gameId == gameData.gameId && whiteUsername.equals(gameData.whiteUsername) && blackUsername.equals(gameData.blackUsername) && gameName.equals(gameData.gameName) && game.equals(gameData.game);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gameId, whiteUsername, blackUsername, gameName, game);
     }
 }

@@ -1,5 +1,9 @@
 package server.models;
 
+import com.google.gson.Gson;
+
+import java.util.Objects;
+
 /**
  * The UserData model is how users' data is stored in the server. AuthTokens are not stored in the UserData model because they are non-permanent (they get created and deleted every session)
  */
@@ -15,12 +19,17 @@ public class UserData {
     /**
      * The user's email. Only using when registering a new user.
      */
-    String email;
+    String email = "";
 
     public UserData(String username, String password, String email) {
         this.username = username;
         this.password = password;
         this.email = email;
+    }
+
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 
     public String getUsername() {
@@ -45,5 +54,18 @@ public class UserData {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserData userData = (UserData) o;
+        return Objects.equals(username, userData.username) && Objects.equals(password, userData.password) && Objects.equals(email, userData.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, password, email);
     }
 }

@@ -1,11 +1,15 @@
 package server.dataAccess;
 
+import chess.Game;
+import chess.pieces.Piece;
 import server.models.AuthToken;
 import server.models.GameData;
 import server.models.UserData;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * In-memory representation of @DataAccessInterface. Creates, reads, updates, and deletes data stored in memory.
@@ -17,14 +21,16 @@ public class DataAccess implements DataAccessInterface {
     final private Map<String, UserData> users = new HashMap<>();
 
     /**
-     * A map containing all the AuthTokens. Key: authToken (String). Value: AuthToken object.
+     * A map containing all the AuthTokens. Key: Username (String). Value: AuthToken object.
      */
     final private Map<String, AuthToken> authTokens = new HashMap<>();
 
     /**
      * A map containing all the games. Key: gameID. Value: GameData object.
      */
-    final private Map<String, GameData> games = new HashMap<>();
+    final private Map<Integer, GameData> games = new HashMap<>();
+
+    int gameId = 1;
 
     // Getters
     public Map<String, UserData> getUsers() {
@@ -33,7 +39,7 @@ public class DataAccess implements DataAccessInterface {
     public Map<String, AuthToken> getAuthTokens() {
         return authTokens;
     }
-    public Map<String, GameData> getGames() {
+    public Map<Integer, GameData> getGames() {
         return games;
     }
 
@@ -113,15 +119,26 @@ public class DataAccess implements DataAccessInterface {
         }
     }
 
+    public GameData newGame(String gameName) throws DataAccessException {
+        GameData game = new GameData(gameId++, null, null, gameName, new Game());
+        return createGame(game);
+    }
+
     /**
-     * Creates a new game and stores it in the database. If the gameID already exists, don't add the game.
+     * Stores a new game in the database. If the gameID already exists, don't add the game.
      * @param game The new game (as a GameData object).
      * @return The GameData object that was stored in the database.
      * @throws DataAccessException Throw an error if something goes wrong (i.e. the game already exists in the database)
      */
     @Override
     public GameData createGame(GameData game) throws DataAccessException {
-        return null;
+        if(findGame(game.getGameId()) == null) {
+            games.put(game.getGameId(), game);
+        }
+        else {
+            throw new DataAccessException("Game already exists in database.");
+        }
+        return game;
     }
 
     /**
@@ -130,8 +147,8 @@ public class DataAccess implements DataAccessInterface {
      * @return The requested game if found in the database; null if not found.
      */
     @Override
-    public GameData findGame(String gameID) {
-        return null;
+    public GameData findGame(int gameID) {
+        return games.get(gameID);
     }
 
     /**
@@ -139,7 +156,7 @@ public class DataAccess implements DataAccessInterface {
      * @return The games map which stores all active games, the key is the gameID and value is the GameData.
      */
     @Override
-    public Map<String, GameData> listGames() {
+    public Map<Integer, GameData> listGames() {
         return games;
     }
 
@@ -151,7 +168,13 @@ public class DataAccess implements DataAccessInterface {
      */
     @Override
     public GameData updateGame(GameData game) throws DataAccessException {
-        return null;
+        if(findGame(game.getGameId()) != null){
+            games.replace(game.getGameId(), game);
+        }
+        else {
+            throw new DataAccessException("Game not found.");
+        }
+        return game;
     }
 
     /**
@@ -160,38 +183,36 @@ public class DataAccess implements DataAccessInterface {
      * @throws DataAccessException Throws an error if not possible to delete.
      */
     @Override
-    public void deleteGame(GameData game) throws DataAccessException {}
+    public void deleteGame(GameData game) throws DataAccessException {
+        if(findGame(game.getGameId()) != null) {
+            games.remove(game.getGameId());
+        }
+        else {
+            throw new DataAccessException("Couldn't delete game, not found in database.");
+        }
+    }
 
     /**
-     * Generates a new AuthToken and stores it in the authTokens map.
+     * Creates a new AuthToken for a username and stores it in the authTokens map.
      * @param username The username connected to new token.
      * @return the new AuthToken
-     * @throws DataAccessException Throw an error if something goes wrong (i.e. the AuthToken already exists in the database)
      */
     @Override
-    public AuthToken createAuthToken(String username) throws DataAccessException {
-        return null;
+    public AuthToken createAuthToken(String username) {
+        String newStringToken = UUID.randomUUID().toString();
+        AuthToken authToken = new AuthToken(newStringToken, username);
+        authTokens.put(newStringToken, authToken);
+        return authToken;
     }
 
     /**
      * Finds an AuthToken in the authToken map.
-     * @param token The AuthToken to find
+     * @param authToken The string token to find
      * @return The token if found in the database; null if not found.
      */
     @Override
-    public AuthToken findAuthToken(AuthToken token) {
-        return null;
-    }
-
-    /**
-     * Updates an AuthToken in the authToken map
-     * @param token The AuthToken to be changed in the database
-     * @return The AuthToken that was updated
-     * @throws DataAccessException Throws an error if not possible to update token
-     */
-    @Override
-    public AuthToken updateAuthToken(AuthToken token) throws DataAccessException {
-        return null;
+    public AuthToken findAuthToken(String authToken) {
+        return authTokens.get(authToken);
     }
 
     /**
@@ -200,7 +221,12 @@ public class DataAccess implements DataAccessInterface {
      * @throws DataAccessException Throws an error if something goes wrong
      */
     @Override
-    public void deleteAuthToken(AuthToken token) throws DataAccessException {
-
+    public void deleteAuthToken(String token) throws DataAccessException {
+        if(findAuthToken(token) != null) {
+            authTokens.remove(token);
+        }
+        else {
+            throw new DataAccessException("Couldn't delete token, not found in database.");
+        }
     }
 }
