@@ -13,6 +13,12 @@ public class AuthService extends Service {
         this.dataAccess = dataAccess;
     }
 
+    /**
+     * Logs in a user, creating a new AuthToken in the database.
+     * @param user The user, providing username and password.
+     * @return An AuthToken if successfully logged in.
+     * @throws ServerException Throws an error if the username or password are incorrect
+     */
     public AuthToken login(UserData user) throws ServerException {
         String username = user.getUsername();
         String password = user.getPassword();
@@ -25,6 +31,11 @@ public class AuthService extends Service {
         throw new ServerException(401, "invalid login credentials");
     }
 
+    /**
+     * Logs out the user represented by the AuthToken.
+     * @param token The user's AuthToken to be removed.
+     * @throws ServerException Throws an error if something goes wrong.
+     */
     public void logout(String token) throws ServerException {
         try {
             dataAccess.deleteAuthToken(token);
@@ -34,6 +45,11 @@ public class AuthService extends Service {
         }
     }
 
+    /**
+     * Gets an AuthToken object given a String AuthToken.
+     * @param token The token as a string.
+     * @return The full AuthToken object.
+     */
     public AuthToken findToken(String token) {
         return dataAccess.findAuthToken(token);
     }

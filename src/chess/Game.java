@@ -8,9 +8,11 @@ import chess.interfaces.ChessPiece;
 import static chess.interfaces.ChessGame.TeamColor.*;
 import static chess.interfaces.ChessPiece.PieceType.*;
 import chess.pieces.Piece;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -320,5 +322,19 @@ public class Game implements chess.interfaces.ChessGame {
                 }
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        // JSON output
+        return getJSON("teamTurn", teamTurn, "pieces", chessBoard.getPieces().values());
+    }
+
+    private static String getJSON(Object... props) {
+        Map<Object, Object> map = new HashMap<>();
+        for (var i = 0; i+1 < props.length; i = i+2) {
+            map.put(props[i], props[i+1]);
+        }
+        return new Gson().toJson(map);
     }
 }

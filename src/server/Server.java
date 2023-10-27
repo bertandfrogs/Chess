@@ -34,13 +34,15 @@ public class Server {
         this.userService = new UserService(dataAccess);
     }
 
+    /**
+     * Configures and runs the server. Specifies the server endpoints and HTTP methods.
+     */
     private void run() {
         try {
             // Configure Spark
             Spark.port(8080);
 
-            // Test Endpoint (Hello World)
-            Spark.get("/hello", (request, response) -> "Hello World!");
+            Spark.externalStaticFileLocation("web/");
 
             // Server Endpoints
             Spark.delete("/db", this::clearApplication);
@@ -65,6 +67,13 @@ public class Server {
         }
     }
 
+    /**
+     * Handles all server exceptions and formats them.
+     * @param e Any ServerException.
+     * @param req The Spark request object.
+     * @param res The Spark response object.
+     * @return The error body.
+     */
     public Object exceptionHandler(ServerException e, Request req, Response res) {
         String body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage()), "success", false));
         res.type("application/json");
@@ -73,35 +82,78 @@ public class Server {
         return body;
     }
 
+    /**
+     * The clearApplication handler. Passes data from the server to the AdminService.
+     * @param req The Spark request object
+     * @param res The Spark response object
+     * @return Only returns success (200) or fail (500).
+     * @throws ServerException
+     */
     public Object clearApplication(Request req, Response res) throws ServerException {
         adminService.clearApplication();
         return responseJSON();
     }
 
+    /**
+     * The registerUser handler gets the user data from the request body. Passes data from the server to the UserService.
+     * @param req The Spark request object.
+     * @param res The Spark response object.
+     * @return If successful, returns the new user's username and their new authToken wrapped in a JSON object.
+     * @throws ServerException
+     */
     public Object registerUser(Request req, Response res) throws ServerException {
         UserData user = getBody(req, UserData.class);
         AuthToken token = userService.registerUser(user);
         return responseJSON("username", user.getUsername(), "authToken", token.getAuthToken());
     }
 
+    /**
+     * The login handler gets the user data from the request body. Passes data from the server to the AuthService.
+     * @param req The Spark request object.
+     * @param res The Spark response object.
+     * @return If successful, returns the username and the authToken for the current session wrapped in a JSON object.
+     * @throws ServerException
+     */
     public Object login(Request req, Response res) throws ServerException {
         UserData user = getBody(req, UserData.class);
         AuthToken token = authService.login(user);
         return responseJSON("username", user.getUsername(), "authToken", token.getAuthToken());
     }
 
+    /**
+     * The logout handler verifies the AuthToken of the request. It sends data from the server to the AuthService.
+     * @param req The Spark request object.
+     * @param res The Spark response object.
+     * @return Only returns success (200) or fail (500).
+     * @throws ServerException
+     */
     public Object logout(Request req, Response res) throws ServerException {
         AuthToken token = getAuthorization(req);
         authService.logout(token.getAuthToken());
         return responseJSON("username", token.getUsername(), "authToken", token.getAuthToken());
     }
 
+    /**
+     * The listGames handler verifies the AuthToken of the request. It sends data from the server to the AuthService.
+     * @param req The Spark request object.
+     * @param res The Spark response object.
+     * @return A list of all games as a JSON object.
+     * @throws ServerException
+     */
     public Object listGames(Request req, Response res) throws ServerException {
         getAuthorization(req);
         var gameList = gameService.listGames();
         return responseJSON("games", gameList.toArray());
     }
 
+    /**
+     * The createGame handler verifies the AuthToken of the request, and gets the game data from the request body.
+     * It sends data from the server to the AuthService.
+     * @param req The Spark request object
+     * @param res The Spark response object
+     * @return The new gameID wrapped in a JSON object.
+     * @throws ServerException
+     */
     public Object createGame(Request req, Response res) throws ServerException {
         getAuthorization(req);
         GameData game = getBody(req, GameData.class);
@@ -116,6 +168,11 @@ public class Server {
         return responseJSON();
     }
 
+    /**
+     * Takes an even number of Objects and serializes them into JSON.
+     * For example, "responseJSON("name", this.name)" would return {"name": "jeffrey"}
+     * @return The JSON object.
+     */
     private static String responseJSON(Object... props) {
         Map<Object, Object> map = new HashMap<>();
         for (var i = 0; i+1 < props.length; i = i+2) {
@@ -132,6 +189,7 @@ public class Server {
         return body;
     }
 
+    // TODO: Maybe move it inside the AuthService instead of the Server class itself
     private AuthToken getAuthorization(Request req) throws ServerException {
         String authorization = req.headers("authorization");
         if(authorization != null){
