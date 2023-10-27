@@ -13,7 +13,7 @@ import java.util.Objects;
  * Manages the requests and responses for all the Game endpoints in the server.
  */
 public class GameService extends Service {
-    private DataAccess dataAccess;
+    private final DataAccess dataAccess;
 
     public GameService(DataAccess data) {
         dataAccess = data;

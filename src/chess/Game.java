@@ -133,12 +133,7 @@ public class Game implements chess.interfaces.ChessGame {
 
         if(attacker.getPieceType() == KNIGHT || attacker.getPieceType() == PAWN) {
             // must be captured to escape checkmate
-            if(getPiecesInRange(attacker.getMyPosition(), teamColor, false).isEmpty()){
-                return true;
-            }
-            else {
-                return false;
-            }
+            return getPiecesInRange(attacker.getMyPosition(), teamColor, false).isEmpty();
         }
         else {
             // check if it can be captured or blocked

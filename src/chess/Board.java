@@ -39,7 +39,7 @@ public class Board implements chess.interfaces.ChessBoard {
     private ChessPosition blackKingPosition = null;
     private ChessPosition whiteKingPosition = null;
 
-    private Map<Integer, Piece> pieces = new HashMap<>(); // Stores pieces according to the hashCode of the position on the board
+    private final Map<Integer, Piece> pieces = new HashMap<>(); // Stores pieces according to the hashCode of the position on the board
 
     @Override
     public void addPiece(ChessPosition pos, ChessPiece p) {
@@ -149,7 +149,7 @@ public class Board implements chess.interfaces.ChessBoard {
             for(int col = 1; col <= 8; col++) {
                 Piece current = getPiece(getHashFromRowAndCol(row, col));
                 if(current != null){
-                    output.append(current.toString());
+                    output.append(current);
                 }
                 else {
                     output.append("   "); // whitespace
@@ -225,7 +225,7 @@ public class Board implements chess.interfaces.ChessBoard {
             case BLACK -> {
                 return blackKingPosition;
             }
-        };
+        }
         return null;
     }
 
@@ -255,7 +255,7 @@ public class Board implements chess.interfaces.ChessBoard {
             case '8' -> 'h';
             default -> throw new IllegalStateException("Unexpected value: " + row);
         };
-        return Character.toString(row) + Character.toString(col);
+        return Character.toString(row) + col;
     }
 
 }

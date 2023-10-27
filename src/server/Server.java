@@ -181,6 +181,13 @@ public class Server {
         return new Gson().toJson(map);
     }
 
+    /**
+     * Gets the body from the HTTP request and deserializes it into a GSON object of a given type.
+     * @param request The Spark Request object
+     * @param classType The type of object to create and return.
+     * @return The object created by deserializing the request.
+     * @throws ServerException Throws an error if there is no Request body.
+     */
     private static <T> T getBody(Request request, Class<T> classType) throws ServerException {
         var body = new Gson().fromJson(request.body(), classType);
         if (body == null) {
@@ -190,6 +197,12 @@ public class Server {
     }
 
     // TODO: Maybe move it inside the AuthService instead of the Server class itself
+    /**
+     * Gets the authorization string from the request header, and checks the database for the token.
+     * @param req The Spark Request object
+     * @return The AuthToken connected to the string token
+     * @throws ServerException Throws a 401 exception if not authorized.
+     */
     private AuthToken getAuthorization(Request req) throws ServerException {
         String authorization = req.headers("authorization");
         if(authorization != null){

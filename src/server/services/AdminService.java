@@ -8,7 +8,7 @@ import server.dataAccess.DataAccessException;
  * Manages the requests and responses to and from the server for the ClearApplication endpoint.
  */
 public class AdminService {
-    private DataAccess dataAccess;
+    private final DataAccess dataAccess;
 
     public AdminService(DataAccess data) {
         dataAccess = data;

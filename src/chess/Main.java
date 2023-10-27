@@ -13,7 +13,7 @@ import java.util.Scanner;
 import static chess.interfaces.ChessPiece.PieceType.PAWN;
 
 public class Main {
-    private static Game game = new Game();
+    private static final Game game = new Game();
     public static void main(String[] args) {
         // Using Scanner class to get input from console until "exit" is entered
         boolean activeConsole = true;
