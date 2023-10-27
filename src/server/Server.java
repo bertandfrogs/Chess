@@ -12,8 +12,7 @@ import server.services.GameService;
 import server.services.UserService;
 import spark.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Server {
     DataAccess dataAccess;
@@ -22,12 +21,10 @@ public class Server {
     GameService gameService;
     UserService userService;
 
-
     public static void main(String[] args) {
         Server server = new Server(new DataAccess());
         server.run();
     }
-
 
     public Server(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
@@ -101,7 +98,8 @@ public class Server {
 
     public Object listGames(Request req, Response res) throws ServerException {
         getAuthorization(req);
-        return null; //FIXME
+        var gameList = gameService.listGames();
+        return responseJSON("games", gameList.toArray());
     }
 
     public Object createGame(Request req, Response res) throws ServerException {

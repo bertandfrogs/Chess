@@ -17,7 +17,7 @@ public class GameService extends Service {
     }
 
     public Collection<GameData> listGames() {
-        return dataAccess.listGames().values();
+        return dataAccess.listGames();
     }
 
     public GameData createGame(String gameName) {
@@ -50,8 +50,8 @@ public class GameService extends Service {
                         throw new ServerException(403, "color taken");
                     }
                 }
-                dataAccess.updateGame(game);
             }
+            dataAccess.updateGame(game);
             return game;
         }
         catch (DataAccessException ignored) {

@@ -7,6 +7,7 @@ import server.models.AuthToken;
 import server.models.GameData;
 import server.models.UserData;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -147,8 +148,8 @@ public class DataAccess implements DataAccessInterface {
      * @return The games map which stores all active games, the key is the gameID and value is the GameData.
      */
     @Override
-    public Map<Integer, GameData> listGames() {
-        return games;
+    public Collection<GameData> listGames() {
+        return games.values();
     }
 
     /**
@@ -159,8 +160,9 @@ public class DataAccess implements DataAccessInterface {
      */
     @Override
     public GameData updateGame(GameData game) throws DataAccessException {
-        if(findGameById(game.getGameId()) != null){
-            games.replace(game.getGameId(), game);
+        int gameID = game.getGameId();
+        if(findGameById(gameID) != null){
+            games.replace(gameID, game);
         }
         else {
             throw new DataAccessException("Game not found.");

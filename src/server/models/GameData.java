@@ -1,6 +1,7 @@
 package server.models;
 
 import chess.Game;
+import com.google.gson.Gson;
 
 import java.util.Objects;
 
@@ -11,7 +12,7 @@ public class GameData {
     /**
      * A unique ID. Used by the DataAccess class as the key to the users map.
      */
-    int gameId;
+    int gameID;
 
     /**
      * The username of the user who is playing as white.
@@ -33,8 +34,8 @@ public class GameData {
      */
     Game game;
 
-    public GameData(int gameId, String whiteUsername, String blackUsername, String gameName, Game game) {
-        this.gameId = gameId;
+    public GameData(int gameID, String whiteUsername, String blackUsername, String gameName, Game game) {
+        this.gameID = gameID;
         this.whiteUsername = whiteUsername;
         this.blackUsername = blackUsername;
         this.gameName = gameName;
@@ -42,11 +43,11 @@ public class GameData {
     }
 
     public int getGameId() {
-        return gameId;
+        return gameID;
     }
 
     public void setGameId(int gameId) {
-        this.gameId = gameId;
+        this.gameID = gameId;
     }
 
     public String getWhiteUsername() {
@@ -86,11 +87,16 @@ public class GameData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GameData gameData = (GameData) o;
-        return gameId == gameData.gameId && whiteUsername.equals(gameData.whiteUsername) && blackUsername.equals(gameData.blackUsername) && gameName.equals(gameData.gameName) && game.equals(gameData.game);
+        return gameID == gameData.gameID && whiteUsername.equals(gameData.whiteUsername) && blackUsername.equals(gameData.blackUsername) && gameName.equals(gameData.gameName) && game.equals(gameData.game);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gameId, whiteUsername, blackUsername, gameName, game);
+        return Objects.hash(gameID, whiteUsername, blackUsername, gameName, game);
+    }
+
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 }

@@ -5,6 +5,7 @@ import server.models.AuthToken;
 import server.models.GameData;
 import server.models.UserData;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -70,7 +71,7 @@ public interface DataAccessInterface {
      * Finds and returns all games in the database.
      * @return All games as a Map, the key is the gameID and value is the GameData.
      */
-    Map<Integer, GameData> listGames();
+    Collection<GameData> listGames();
 
     /**
      * Updates a game in the database.
