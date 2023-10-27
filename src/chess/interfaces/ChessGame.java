@@ -1,6 +1,7 @@
 package chess.interfaces;
 
 import chess.InvalidMoveException;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.Collection;
 
@@ -28,8 +29,8 @@ public interface ChessGame {
      * Enum identifying the 2 possible teams in a chess game
      */
     enum TeamColor {
-        WHITE,
-        BLACK
+        @SerializedName("WHITE") WHITE,
+        @SerializedName("BLACK") BLACK
     }
 
     /**

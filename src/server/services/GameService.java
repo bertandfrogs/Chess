@@ -20,18 +20,13 @@ public class GameService extends Service {
         return dataAccess.listGames().values();
     }
 
-    public GameData createGame(String gameName) throws ServerException {
-        try {
-            return dataAccess.newGame(gameName);
-        }
-        catch (DataAccessException e) {
-            throw new ServerException(500, e.getMessage());
-        }
+    public GameData createGame(String gameName) {
+        return dataAccess.createGame(gameName);
     }
 
     public GameData joinGame(String username, ChessGame.TeamColor color, int gameID) throws ServerException {
         try {
-            GameData game = dataAccess.findGame(gameID);
+            GameData game = dataAccess.findGameById(gameID);
             if (game == null) {
                 throw new ServerException(400, "unknown gameID");
             }

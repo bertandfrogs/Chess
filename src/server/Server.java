@@ -2,8 +2,9 @@ package server;
 
 import com.google.gson.Gson;
 import server.dataAccess.DataAccess;
-import server.dataAccess.DataAccessException;
 import server.models.AuthToken;
+import server.models.GameData;
+import server.services.GameJoinRequest;
 import server.models.UserData;
 import server.services.AdminService;
 import server.services.AuthService;
@@ -54,8 +55,8 @@ public class Server {
             Spark.put("/game", this::joinGame);
 
             // Exceptions
-            Spark.exception(ServerException.class, this::exceptionHandler);
-            Spark.exception(Exception.class, (e, req, res) -> exceptionHandler(new ServerException(500, e.getMessage()), req, res));
+            Spark.exception(ServerException.class, this::exceptionHandler); // handles ServerException errors
+            Spark.exception(Exception.class, (e, req, res) -> exceptionHandler(new ServerException(500, e.getMessage()), req, res)); // handles Spark exceptions
             Spark.notFound((req, res) -> {
                 var msg = String.format("[%s] %s not found", req.requestMethod(), req.pathInfo());
                 return exceptionHandler(new ServerException(404, msg), req, res);
@@ -98,16 +99,23 @@ public class Server {
         return responseJSON("username", token.getUsername(), "authToken", token.getAuthToken());
     }
 
-    public Object listGames(Request req, Response res) {
+    public Object listGames(Request req, Response res) throws ServerException {
+        getAuthorization(req);
         return null; //FIXME
     }
 
-    public Object createGame(Request req, Response res) {
-        return null; //FIXME
+    public Object createGame(Request req, Response res) throws ServerException {
+        getAuthorization(req);
+        GameData game = getBody(req, GameData.class);
+        game = gameService.createGame(game.getGameName());
+        return responseJSON("gameID", game.getGameId());
     }
 
-    public Object joinGame(Request req, Response res) {
-        return null; //FIXME
+    public Object joinGame(Request req, Response res) throws ServerException {
+        AuthToken token = getAuthorization(req);
+        GameJoinRequest gameJoinRequest = getBody(req, GameJoinRequest.class);
+        gameService.joinGame(token.getUsername(), gameJoinRequest.playerColor, gameJoinRequest.gameID);
+        return responseJSON();
     }
 
     private static String responseJSON(Object... props) {

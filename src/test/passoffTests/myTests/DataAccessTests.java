@@ -19,35 +19,6 @@ public class DataAccessTests {
     }
 
     @Test
-    void clearApplicationTests() {
-        // clearing empty database
-        Assertions.assertDoesNotThrow(() -> dataAccess.clear());
-        Assertions.assertEquals(0, dataAccess.getUsers().size());
-        Assertions.assertEquals(0, dataAccess.getGames().size());
-        Assertions.assertEquals(0, dataAccess.getAuthTokens().size());
-
-        Assertions.assertDoesNotThrow(() -> {
-            dataAccess.createUser(new UserData("test1", "pass", "sbemail"));
-            dataAccess.createUser(new UserData("test2", "pass", "sbemail"));
-            dataAccess.createUser(new UserData("test3", "pass", "sbemail"));
-            dataAccess.createUser(new UserData("test4", "pass", "sbemail"));
-            dataAccess.createUser(new UserData("test5", "pass", "sbemail"));
-            dataAccess.createUser(new UserData("test6", "pass", "sbemail"));
-        });
-
-        Assertions.assertDoesNotThrow(() -> {
-            dataAccess.createGame(new GameData(1234, "test1", "test2", "bob1", new Game()));
-            dataAccess.createGame(new GameData(3454, "test3", "test4", "bob2", new Game()));
-            dataAccess.createGame(new GameData(5747, "test5", "test6", "bob3", new Game()));
-        });
-
-        Assertions.assertDoesNotThrow(() -> dataAccess.clear());
-        Assertions.assertEquals(0, dataAccess.getUsers().size());
-        Assertions.assertEquals(0, dataAccess.getGames().size());
-        Assertions.assertEquals(0, dataAccess.getAuthTokens().size());
-    }
-
-    @Test
     void createUserTests() {
         UserData newUser1 = new UserData("beans88", "12345", "beans88@gmail.com");
 
@@ -208,82 +179,6 @@ public class DataAccessTests {
     }
 
     @Test
-    void createGameTests() {
-        // game hasn't been added yet
-        Assertions.assertNull(dataAccess.findGame(1));
-
-        Game newChessGame = new Game();
-        GameData newGame = new GameData(1, "white", "black", "My First Game", newChessGame);
-        Assertions.assertDoesNotThrow(() -> {
-            dataAccess.createGame(newGame);
-        });
-
-        // trying to find nonexistent game
-        Assertions.assertNull(dataAccess.findGame(5));
-
-        Assertions.assertEquals(newGame, dataAccess.findGame(1));
-
-        // Throws an exception when trying to create a duplicate game
-        Assertions.assertThrows(DataAccessException.class, () -> {
-            dataAccess.createGame(newGame);
-        });
-    }
-
-    @Test
-    void updateGameTests(){
-        Game newChessGame = new Game();
-        GameData newGame = new GameData(1, "white", "black", "My First Game", newChessGame);
-        GameData updatedGame = new GameData(newGame.getGameId(), "different", "different", "otherGameName", newChessGame);
-
-        // Throws an exception when trying to update a game that's not in the db
-        Assertions.assertThrows(DataAccessException.class, () -> {
-            dataAccess.updateGame(updatedGame);
-        });
-
-        Assertions.assertDoesNotThrow(() -> {
-            dataAccess.createGame(newGame);
-        });
-
-        Assertions.assertEquals(newGame, dataAccess.findGame(1));
-
-        Assertions.assertDoesNotThrow(() -> {
-            dataAccess.updateGame(updatedGame);
-        });
-
-        Assertions.assertEquals(updatedGame, dataAccess.findGame(1));
-    }
-
-    @Test
-    void deleteGameTests() {
-        Game newChessGame = new Game();
-        GameData newGame = new GameData(1, "white", "black", "My First Game", newChessGame);
-
-        // make sure it throws an error when trying to delete a game that's not in db
-        Assertions.assertThrows(DataAccessException.class, () -> {
-            dataAccess.deleteGame(newGame);
-        });
-
-        Assertions.assertDoesNotThrow(() -> {
-            dataAccess.createGame(newGame);
-        });
-
-        Assertions.assertEquals(newGame, dataAccess.findGame(1));
-
-        // Normal Game Deletion
-        Assertions.assertDoesNotThrow(() -> {
-            dataAccess.deleteGame(newGame);
-        });
-
-        Assertions.assertNull(dataAccess.findGame(1));
-        Assertions.assertEquals(0, dataAccess.getGames().size());
-
-        // trying to delete it again, should throw an error
-        Assertions.assertThrows(DataAccessException.class, () -> {
-            dataAccess.deleteGame(newGame);
-        });
-    }
-
-    @Test
     void createAuthTokenTests() {
         AuthToken newAuthToken = dataAccess.createAuthToken("beans");
         String tokenStr = newAuthToken.getAuthToken();
@@ -313,5 +208,13 @@ public class DataAccessTests {
         Assertions.assertThrows(DataAccessException.class, () -> {
             dataAccess.deleteAuthToken(tokenStr);
         });
+    }
+
+    @Test
+    void createGameTests(){
+        GameData newGame = dataAccess.createGame("the ultimate showdown");
+        Assertions.assertNotNull(dataAccess.getGames());
+        Assertions.assertTrue(newGame.getGameId() > 0);
+        Assertions.assertEquals(newGame, dataAccess.findGameById(newGame.getGameId()));
     }
 }

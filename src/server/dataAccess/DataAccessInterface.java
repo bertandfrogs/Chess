@@ -1,5 +1,6 @@
 package server.dataAccess;
 
+import server.ServerException;
 import server.models.AuthToken;
 import server.models.GameData;
 import server.models.UserData;
@@ -52,18 +53,18 @@ public interface DataAccessInterface {
     // Accessing Game Data
     /**
      * Creates a new game and stores it in the database. If the gameID already exists, don't add the game.
-     * @param game The new GameData object.
-     * @return The new GameData object
-     * @throws DataAccessException Throw an error if something goes wrong (i.e. game already exists, etc.)
+     * @param gameName The name of the new game.
+     * @return The new GameData object.
+     * @throws server.ServerException Throw an error if something goes wrong (i.e. game already exists, etc.)
      */
-    GameData createGame(GameData game) throws DataAccessException;
+    GameData createGame(String gameName) throws ServerException;
 
     /**
      * Gets a game from the database and returns it.
      * @param gameID The ID of the game we're looking for.
      * @return the GameData object if found in the database, returns null if not found.
      */
-    GameData findGame(int gameID);
+    GameData findGameById(int gameID);
 
     /**
      * Finds and returns all games in the database.

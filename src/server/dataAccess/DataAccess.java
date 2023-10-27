@@ -1,14 +1,14 @@
 package server.dataAccess;
 
 import chess.Game;
-import chess.pieces.Piece;
+import server.Server;
+import server.ServerException;
 import server.models.AuthToken;
 import server.models.GameData;
 import server.models.UserData;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -30,7 +30,7 @@ public class DataAccess implements DataAccessInterface {
      */
     final private Map<Integer, GameData> games = new HashMap<>();
 
-    int gameId = 1;
+    int newGameId = 1000;
 
     // Getters
     public Map<String, UserData> getUsers() {
@@ -119,25 +119,16 @@ public class DataAccess implements DataAccessInterface {
         }
     }
 
-    public GameData newGame(String gameName) throws DataAccessException {
-        GameData game = new GameData(gameId++, null, null, gameName, new Game());
-        return createGame(game);
-    }
-
     /**
-     * Stores a new game in the database. If the gameID already exists, don't add the game.
-     * @param game The new game (as a GameData object).
+     * Stores a new game in the database. If the name already exists, don't add the game.
+     * @param gameName The name of the new game.
      * @return The GameData object that was stored in the database.
-     * @throws DataAccessException Throw an error if something goes wrong (i.e. the game already exists in the database)
      */
     @Override
-    public GameData createGame(GameData game) throws DataAccessException {
-        if(findGame(game.getGameId()) == null) {
-            games.put(game.getGameId(), game);
-        }
-        else {
-            throw new DataAccessException("Game already exists in database.");
-        }
+    public GameData createGame(String gameName) {
+        newGameId++;
+        GameData game = new GameData(newGameId, null, null, gameName, new Game());
+        games.put(newGameId, game);
         return game;
     }
 
@@ -147,7 +138,7 @@ public class DataAccess implements DataAccessInterface {
      * @return The requested game if found in the database; null if not found.
      */
     @Override
-    public GameData findGame(int gameID) {
+    public GameData findGameById(int gameID) {
         return games.get(gameID);
     }
 
@@ -168,7 +159,7 @@ public class DataAccess implements DataAccessInterface {
      */
     @Override
     public GameData updateGame(GameData game) throws DataAccessException {
-        if(findGame(game.getGameId()) != null){
+        if(findGameById(game.getGameId()) != null){
             games.replace(game.getGameId(), game);
         }
         else {
@@ -184,7 +175,7 @@ public class DataAccess implements DataAccessInterface {
      */
     @Override
     public void deleteGame(GameData game) throws DataAccessException {
-        if(findGame(game.getGameId()) != null) {
+        if(findGameById(game.getGameId()) != null) {
             games.remove(game.getGameId());
         }
         else {
