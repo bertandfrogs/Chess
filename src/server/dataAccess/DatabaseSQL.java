@@ -7,16 +7,18 @@ import server.models.UserData;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class DatabaseSQL implements DataAccessInterface {
     int newGameId = 1000;
     String user = "chess";
     String pass = "jaquemate";
 
-    private Connection getConnection() throws SQLException {
+    protected Connection getConnection() throws SQLException {
         Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306", user, pass);
         connection.setCatalog("chess");
         return connection;
@@ -140,7 +142,21 @@ public class DatabaseSQL implements DataAccessInterface {
     @Override
     public void clear() throws ServerException {
         try (var conn = getConnection()) {
-
+            try (var preparedStatement = conn.prepareStatement("""
+            DELETE from users
+            """)) {
+                preparedStatement.executeUpdate();
+            }
+            try (var preparedStatement = conn.prepareStatement("""
+            DELETE from games
+            """)) {
+                preparedStatement.executeUpdate();
+            }
+            try (var preparedStatement = conn.prepareStatement("""
+            DELETE from sessions
+            """)) {
+                preparedStatement.executeUpdate();
+            }
         }
         catch (SQLException e) {
             throw new ServerException(e.getErrorCode(), e.getMessage());
@@ -150,13 +166,13 @@ public class DatabaseSQL implements DataAccessInterface {
     @Override
     public UserData createUser(UserData user) throws ServerException {
         try (var conn = getConnection()) {
-            if(existsUserInDB(user, conn)){
+            if(findUser(user.getUsername()) != null){
                 throw new ServerException(403, "User already exists in database.");
             }
 
             try (var preparedStatement = conn.prepareStatement("""
                 INSERT INTO users (username, password, email) VALUES (?, ?, ?)
-                """)) {
+                """, Statement.RETURN_GENERATED_KEYS)) {
                 preparedStatement.setString(1, user.getUsername());
                 preparedStatement.setString(2, user.getPassword());
                 preparedStatement.setString(3, user.getEmail());
@@ -169,25 +185,6 @@ public class DatabaseSQL implements DataAccessInterface {
                     createdUsername = result.getString(1);
                 }
                 return new UserData(createdUsername, user.getPassword(), user.getEmail());
-            }
-        }
-        catch (SQLException e) {
-            throw new ServerException(e.getErrorCode(), e.getMessage());
-        }
-    }
-
-    private boolean existsUserInDB(UserData user, Connection conn) throws ServerException {
-        try {
-            try (var preparedStatement = conn.prepareStatement("""
-                 SELECT * from users WHERE username=? AND password=? AND email=?
-                 """)) {
-                preparedStatement.setString(1, user.getUsername());
-                preparedStatement.setString(2, user.getPassword());
-                preparedStatement.setString(3, user.getEmail());
-
-                try (var resultSet = preparedStatement.executeQuery()) {
-                    return resultSet.next(); // returns true if there's a result, false if not
-                }
             }
         }
         catch (SQLException e) {
@@ -221,19 +218,107 @@ public class DatabaseSQL implements DataAccessInterface {
 
     @Override
     public UserData updateUser(UserData user) throws ServerException {
-        try (var conn = getConnection()) {
+        UserData userInDb = findUser(user.getUsername());
+        if(userInDb != null){
+            try (var conn = getConnection()) {
+                try (var preparedStatement = conn.prepareStatement("""
+                     UPDATE users
+                     SET password=?, email=?
+                     WHERE username=?
+                     """)) {
+                    preparedStatement.setString(1, user.getPassword());
+                    preparedStatement.setString(2, user.getEmail());
+                    preparedStatement.setString(3, user.getUsername());
 
+                    preparedStatement.executeUpdate();
+
+                    return user;
+                }
+            }
+            catch (SQLException e) {
+                throw new ServerException(e.getErrorCode(), e.getMessage());
+            }
         }
-        catch (SQLException e) {
-            throw new ServerException(e.getErrorCode(), e.getMessage());
+        else {
+            throw new ServerException(500, "Couldn't update user, not found in database.");
         }
-        return null;
     }
 
     @Override
     public void deleteUser(UserData user) throws ServerException {
         try (var conn = getConnection()) {
+            if(findUser(user.getUsername()) != null){
+                try (var preparedStatement = conn.prepareStatement("""
+                DELETE from users WHERE username=?
+                """)) {
+                    preparedStatement.setString(1, user.getUsername());
+                    preparedStatement.executeUpdate();
+                }
+            }
+            else {
+                throw new ServerException(400, "bad request");
+            }
+        }
+        catch (SQLException e) {
+            throw new ServerException(e.getErrorCode(), e.getMessage());
+        }
+    }
 
+    @Override
+    public AuthToken createAuthToken(String username) throws ServerException {
+        try (var conn = getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("""
+            INSERT INTO sessions (authToken, username) VALUES (?, ?)
+            """)) {
+                String newStringToken = UUID.randomUUID().toString();
+                preparedStatement.setString(1, newStringToken);
+                preparedStatement.setString(2, username);
+                preparedStatement.executeUpdate();
+                return new AuthToken(newStringToken, username);
+            }
+        }
+        catch (SQLException e) {
+            throw new ServerException(e.getErrorCode(), e.getMessage());
+        }
+    }
+
+    @Override
+    public AuthToken findAuthToken(String authToken) throws ServerException {
+        try (var conn = getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("""
+                 SELECT * from sessions WHERE authToken=?
+                 """)) {
+                preparedStatement.setString(1, authToken);
+
+                try (var resultSet = preparedStatement.executeQuery()) {
+                    AuthToken foundToken = null;
+                    if (resultSet.next()) {
+                        var username = resultSet.getString("username");
+                        foundToken = new AuthToken(authToken, username);
+                    }
+                    return foundToken;
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new ServerException(e.getErrorCode(), e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteAuthToken(String authToken) throws ServerException {
+        try (var conn = getConnection()) {
+            if(findAuthToken(authToken) != null){
+                try (var preparedStatement = conn.prepareStatement("""
+                DELETE from sessions WHERE authToken=?
+                """)) {
+                    preparedStatement.setString(1, authToken);
+                    preparedStatement.executeUpdate();
+                }
+            }
+            else {
+                throw new ServerException(400, "bad request");
+            }
         }
         catch (SQLException e) {
             throw new ServerException(e.getErrorCode(), e.getMessage());
@@ -243,7 +328,7 @@ public class DatabaseSQL implements DataAccessInterface {
     @Override
     public GameData createGame(String gameName) throws ServerException {
         try (var conn = getConnection()) {
-
+            
         }
         catch (SQLException e) {
             throw new ServerException(e.getErrorCode(), e.getMessage());
@@ -294,37 +379,6 @@ public class DatabaseSQL implements DataAccessInterface {
         }
     }
 
-    @Override
-    public AuthToken createAuthToken(String username) throws ServerException {
-        try (var conn = getConnection()) {
-
-        }
-        catch (SQLException e) {
-            throw new ServerException(e.getErrorCode(), e.getMessage());
-        }
-        return null;
-    }
-
-    @Override
-    public AuthToken findAuthToken(String authToken) throws ServerException {
-        try (var conn = getConnection()) {
-
-        }
-        catch (SQLException e) {
-            throw new ServerException(e.getErrorCode(), e.getMessage());
-        }
-        return null;
-    }
-
-    @Override
-    public void deleteAuthToken(String authToken) throws ServerException {
-        try (var conn = getConnection()) {
-
-        }
-        catch (SQLException e) {
-            throw new ServerException(e.getErrorCode(), e.getMessage());
-        }
-    }
 
 //    public static void main(String[] args) throws Exception {
 //        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/chess", "chess", "jaquemate")) {

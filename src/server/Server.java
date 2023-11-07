@@ -137,7 +137,7 @@ public class Server {
      * @throws ServerException
      */
     public Object logout(Request req, Response res) throws ServerException {
-        AuthToken token = getAuthorization(req);
+        AuthToken token = AuthService.getAuthorization(req);
         authService.logout(token.getAuthToken());
         return responseJSON("username", token.getUsername(), "authToken", token.getAuthToken());
     }
@@ -150,7 +150,7 @@ public class Server {
      * @throws ServerException
      */
     public Object listGames(Request req, Response res) throws ServerException {
-        getAuthorization(req);
+        AuthService.getAuthorization(req);
         var gameList = gameService.listGames();
         return responseJSON("games", gameList.toArray());
     }
@@ -164,14 +164,14 @@ public class Server {
      * @throws ServerException
      */
     public Object createGame(Request req, Response res) throws ServerException {
-        getAuthorization(req);
+        AuthService.getAuthorization(req);
         GameData game = getBody(req, GameData.class);
         game = gameService.createGame(game.getGameName());
         return responseJSON("gameID", game.getGameId());
     }
 
     public Object joinGame(Request req, Response res) throws ServerException {
-        AuthToken token = getAuthorization(req);
+        AuthToken token = AuthService.getAuthorization(req);
         GameJoinRequest gameJoinRequest = getBody(req, GameJoinRequest.class);
         gameService.joinGame(token.getUsername(), gameJoinRequest.playerColor, gameJoinRequest.gameID);
         return responseJSON();
@@ -203,23 +203,5 @@ public class Server {
             throw new ServerException(400, "missing body");
         }
         return body;
-    }
-
-    // TODO: Maybe move it inside the AuthService instead of the Server class itself
-    /**
-     * Gets the authorization string from the request header, and checks the database for the token.
-     * @param req The Spark Request object
-     * @return The AuthToken connected to the string token
-     * @throws ServerException Throws a 401 exception if not authorized.
-     */
-    private AuthToken getAuthorization(Request req) throws ServerException {
-        String authorization = req.headers("authorization");
-        if(authorization != null){
-            AuthToken token = databaseSQL.findAuthToken(authorization);
-            if(token != null) {
-                return token;
-            }
-        }
-        throw new ServerException(401, "not authorized");
     }
 }

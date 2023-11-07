@@ -6,9 +6,10 @@ import server.dataAccess.DataAccessException;
 import server.dataAccess.DatabaseSQL;
 import server.models.AuthToken;
 import server.models.UserData;
+import spark.Request;
 
 public class AuthService extends Service {
-    DatabaseSQL dataAccess;
+    static DatabaseSQL dataAccess;
 
     public AuthService(DatabaseSQL dataAccess) {
         this.dataAccess = dataAccess;
@@ -39,6 +40,23 @@ public class AuthService extends Service {
      */
     public void logout(String token) throws ServerException {
         dataAccess.deleteAuthToken(token);
+    }
+
+    /**
+     * Gets the authorization string from the request header, and checks the database for the token.
+     * @param req The Spark Request object
+     * @return The AuthToken connected to the string token
+     * @throws ServerException Throws a 401 exception if not authorized.
+     */
+    public static AuthToken getAuthorization(Request req) throws ServerException {
+        String authorization = req.headers("authorization");
+        if(authorization != null){
+            AuthToken token = dataAccess.findAuthToken(authorization);
+            if(token != null) {
+                return token;
+            }
+        }
+        throw new ServerException(401, "not authorized");
     }
 
     /**
