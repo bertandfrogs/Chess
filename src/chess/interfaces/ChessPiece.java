@@ -1,9 +1,6 @@
 package chess.interfaces;
 
-import chess.interfaces.ChessBoard;
-import chess.interfaces.ChessGame;
-import chess.interfaces.ChessMove;
-import chess.interfaces.ChessPosition;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.Collection;
 
@@ -19,12 +16,12 @@ public interface ChessPiece {
      * The various different chess piece options
      */
     enum PieceType {
-        KING,
-        QUEEN,
-        BISHOP,
-        KNIGHT,
-        ROOK,
-        PAWN
+        @SerializedName("KING") KING,
+        @SerializedName("QUEEN") QUEEN,
+        @SerializedName("BISHOP") BISHOP,
+        @SerializedName("KNIGHT") KNIGHT,
+        @SerializedName("ROOK") ROOK,
+        @SerializedName("PAWN") PAWN
     }
 
     /**

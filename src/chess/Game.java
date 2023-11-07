@@ -9,11 +9,10 @@ import static chess.interfaces.ChessGame.TeamColor.*;
 import static chess.interfaces.ChessPiece.PieceType.*;
 import chess.pieces.Piece;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import server.dataAccess.GameDeserializer;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 // This class is the top-level management of the chess game.
@@ -322,14 +321,31 @@ public class Game implements chess.interfaces.ChessGame {
     @Override
     public String toString() {
         // JSON output
-        return getJSON("teamTurn", teamTurn, "pieces", chessBoard.getPieces().values());
+        return getJSON();
     }
 
-    private static String getJSON(Object... props) {
-        Map<Object, Object> map = new HashMap<>();
-        for (var i = 0; i+1 < props.length; i = i+2) {
-            map.put(props[i], props[i+1]);
+    private String getJSON() {
+        Map<Object, Object> jsonMap = new HashMap<>();
+        Map<Object, Object> boardMap = new HashMap<>();
+
+        jsonMap.put("turn", teamTurn);
+
+        if(chessBoard != null && !chessBoard.getPieces().isEmpty()) {
+            for(Map.Entry<Integer, Piece> entry : chessBoard.getPieces().entrySet()) {
+                Map<Object, Object> colorAndType = new HashMap<>();
+                colorAndType.put("color", entry.getValue().getTeamColor());
+                colorAndType.put("type", entry.getValue().getPieceType());
+                boardMap.put(entry.getKey(), colorAndType);
+            }
         }
-        return new Gson().toJson(map);
+
+        jsonMap.put("board", boardMap);
+
+        return new Gson().toJson(jsonMap);
+    }
+
+    public Game getGameFromJSON(String json) throws Exception {
+        GameDeserializer gd = new GameDeserializer();
+        return gd.deserialize(json);
     }
 }

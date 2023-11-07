@@ -3,6 +3,7 @@ package server.services;
 import server.ServerException;
 import server.dataAccess.DataAccess;
 import server.dataAccess.DataAccessException;
+import server.dataAccess.DatabaseSQL;
 import server.models.AuthToken;
 import server.models.UserData;
 
@@ -10,9 +11,9 @@ import server.models.UserData;
  * Manages the requests and responses to and from the server for the User related endpoints (Register User)
  */
 public class UserService extends Service {
-    DataAccess dataAccess;
+    DatabaseSQL dataAccess;
 
-    public UserService(DataAccess data) {
+    public UserService(DatabaseSQL data) {
         dataAccess = data;
     }
 
@@ -29,13 +30,11 @@ public class UserService extends Service {
         if(user.getPassword() == null) {
             throw new ServerException(400, "missing password");
         }
+        if(user.getEmail() == null) {
+            throw new ServerException(400, "missing email");
+        }
 
-        try {
-            user = dataAccess.createUser(user);
-            return dataAccess.createAuthToken(user.getUsername());
-        }
-        catch (DataAccessException e) {
-            throw new ServerException(403, e.getMessage());
-        }
+        user = dataAccess.createUser(user);
+        return dataAccess.createAuthToken(user.getUsername());
     }
 }

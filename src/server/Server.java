@@ -1,7 +1,10 @@
 package server;
 
 import com.google.gson.Gson;
+import org.slf4j.Logger;
 import server.dataAccess.DataAccess;
+import server.dataAccess.DataAccessException;
+import server.dataAccess.DatabaseSQL;
 import server.models.AuthToken;
 import server.models.GameData;
 import server.services.GameJoinRequest;
@@ -12,26 +15,29 @@ import server.services.GameService;
 import server.services.UserService;
 import spark.*;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.*;
 
 public class Server {
-    DataAccess dataAccess;
+    DatabaseSQL databaseSQL;
     AdminService adminService;
     AuthService authService;
     GameService gameService;
     UserService userService;
 
-    public static void main(String[] args) {
-        Server server = new Server(new DataAccess());
+    public static void main(String[] args) throws SQLException {
+        Server server = new Server(new DatabaseSQL());
         server.run();
     }
 
-    public Server(DataAccess dataAccess) {
-        this.dataAccess = dataAccess;
-        this.adminService = new AdminService(dataAccess);
-        this.gameService = new GameService(dataAccess);
-        this.authService = new AuthService(dataAccess);
-        this.userService = new UserService(dataAccess);
+    public Server(DatabaseSQL databaseSQL) throws SQLException {
+        this.databaseSQL = databaseSQL;
+        this.adminService = new AdminService(Server.this.databaseSQL);
+        this.gameService = new GameService(Server.this.databaseSQL);
+        this.authService = new AuthService(Server.this.databaseSQL);
+        this.userService = new UserService(Server.this.databaseSQL);
     }
 
     /**
@@ -39,6 +45,9 @@ public class Server {
      */
     private void run() {
         try {
+            // Configure MySQL database
+            databaseSQL.configureDatabase();
+
             // Configure Spark
             Spark.port(8080);
 
@@ -114,7 +123,7 @@ public class Server {
      * @return If successful, returns the username and the authToken for the current session wrapped in a JSON object.
      * @throws ServerException
      */
-    public Object login(Request req, Response res) throws ServerException {
+    public Object login(Request req, Response res) throws Exception {
         UserData user = getBody(req, UserData.class);
         AuthToken token = authService.login(user);
         return responseJSON("username", user.getUsername(), "authToken", token.getAuthToken());
@@ -206,7 +215,7 @@ public class Server {
     private AuthToken getAuthorization(Request req) throws ServerException {
         String authorization = req.headers("authorization");
         if(authorization != null){
-            AuthToken token = dataAccess.findAuthToken(authorization);
+            AuthToken token = databaseSQL.findAuthToken(authorization);
             if(token != null) {
                 return token;
             }

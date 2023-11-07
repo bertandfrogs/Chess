@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import server.ServerException;
 import server.dataAccess.DataAccess;
 import server.dataAccess.DataAccessException;
+import server.dataAccess.DatabaseSQL;
 import server.models.AuthToken;
 import server.models.GameData;
 import server.models.UserData;
@@ -20,7 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class ServiceTests {
-    DataAccess dataAccess;
+    DatabaseSQL dataAccess;
     AdminService adminService;
     UserService userService;
     AuthService authService;
@@ -32,7 +33,7 @@ public class ServiceTests {
 
     @BeforeEach
     void setup() throws ServerException {
-        this.dataAccess = new DataAccess();
+        this.dataAccess = new DatabaseSQL();
         this.adminService = new AdminService(dataAccess);
         this.gameService = new GameService(dataAccess);
         this.authService = new AuthService(dataAccess);
@@ -123,7 +124,7 @@ public class ServiceTests {
         });
 
         // there should be no current sessions (no logged-in users)
-        Assertions.assertEquals(0, dataAccess.getAuthTokens().size());
+        Assertions.assertEquals(0, dataAccess.getSessions().size());
     }
 
     @Test
@@ -155,7 +156,7 @@ public class ServiceTests {
     }
 
     @Test
-    void createGame() {
+    void createGame() throws ServerException {
         GameData newGame = gameService.createGame("New Game");
         Assertions.assertEquals(newGame, dataAccess.findGameById(newGame.getGameId()));
     }

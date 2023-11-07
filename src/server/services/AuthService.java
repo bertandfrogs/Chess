@@ -3,13 +3,14 @@ package server.services;
 import server.ServerException;
 import server.dataAccess.DataAccess;
 import server.dataAccess.DataAccessException;
+import server.dataAccess.DatabaseSQL;
 import server.models.AuthToken;
 import server.models.UserData;
 
 public class AuthService extends Service {
-    DataAccess dataAccess;
+    DatabaseSQL dataAccess;
 
-    public AuthService(DataAccess dataAccess) {
+    public AuthService(DatabaseSQL dataAccess) {
         this.dataAccess = dataAccess;
     }
 
@@ -37,12 +38,7 @@ public class AuthService extends Service {
      * @throws ServerException Throws an error if something goes wrong.
      */
     public void logout(String token) throws ServerException {
-        try {
-            dataAccess.deleteAuthToken(token);
-        }
-        catch (DataAccessException e) {
-            throw new ServerException(500, "server error");
-        }
+        dataAccess.deleteAuthToken(token);
     }
 
     /**
@@ -50,7 +46,7 @@ public class AuthService extends Service {
      * @param token The token as a string.
      * @return The full AuthToken object.
      */
-    public AuthToken findToken(String token) {
+    public AuthToken findToken(String token) throws ServerException {
         return dataAccess.findAuthToken(token);
     }
 }

@@ -5,6 +5,7 @@ import server.models.AuthToken;
 import server.models.GameData;
 import server.models.UserData;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ public interface DataAccessInterface {
      * Will not be available outside of testing.
      * @throws DataAccessException Throws an error if it's not able to clear the database for some reason.
      */
-    void clear() throws DataAccessException;
+    void clear() throws Exception;
 
     // Accessing User Data
     /**
@@ -27,14 +28,14 @@ public interface DataAccessInterface {
      * @return The new UserData object.
      * @throws DataAccessException Throw an error if something goes wrong (i.e. the user already exists in the database)
      */
-    UserData createUser(UserData user) throws DataAccessException;
+    UserData createUser(UserData user) throws Exception;
 
     /**
      * Gets a user from the database and returns it.
      * @param username The username we're looking for.
      * @return The UserData object if found in the database, returns null if not found.
      */
-    UserData findUser(String username);
+    UserData findUser(String username) throws Exception;
 
     /**
      * Updates a user's information in the database.
@@ -42,14 +43,14 @@ public interface DataAccessInterface {
      * @return The updated UserData object.
      * @throws DataAccessException Throws an error if not able to update user (i.e. user doesn't exist in database)
      */
-    UserData updateUser(UserData user) throws DataAccessException;
+    UserData updateUser(UserData user) throws Exception;
 
     /**
      * Deletes a user from the database.
      * @param user The UserData object to be deleted.
      * @throws DataAccessException Throws an error if not possible to delete (i.e. the user doesn't exist, etc.)
      */
-    void deleteUser(UserData user) throws DataAccessException;
+    void deleteUser(UserData user) throws Exception;
 
     // Accessing Game Data
     /**
@@ -58,20 +59,20 @@ public interface DataAccessInterface {
      * @return The new GameData object.
      * @throws server.ServerException Throw an error if something goes wrong (i.e. game already exists, etc.)
      */
-    GameData createGame(String gameName) throws ServerException;
+    GameData createGame(String gameName) throws ServerException, SQLException;
 
     /**
      * Gets a game from the database and returns it.
      * @param gameID The ID of the game we're looking for.
      * @return the GameData object if found in the database, returns null if not found.
      */
-    GameData findGameById(int gameID);
+    GameData findGameById(int gameID) throws Exception;
 
     /**
      * Finds and returns all games in the database.
      * @return All games as a Map, the key is the gameID and value is the GameData.
      */
-    Collection<GameData> listGames();
+    Collection<GameData> listGames() throws Exception;
 
     /**
      * Updates a game in the database.
@@ -79,14 +80,14 @@ public interface DataAccessInterface {
      * @return The game that was updated.
      * @throws DataAccessException Throws an error if not able to update game.
      */
-    GameData updateGame(GameData game) throws DataAccessException;
+    GameData updateGame(GameData game) throws Exception;
 
     /**
      * Deletes a game from the database.
      * @param game The GameData object to delete.
      * @throws DataAccessException Throws an error if not possible to delete.
      */
-    void deleteGame(GameData game) throws DataAccessException;
+    void deleteGame(GameData game) throws Exception;
 
     /**
      * Creates a new AuthToken for a given user and stores it in the database.
@@ -94,19 +95,19 @@ public interface DataAccessInterface {
      * @return the new AuthToken.
      * @throws DataAccessException Throws an error if something goes wrong (user already has AuthToken, etc.)
      */
-    AuthToken createAuthToken(String username) throws DataAccessException;
+    AuthToken createAuthToken(String username) throws Exception;
 
     /**
      * Finds an AuthToken in the database.
      * @param authToken The String AuthToken to find.
      * @return The AuthToken if found; returns null if not found.
      */
-    AuthToken findAuthToken(String authToken);
+    AuthToken findAuthToken(String authToken) throws Exception;
 
     /**
      * Deletes an AuthToken from the database.
-     * @param token the String AuthToken to delete.
+     * @param authToken the String AuthToken to delete.
      * @throws DataAccessException Throws an error if something goes wrong (i.e. the token doesn't exist in database).
      */
-    void deleteAuthToken(String authToken) throws DataAccessException;
+    void deleteAuthToken(String authToken) throws Exception;
 }

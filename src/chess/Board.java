@@ -141,24 +141,26 @@ public class Board implements chess.interfaces.ChessBoard {
 
     @Override
     public String toString(){
-        StringBuilder output = new StringBuilder();
-
-        // starting from row 8 and going down (following board notation)
-        for(int row = 8; row >= 1; row--) {
-            output.append("|");
-            for(int col = 1; col <= 8; col++) {
-                Piece current = getPiece(getHashFromRowAndCol(row, col));
-                if(current != null){
-                    output.append(current);
-                }
-                else {
-                    output.append("   "); // whitespace
-                }
-                output.append("|");
-            }
-            output.append("\n");
-        }
-        return output.toString();
+        return toStringUnicode();
+        // boring old string output
+//        StringBuilder output = new StringBuilder();
+//
+//        // starting from row 8 and going down (following board notation)
+//        for(int row = 8; row >= 1; row--) {
+//            output.append("|");
+//            for(int col = 1; col <= 8; col++) {
+//                Piece current = getPiece(getHashFromRowAndCol(row, col));
+//                if(current != null){
+//                    output.append(current);
+//                }
+//                else {
+//                    output.append("   "); // whitespace
+//                }
+//                output.append("|");
+//            }
+//            output.append("\n");
+//        }
+//        return output.toString();
     }
 
     public void movePiece(ChessMove move) {
