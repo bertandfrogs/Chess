@@ -6,10 +6,7 @@ import chess.interfaces.ChessPosition;
 import chess.interfaces.ChessPiece;
 import chess.pieces.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static chess.interfaces.ChessGame.TeamColor.WHITE;
 import static chess.interfaces.ChessPiece.PieceType.KING;
@@ -260,4 +257,28 @@ public class Board implements chess.interfaces.ChessBoard {
         return Character.toString(row) + col;
     }
 
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Board board = (Board) o;
+        if (pieces.isEmpty() ^ board.pieces.isEmpty()) return false;
+
+        // check pieces
+        if(!pieces.isEmpty()) {
+            if (pieces.size() != board.pieces.size()) {
+                return false;
+            }
+            for(Map.Entry<Integer, Piece> piece : pieces.entrySet()) {
+                Piece boardPiece = board.pieces.get(piece.getKey());
+                if(!piece.getValue().equals(boardPiece)) return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(blackKingPosition, whiteKingPosition, pieces);
+    }
 }

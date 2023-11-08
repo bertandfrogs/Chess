@@ -88,4 +88,7 @@ public interface ChessGame {
      * @return the chessboard
      */
     ChessBoard getBoard();
+
+    @Override
+    boolean equals(Object o);
 }

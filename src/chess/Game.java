@@ -348,4 +348,17 @@ public class Game implements chess.interfaces.ChessGame {
         GameDeserializer gd = new GameDeserializer();
         return gd.deserialize(json);
     }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Game game = (Game) o;
+        return teamTurn == game.teamTurn
+                && chessBoard.equals(game.chessBoard);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(teamTurn, chessBoard);
+    }
 }

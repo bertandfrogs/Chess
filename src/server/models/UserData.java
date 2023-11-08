@@ -61,7 +61,13 @@ public class UserData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserData userData = (UserData) o;
-        return Objects.equals(username, userData.username) && Objects.equals(password, userData.password) && Objects.equals(email, userData.email);
+        if (username == null ^ userData.username == null) return false;
+        if (password == null ^ userData.password == null) return false;
+        if (email == null ^ userData.email == null) return false;
+
+        return (username != null && username.equals(userData.username))
+                && (password != null && password.equals(userData.password))
+                && (email != null && email.equals(userData.email));
     }
 
     @Override

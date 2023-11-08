@@ -20,4 +20,7 @@ public interface ChessPosition {
     int getColumn();
 
     boolean isOutOfBounds();
+
+    @Override
+    boolean equals(Object o);
 }

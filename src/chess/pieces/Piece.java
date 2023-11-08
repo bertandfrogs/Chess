@@ -8,6 +8,7 @@ import chess.interfaces.ChessMove;
 import chess.interfaces.ChessPosition;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public abstract class Piece implements chess.interfaces.ChessPiece {
     // the Piece class is abstract, the specific Pawn, Rook, Bishop, etc. classes need to be instantiated
@@ -114,6 +115,16 @@ public abstract class Piece implements chess.interfaces.ChessPiece {
         if(!newMoves.isEmpty()) {
             moves.addAll(newMoves);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Piece piece = (Piece) o;
+        return color == piece.color
+                && type == piece.type
+                && myPosition.equals(piece.myPosition);
     }
 }
 

@@ -1,4 +1,5 @@
 package server.dataAccess;
+import chess.Game;
 import server.ServerException;
 import server.models.AuthToken;
 import server.models.GameData;
@@ -31,39 +32,34 @@ public class DatabaseSQL implements DataAccessInterface {
 
             conn.setCatalog("chess");
 
-            var createUsersTable = """
+            try (var createUsersTable = conn.prepareStatement("""
                 CREATE TABLE IF NOT EXISTS users (
                     username VARCHAR(255) NOT NULL,
                     password VARCHAR(255) NOT NULL,
                     email VARCHAR(255) NOT NULL,
                     PRIMARY KEY (username)
-                )""";
-
-            var createGamesTable = """
+                )""")) {
+                createUsersTable.executeUpdate();
+            }
+            try (var createGamesTable = conn.prepareStatement("""
                 CREATE TABLE IF NOT EXISTS games (
-                    gameID INT NOT NULL,
+                    gameID INT NOT NULL AUTO_INCREMENT,
                     whiteUsername VARCHAR(255),
                     blackUsername VARCHAR(255),
                     gameName VARCHAR(255),
                     game VARCHAR(4000),
-                    PRIMARY KEY (gameID)
-                )""";
-
-            var createSessionsTable = """
+                    PRIMARY KEY (gameID),
+                    INDEX (gameName)
+                )""")) {
+                createGamesTable.executeUpdate();
+            }
+            try (var createSessionsTable = conn.prepareStatement("""
                 CREATE TABLE IF NOT EXISTS sessions (
                     authToken VARCHAR(36) NOT NULL,
                     username VARCHAR(255) NOT NULL,
                     PRIMARY KEY (authToken)
-                )""";
-
-            try (var createTableStatement = conn.prepareStatement(createUsersTable)) {
-                createTableStatement.executeUpdate();
-            }
-            try (var createTableStatement = conn.prepareStatement(createGamesTable)) {
-                createTableStatement.executeUpdate();
-            }
-            try (var createTableStatement = conn.prepareStatement(createSessionsTable)) {
-                createTableStatement.executeUpdate();
+                )""")) {
+                createSessionsTable.executeUpdate();
             }
         }
     }
@@ -172,19 +168,14 @@ public class DatabaseSQL implements DataAccessInterface {
 
             try (var preparedStatement = conn.prepareStatement("""
                 INSERT INTO users (username, password, email) VALUES (?, ?, ?)
-                """, Statement.RETURN_GENERATED_KEYS)) {
+                """)) {
                 preparedStatement.setString(1, user.getUsername());
                 preparedStatement.setString(2, user.getPassword());
                 preparedStatement.setString(3, user.getEmail());
 
                 preparedStatement.executeUpdate();
 
-                var result = preparedStatement.getGeneratedKeys();
-                String createdUsername = "";
-                if (result.next()) {
-                    createdUsername = result.getString(1);
-                }
-                return new UserData(createdUsername, user.getPassword(), user.getEmail());
+                return user;
             }
         }
         catch (SQLException e) {
@@ -328,78 +319,110 @@ public class DatabaseSQL implements DataAccessInterface {
     @Override
     public GameData createGame(String gameName) throws ServerException {
         try (var conn = getConnection()) {
-            
+            try (var preparedStatement = conn.prepareStatement("""
+            INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (NULL, NULL, ?, ?)
+            """, Statement.RETURN_GENERATED_KEYS)) {
+                Game newGame = new Game();
+                preparedStatement.setString(1, gameName);
+                preparedStatement.setString(2, newGame.toString());
+
+                preparedStatement.executeUpdate();
+                var result = preparedStatement.getGeneratedKeys();
+                int newID;
+                if (result.next()) {
+                    newID = result.getInt(1);
+                    return new GameData(newID, null, null, gameName, newGame);
+                }
+                else {
+                    throw new ServerException(500, "couldn't create game");
+                }
+            }
         }
         catch (SQLException e) {
             throw new ServerException(e.getErrorCode(), e.getMessage());
         }
-        return null;
     }
 
     @Override
     public GameData findGameById(int gameID) throws ServerException {
         try (var conn = getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("""
+                 SELECT * from games WHERE gameID=?
+                 """)) {
+                preparedStatement.setInt(1, gameID);
 
+                try (var resultSet = preparedStatement.executeQuery()) {
+                    GameData foundGame = null;
+                    if (resultSet.next()) {
+                        var whiteUsername = resultSet.getString("whiteUsername");
+                        var blackUsername = resultSet.getString("blackUsername");
+                        var gameName = resultSet.getString("gameName");
+                        var gameJSON = resultSet.getString("game");
+                        GameDeserializer gd = new GameDeserializer();
+                        Game game = gd.deserialize(gameJSON);
+                        foundGame = new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+                    }
+                    return foundGame;
+                }
+            }
         }
         catch (SQLException e) {
             throw new ServerException(e.getErrorCode(), e.getMessage());
         }
-        return null;
     }
 
     @Override
     public Collection<GameData> listGames() throws ServerException {
-        try (var conn = getConnection()) {
-
-        }
-        catch (SQLException e) {
-            throw new ServerException(e.getErrorCode(), e.getMessage());
-        }
-        return null;
+        return getGames().values();
     }
 
     @Override
     public GameData updateGame(GameData game) throws ServerException {
-        try (var conn = getConnection()) {
+        GameData gameInDb = findGameById(game.getGameId());
+        if(gameInDb != null){
+            try (var conn = getConnection()) {
+                try (var preparedStatement = conn.prepareStatement("""
+                     UPDATE games
+                     SET whiteUsername=?, blackUsername=?, gameName=?, game=?
+                     WHERE gameID=?
+                     """)) {
+                    preparedStatement.setString(1, game.getWhiteUsername());
+                    preparedStatement.setString(2, game.getBlackUsername());
+                    preparedStatement.setString(3, game.getGameName());
+                    preparedStatement.setString(4, game.getGame().toString());
+                    preparedStatement.setInt(5, game.getGameId());
 
+                    preparedStatement.executeUpdate();
+
+                    return game;
+                }
+            }
+            catch (SQLException e) {
+                throw new ServerException(e.getErrorCode(), e.getMessage());
+            }
         }
-        catch (SQLException e) {
-            throw new ServerException(e.getErrorCode(), e.getMessage());
+        else {
+            throw new ServerException(500, "Couldn't update game, not found in database.");
         }
-        return null;
     }
 
     @Override
     public void deleteGame(GameData game) throws ServerException {
         try (var conn = getConnection()) {
-
+            if(findGameById(game.getGameId()) != null){
+                try (var preparedStatement = conn.prepareStatement("""
+                DELETE from games WHERE gameID=?
+                """)) {
+                    preparedStatement.setInt(1, game.getGameId());
+                    preparedStatement.executeUpdate();
+                }
+            }
+            else {
+                throw new ServerException(400, "bad request");
+            }
         }
         catch (SQLException e) {
             throw new ServerException(e.getErrorCode(), e.getMessage());
         }
     }
-
-
-//    public static void main(String[] args) throws Exception {
-//        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/chess", "chess", "jaquemate")) {
-////            var catalogs = conn.getMetaData().getCatalogs();
-////            while (catalogs.next()) {
-////                System.out.println(catalogs.getString(1));
-////            }
-//
-//            conn.setCatalog("chess");
-//
-//            try (var preparedStatement = conn.prepareStatement("SELECT username, password, email from users")) {
-//                try (var rs = preparedStatement.executeQuery()) {
-//                    while (rs.next()) {
-//                        var username = rs.getString("username");
-//                        var password = rs.getString("password");
-//                        var email = rs.getString("email");
-//
-//                        System.out.printf("username: %s, password: %s, email: %s%n", username, password, email);
-//                    }
-//                }
-//            }
-//        }
-//    }
 }

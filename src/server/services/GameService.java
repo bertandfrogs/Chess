@@ -56,7 +56,7 @@ public class GameService extends Service {
         }
         else {
             if(color == ChessGame.TeamColor.WHITE) {
-                if (game.getWhiteUsername() == null || Objects.equals(game.getWhiteUsername(), username)) {
+                if (game.getWhiteUsername() == null || game.getWhiteUsername().equals(username)) {
                     game.setWhiteUsername(username);
                 }
                 else {
@@ -64,7 +64,7 @@ public class GameService extends Service {
                 }
             }
             else if(color == ChessGame.TeamColor.BLACK) {
-                if (game.getBlackUsername() == null || Objects.equals(game.getBlackUsername(), username)) {
+                if (game.getBlackUsername() == null || game.getBlackUsername().equals(username)) {
                     game.setBlackUsername(username);
                 }
                 else {

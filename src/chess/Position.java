@@ -27,12 +27,15 @@ public class Position implements chess.interfaces.ChessPosition {
         return (row > 8 || row < 1 || column > 8 || column < 1);
     }
 
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Position position = (Position) o;
-        return hashCode() == position.hashCode() && row == position.row && column == position.column;
+        if(isOutOfBounds() ^ position.isOutOfBounds()) return false;
+
+        return hashCode() == position.hashCode()
+                && row == position.row
+                && column == position.column;
     }
 
     @Override

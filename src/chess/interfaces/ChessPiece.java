@@ -42,4 +42,7 @@ public interface ChessPiece {
      * @return Collection of valid moves
      */
     Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition);
+
+    @Override
+    boolean equals(Object o);
 }

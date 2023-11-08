@@ -3,28 +3,44 @@ package passoffTests.myTests;
 import server.ServerException;
 import server.dataAccess.DatabaseSQL;
 import server.models.AuthToken;
+import server.models.GameData;
 import server.models.UserData;
 
 import java.sql.SQLException;
 import java.util.UUID;
 
+/**
+ * This class is to be used to easily clean up test data while testing database functionality. Uses the DatabaseSQL methods but alters data passed in
+ */
 public class MySQLTestHelper extends DatabaseSQL {
-    public MySQLTestHelper() {
-
+    @Override
+    public UserData createUser(UserData user) throws ServerException {
+        String testDataUsername = "testData-" + user.getUsername();
+        return super.createUser(new UserData(testDataUsername, user.getPassword(), user.getEmail()));
     }
 
     @Override
-    public UserData createUser(UserData user) {
-        UUID uuid = UUID.randomUUID();
-        String testDataUsername = "testData-" + user.getUsername() + "-" + uuid.toString().substring(0,7);
-        return new UserData(testDataUsername, user.getPassword(), user.getEmail());
+    public AuthToken createAuthToken(String username) throws ServerException {
+        String testDataUsername = "testData-" + username;
+        return super.createAuthToken(testDataUsername);
     }
 
     @Override
-    public AuthToken createAuthToken(String username) {
-        UUID uuid = UUID.randomUUID();
-        String testDataToken = "testData-" + uuid.toString().substring(0,7);
-        return new AuthToken(testDataToken, username);
+    public GameData createGame(String gameName) throws ServerException {
+        String testDataGameName = "testData-" + gameName;
+        return super.createGame(testDataGameName);
+    }
+
+    @Override
+    public UserData findUser(String username) throws ServerException {
+        String testDataUsername = "testData-" + username;
+        return super.findUser(testDataUsername);
+    }
+
+    @Override
+    public AuthToken findAuthToken(String authToken) throws ServerException {
+        String testDataToken = "testData-" + authToken;
+        return super.findAuthToken(testDataToken);
     }
 
     public void clearAllTestData() throws ServerException {

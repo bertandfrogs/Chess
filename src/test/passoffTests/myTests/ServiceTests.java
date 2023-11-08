@@ -1,6 +1,7 @@
 package passoffTests.myTests;
 
 import chess.interfaces.ChessGame;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ public class ServiceTests {
         this.gameService = new GameService(dataAccess);
         this.authService = new AuthService(dataAccess);
         this.userService = new UserService(dataAccess);
+        dataAccess.clear();
         user1 = new UserData("ducky", "quack", "ducky@pond.net");
         user2 = new UserData("tortoise", "654321", "tortoise@shell.com");
         invalidUser = new UserData("fox", "77777", "foxy@fox.com");

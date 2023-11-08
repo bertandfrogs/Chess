@@ -2,7 +2,11 @@ package server.models;
 
 import chess.Game;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -87,7 +91,17 @@ public class GameData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GameData gameData = (GameData) o;
-        return gameID == gameData.gameID && whiteUsername.equals(gameData.whiteUsername) && blackUsername.equals(gameData.blackUsername) && gameName.equals(gameData.gameName) && game.equals(gameData.game);
+
+        if ((whiteUsername == null ^ gameData.whiteUsername == null)
+                || (blackUsername == null ^ gameData.blackUsername == null)
+                || (gameName == null ^ gameData.gameName == null)
+                || (whiteUsername != null && !whiteUsername.equals(gameData.whiteUsername))
+                || (blackUsername != null && !blackUsername.equals(gameData.blackUsername))
+                || (gameName != null && !gameName.equals(gameData.gameName))) {
+            return false;
+        }
+
+        return gameID == gameData.gameID && game.equals(gameData.game);
     }
 
     @Override
@@ -97,6 +111,13 @@ public class GameData {
 
     @Override
     public String toString() {
-        return new Gson().toJson(this);
+        Map<Object, Object> map = new HashMap<>();
+        map.put("gameID", gameID);
+        map.put("whiteUsername", whiteUsername);
+        map.put("blackUsername", blackUsername);
+        map.put("gameName", gameName);
+        JsonObject gameJson = JsonParser.parseString(game.toString()).getAsJsonObject();
+        map.put("game", gameJson);
+        return new Gson().toJson(map);
     }
 }
