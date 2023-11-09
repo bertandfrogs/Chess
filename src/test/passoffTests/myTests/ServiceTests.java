@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class ServiceTests {
-    DatabaseSQL dataAccess;
+    MySQLTestHelper dataAccess;
     AdminService adminService;
     UserService userService;
     AuthService authService;
@@ -34,7 +34,7 @@ public class ServiceTests {
 
     @BeforeEach
     void setup() throws ServerException {
-        this.dataAccess = new DatabaseSQL();
+        this.dataAccess = new MySQLTestHelper();
         this.adminService = new AdminService(dataAccess);
         this.gameService = new GameService(dataAccess);
         this.authService = new AuthService(dataAccess);
@@ -64,13 +64,13 @@ public class ServiceTests {
         // normal register new user
         AuthToken token1 = userService.registerUser(user1);
 
-        Assertions.assertEquals(user1, dataAccess.findUser(user1.getUsername()));
+        Assertions.assertEquals(new UserData(dataAccess.testString(user1.getUsername()), user1.getPassword(), user1.getEmail()), dataAccess.findUser(user1.getUsername()));
         Assertions.assertEquals(token1, authService.findToken(token1.getAuthToken()));
 
         // register another user
         AuthToken token2 = userService.registerUser(user2);
 
-        Assertions.assertEquals(user2, dataAccess.findUser(user2.getUsername()));
+        Assertions.assertEquals(new UserData(dataAccess.testString(user2.getUsername()), user2.getPassword(), user2.getEmail()), dataAccess.findUser(user2.getUsername()));
         Assertions.assertEquals(token2, authService.findToken(token2.getAuthToken()));
     }
 
@@ -79,7 +79,7 @@ public class ServiceTests {
         // normal register new user
         AuthToken userToken = userService.registerUser(user1);
 
-        Assertions.assertEquals(user1, dataAccess.findUser(user1.getUsername()));
+        Assertions.assertEquals(new UserData(dataAccess.testString(user1.getUsername()), user1.getPassword(), user1.getEmail()), dataAccess.findUser(user1.getUsername()));
         Assertions.assertEquals(userToken, authService.findToken(userToken.getAuthToken()));
 
         // try to register duplicate user throws an exception

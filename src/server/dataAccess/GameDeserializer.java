@@ -76,8 +76,8 @@ public class GameDeserializer {
         if(chars.length != 2) {
             return null;
         }
-        int row = Character.getNumericValue(chars[1]);
-        int col = Character.getNumericValue(chars[0]);
+        int row = Character.getNumericValue(chars[0]);
+        int col = Character.getNumericValue(chars[1]);
         return new Position(row,col);
     }
 }

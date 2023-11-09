@@ -23,32 +23,19 @@ public class ChessJSON {
 
     @Test
     public void serializeBoardOnePiece() {
-        addNewPieceToBoard(8, 8, ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
+        addNewPieceToBoard(3, 1, ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
         game.setTeamTurn(ChessGame.TeamColor.WHITE);
         String json = game.toString();
-        System.out.println(game.getBoard().toString());
-        System.out.println(json);
-        Assertions.assertEquals("{\"turn\":\"WHITE\",\"board\":{\"88\":{\"color\":\"WHITE\",\"type\":\"QUEEN\"}}}", json);
-    }
-
-    @Test
-    public void serializeFullChessGame() {
-        game.newGame();
-        String json = game.toString();
-        System.out.println(game.getBoard().toString());
-        StringBuilder expected = new StringBuilder();
-        expected.append("{");
-        expected.append("}");
-        System.out.println(json);
+        Assertions.assertEquals("{\"turn\":\"WHITE\",\"board\":{\"31\":{\"color\":\"WHITE\",\"type\":\"QUEEN\"}}}", json);
     }
 
     @Test
     public void deserializeOnePieceTest() throws Exception {
-        addNewPieceToBoard(8, 8, ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
+        addNewPieceToBoard(8, 3, ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
         game.setTeamTurn(ChessGame.TeamColor.WHITE);
         String json = game.toString();
         Game result = game.getGameFromJSON(json);
-        System.out.println(game.getBoard().toString());
+        Assertions.assertEquals(game, result);
     }
 
     @Test
@@ -60,7 +47,7 @@ public class ChessJSON {
         game.setTeamTurn(ChessGame.TeamColor.BLACK);
         String json = game.toString();
         Game result = game.getGameFromJSON(json);
-        System.out.println(game.getBoard().toString());
+        Assertions.assertEquals(game, result);
     }
 
     @Test
@@ -68,14 +55,10 @@ public class ChessJSON {
         game.newGame();
         String json = game.toString();
         Game result = game.getGameFromJSON(json);
-        System.out.println(game.getBoard().toString());
+        Assertions.assertEquals(game, result);
     }
 
-    public StringBuilder addJSONtoString(StringBuilder stringBuilder, String hashCode, String color, String type) {
-        stringBuilder.append("\"" + hashCode + "\":{\"color\":\"" + color + "\",\"type\":\"" + type + "\"}");
-        return stringBuilder;
-    }
-
+    // Test Helper Functions
     private void addNewPieceToBoard(int row, int col, ChessGame.TeamColor color, ChessPiece.PieceType type){
         Piece piece = switch (type) {
             case KING -> new King(color);
@@ -91,8 +74,7 @@ public class ChessJSON {
         game.setBoard(board);
     }
 
-    @Test
-    public void printTest() {
+    public void print() {
         for(int row = 0; row < 33; row++) {
             if (row % 4 == 0) {
                 System.out.print("+");

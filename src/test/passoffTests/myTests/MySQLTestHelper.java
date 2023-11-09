@@ -13,34 +13,11 @@ import java.util.UUID;
  * This class is to be used to easily clean up test data while testing database functionality. Uses the DatabaseSQL methods but alters data passed in
  */
 public class MySQLTestHelper extends DatabaseSQL {
-    @Override
-    public UserData createUser(UserData user) throws ServerException {
-        String testDataUsername = "testData-" + user.getUsername();
-        return super.createUser(new UserData(testDataUsername, user.getPassword(), user.getEmail()));
-    }
-
-    @Override
-    public AuthToken createAuthToken(String username) throws ServerException {
-        String testDataUsername = "testData-" + username;
-        return super.createAuthToken(testDataUsername);
-    }
-
-    @Override
-    public GameData createGame(String gameName) throws ServerException {
-        String testDataGameName = "testData-" + gameName;
-        return super.createGame(testDataGameName);
-    }
-
-    @Override
-    public UserData findUser(String username) throws ServerException {
-        String testDataUsername = "testData-" + username;
-        return super.findUser(testDataUsername);
-    }
-
-    @Override
-    public AuthToken findAuthToken(String authToken) throws ServerException {
-        String testDataToken = "testData-" + authToken;
-        return super.findAuthToken(testDataToken);
+    public String testString(String str) {
+        if(str.contains("testData-")){
+            return str;
+        }
+        return "testData-" + str;
     }
 
     public void clearAllTestData() throws ServerException {
@@ -64,5 +41,45 @@ public class MySQLTestHelper extends DatabaseSQL {
         catch (SQLException e) {
             throw new ServerException(e.getErrorCode(), e.getMessage());
         }
+    }
+
+    @Override
+    public void clear() throws ServerException {
+        clearAllTestData();
+    }
+
+    @Override
+    public UserData createUser(UserData user) throws ServerException {
+        return super.createUser(new UserData(testString(user.getUsername()), user.getPassword(), user.getEmail()));
+    }
+
+    @Override
+    public UserData findUser(String username) throws ServerException {
+        return super.findUser(testString(username));
+    }
+
+    @Override
+    public UserData updateUser(UserData user) throws ServerException {
+        return super.updateUser(new UserData(testString(user.getUsername()), user.getPassword(), user.getEmail()));
+    }
+
+    @Override
+    public void deleteUser(UserData user) throws ServerException {
+        super.deleteUser(new UserData(testString(user.getUsername()), user.getPassword(), user.getEmail()));
+    }
+
+    @Override
+    public AuthToken createAuthToken(String username) throws ServerException {
+        return super.createAuthToken(testString(username));
+    }
+
+    @Override
+    public GameData createGame(String gameName) throws ServerException {
+        return super.createGame(testString(gameName));
+    }
+
+    @Override
+    public GameData updateGame(GameData game) throws ServerException {
+        return super.updateGame(new GameData(game.getGameId(), game.getWhiteUsername(), game.getBlackUsername(), testString(game.getGameName()), game.getGame()));
     }
 }
