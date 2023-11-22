@@ -1,5 +1,6 @@
 package passoffTests.myTests;
 
+import org.eclipse.jetty.http.HttpTokens;
 import org.junit.jupiter.api.*;
 import server.ServerException;
 import server.dataAccess.DatabaseSQL;
@@ -42,9 +43,50 @@ public class MySQLTests {
     }
 
     @Test
+    void clearDB() throws ServerException {
+        // populate database
+        db.createUser(user1);
+        db.createUser(user2);
+        db.createUser(existingUser);
+        db.createAuthToken(user1.getUsername());
+        db.createAuthToken(user2.getUsername());
+        db.createAuthToken(existingUser.getUsername());
+        db.createGame("game1");
+        db.createGame("game2");
+        db.createGame("game3");
+
+        // check that data was added to db
+        Assertions.assertEquals(initialSizeGames+3, db.getGames().size());
+        Assertions.assertEquals(initialSizeUsers+3, db.getUsers().size());
+        Assertions.assertEquals(initialSizeAuths+3, db.getSessions().size());
+
+        // clear database
+        Assertions.assertDoesNotThrow(() -> db.clear());
+
+        // check that data was deleted from db
+        Assertions.assertEquals(initialSizeGames, db.getGames().size());
+        Assertions.assertEquals(initialSizeUsers, db.getUsers().size());
+        Assertions.assertEquals(initialSizeAuths, db.getSessions().size());
+
+        // can clear again without issue
+        Assertions.assertDoesNotThrow(() -> db.clear());
+    }
+
+    @Test
     void findUserTest() throws ServerException {
         UserData userInDB = db.createUser(existingUser);
         Assertions.assertEquals(userInDB, db.findUser(existingUser.getUsername()));
+    }
+
+    @Test
+    void findInvalidUserTest() throws ServerException {
+        // try to find a username i just made up
+        UserData invalidUser = db.findUser("invalid-user");
+        Assertions.assertNull(invalidUser);
+
+        // try to find the username of a user not added yet
+        UserData invalidUser2 = db.findUser(user1.getUsername());
+        Assertions.assertNull(invalidUser2);
     }
 
     @Test
@@ -106,11 +148,8 @@ public class MySQLTests {
         // trying to delete user that hasn't been added yet
         Assertions.assertThrows(ServerException.class, () -> db.deleteUser(user1));
 
-        Assertions.assertDoesNotThrow(() -> {
-            db.createUser(user1);
-        });
-
-        Assertions.assertEquals(initialSizeUsers + 1, db.getUsers().size());
+        // create the user
+        db.createUser(user1);
 
         Assertions.assertEquals(new UserData(db.testString(user1.getUsername()), user1.getPassword(), user1.getEmail()), db.findUser(user1.getUsername()));
 
@@ -213,14 +252,31 @@ public class MySQLTests {
     }
 
     @Test
-    void createAuthTokenTests() throws ServerException  {
+    void findValidAuth() throws ServerException  {
         AuthToken newAuthToken = db.createAuthToken("beans");
         String tokenStr = newAuthToken.getAuthToken();
-
-        // trying to find nonexistent authToken
-        Assertions.assertNull(db.findAuthToken("NOT_REAL"));
-
         Assertions.assertEquals(newAuthToken, db.findAuthToken(tokenStr));
+    }
+
+    @Test
+    void findInvalidAuth() throws ServerException {
+        Assertions.assertNull(db.findAuthToken("NOT_REAL"));
+    }
+
+    @Test
+    void validAuthCreate() throws ServerException {
+        AuthToken newAuthToken = db.createAuthToken("beans");
+        String tokenStr = newAuthToken.getAuthToken();
+        Assertions.assertEquals(newAuthToken, db.findAuthToken(tokenStr));
+        Assertions.assertEquals(initialSizeAuths + 1, db.getSessions().size());
+    }
+
+    @Test
+    void authCreationUniqueTokens() throws ServerException {
+        String tokenStr = db.createAuthToken("beans").getAuthToken();
+        String tokenStr2 = db.createAuthToken("beans").getAuthToken();
+        String tokenStr3 = db.createAuthToken("beans").getAuthToken();
+        Assertions.assertFalse(tokenStr.equals(tokenStr2) && tokenStr2.equals(tokenStr3));
     }
 
     @Test

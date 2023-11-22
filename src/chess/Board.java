@@ -254,7 +254,7 @@ public class Board implements chess.interfaces.ChessBoard {
             case '8' -> 'h';
             default -> throw new IllegalStateException("Unexpected value: " + row);
         };
-        return Character.toString(row) + col;
+        return col + Character.toString(row);
     }
 
     public boolean equals(Object o) {

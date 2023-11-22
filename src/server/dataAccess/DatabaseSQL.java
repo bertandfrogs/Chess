@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.UUID;
 
 public class DatabaseSQL implements DataAccessInterface {
-    int newGameId = 1000;
     String user = "chess";
     String pass = "jaquemate";
 
@@ -67,10 +66,7 @@ public class DatabaseSQL implements DataAccessInterface {
     public Map<String, UserData> getUsers() throws ServerException {
         Map<String, UserData> users = new HashMap<>();
         try (var conn = getConnection()) {
-            var selectUsers = """
-                 SELECT * from users
-                 """;
-            try (var preparedStatement = conn.prepareStatement(selectUsers)) {
+            try (var preparedStatement = conn.prepareStatement("SELECT * from users")) {
                 try (var resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         var username = resultSet.getString("username");
@@ -90,10 +86,7 @@ public class DatabaseSQL implements DataAccessInterface {
     public Map<String, AuthToken> getSessions() throws ServerException {
         Map<String, AuthToken> sessions = new HashMap<>();
         try (var conn = getConnection()) {
-            var selectSessions = """
-                 SELECT * from sessions
-                 """;
-            try (var preparedStatement = conn.prepareStatement(selectSessions)) {
+            try (var preparedStatement = conn.prepareStatement("SELECT * from sessions")) {
                 try (var resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         var authToken = resultSet.getString("authToken");
@@ -112,10 +105,7 @@ public class DatabaseSQL implements DataAccessInterface {
     public Map<Integer, GameData> getGames() throws ServerException {
         Map<Integer, GameData> games = new HashMap<>();
         try (var conn = getConnection()) {
-            var selectGames = """
-                 SELECT * from games
-                 """;
-            try (var preparedStatement = conn.prepareStatement(selectGames)) {
+            try (var preparedStatement = conn.prepareStatement("SELECT * from games")) {
                 try (var resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         var gameID = resultSet.getInt("gameID");
@@ -138,19 +128,13 @@ public class DatabaseSQL implements DataAccessInterface {
     @Override
     public void clear() throws ServerException {
         try (var conn = getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("""
-            DELETE from users
-            """)) {
+            try (var preparedStatement = conn.prepareStatement("DELETE from users")) {
                 preparedStatement.executeUpdate();
             }
-            try (var preparedStatement = conn.prepareStatement("""
-            DELETE from games
-            """)) {
+            try (var preparedStatement = conn.prepareStatement("DELETE from games")) {
                 preparedStatement.executeUpdate();
             }
-            try (var preparedStatement = conn.prepareStatement("""
-            DELETE from sessions
-            """)) {
+            try (var preparedStatement = conn.prepareStatement("DELETE from sessions")) {
                 preparedStatement.executeUpdate();
             }
         }
@@ -186,9 +170,7 @@ public class DatabaseSQL implements DataAccessInterface {
     @Override
     public UserData findUser(String username) throws ServerException {
         try (var conn = getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("""
-                 SELECT * from users WHERE username=?
-                 """)) {
+            try (var preparedStatement = conn.prepareStatement("SELECT * from users WHERE username=?")) {
                 preparedStatement.setString(1, username);
 
                 try (var resultSet = preparedStatement.executeQuery()) {
@@ -239,9 +221,7 @@ public class DatabaseSQL implements DataAccessInterface {
     public void deleteUser(UserData user) throws ServerException {
         try (var conn = getConnection()) {
             if(findUser(user.getUsername()) != null){
-                try (var preparedStatement = conn.prepareStatement("""
-                DELETE from users WHERE username=?
-                """)) {
+                try (var preparedStatement = conn.prepareStatement("DELETE from users WHERE username=?")) {
                     preparedStatement.setString(1, user.getUsername());
                     preparedStatement.executeUpdate();
                 }
@@ -276,9 +256,7 @@ public class DatabaseSQL implements DataAccessInterface {
     @Override
     public AuthToken findAuthToken(String authToken) throws ServerException {
         try (var conn = getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("""
-                 SELECT * from sessions WHERE authToken=?
-                 """)) {
+            try (var preparedStatement = conn.prepareStatement("SELECT * from sessions WHERE authToken=?")) {
                 preparedStatement.setString(1, authToken);
 
                 try (var resultSet = preparedStatement.executeQuery()) {
@@ -300,9 +278,7 @@ public class DatabaseSQL implements DataAccessInterface {
     public void deleteAuthToken(String authToken) throws ServerException {
         try (var conn = getConnection()) {
             if(findAuthToken(authToken) != null){
-                try (var preparedStatement = conn.prepareStatement("""
-                DELETE from sessions WHERE authToken=?
-                """)) {
+                try (var preparedStatement = conn.prepareStatement("DELETE from sessions WHERE authToken=?")) {
                     preparedStatement.setString(1, authToken);
                     preparedStatement.executeUpdate();
                 }
@@ -346,9 +322,7 @@ public class DatabaseSQL implements DataAccessInterface {
     @Override
     public GameData findGameById(int gameID) throws ServerException {
         try (var conn = getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("""
-                 SELECT * from games WHERE gameID=?
-                 """)) {
+            try (var preparedStatement = conn.prepareStatement("SELECT * from games WHERE gameID=?")) {
                 preparedStatement.setInt(1, gameID);
 
                 try (var resultSet = preparedStatement.executeQuery()) {
@@ -410,9 +384,7 @@ public class DatabaseSQL implements DataAccessInterface {
     public void deleteGame(GameData game) throws ServerException {
         try (var conn = getConnection()) {
             if(findGameById(game.getGameId()) != null){
-                try (var preparedStatement = conn.prepareStatement("""
-                DELETE from games WHERE gameID=?
-                """)) {
+                try (var preparedStatement = conn.prepareStatement("DELETE from games WHERE gameID=?")) {
                     preparedStatement.setInt(1, game.getGameId());
                     preparedStatement.executeUpdate();
                 }
