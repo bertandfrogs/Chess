@@ -21,17 +21,13 @@ public class MySQLTests {
     static int initialSizeGames;
     static int initialSizeAuths;
 
-    @BeforeAll
-    static void mainSetup() throws ServerException {
+    @BeforeEach
+    void setup() throws ServerException {
         db = new MySQLTestHelper();
+        db.clear();
         initialSizeUsers = db.getUsers().size();
         initialSizeGames = db.getGames().size();
         initialSizeAuths = db.getSessions().size();
-    }
-
-    @BeforeEach
-    void setup() throws ServerException {
-        db.clear();
         user1 = new UserData("beans88", "12345", "beans88@gmail.com");
         user2 = new UserData("ducky", "quack", "duckyduck@gmail.com");
         existingUser = new UserData("regularGuy", "pass", "mail@mail.com");

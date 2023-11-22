@@ -14,7 +14,7 @@ import java.util.UUID;
  */
 public class MySQLTestHelper extends DatabaseSQL {
     public String testString(String str) {
-        if(str.contains("testData-")){
+        if(str.contains("testData")){
             return str;
         }
         return "testData-" + str;
