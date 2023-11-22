@@ -6,6 +6,8 @@ import chess.interfaces.ChessPosition;
 import chess.interfaces.ChessPiece;
 import chess.pieces.*;
 
+import ui.EscapeSequences;
+
 import java.util.*;
 
 import static chess.interfaces.ChessGame.TeamColor.WHITE;
@@ -107,8 +109,8 @@ public class Board implements chess.interfaces.ChessBoard {
     public String toStringUnicode() {
         StringBuilder output = new StringBuilder();
         // variables that format the color of the console output (for tiles)
-        final String ANSI_RESET = "\u001B[0m"; // to reset console output
-        final String ANSI_BLACK_BG = "\u001B[40m";
+        final String ANSI_RESET = EscapeSequences.RESET_ALL_FORMATTING; // "\u001B[0m"; // to reset console output
+        final String ANSI_BLACK_BG = EscapeSequences.SET_BG_COLOR_BLACK; // "\u001B[40m";
 
         // starting from row 8 and going down (following board notation)
         for(int row = 8; row >= 1; row--) {
@@ -126,7 +128,7 @@ public class Board implements chess.interfaces.ChessBoard {
                     output.append(current.toStringUnicode());
                 }
                 else {
-                    output.append(" \u2003 "); // whitespace
+                    output.append(EscapeSequences.EMPTY); // whitespace
                 }
 
                 output.append(ANSI_RESET);
