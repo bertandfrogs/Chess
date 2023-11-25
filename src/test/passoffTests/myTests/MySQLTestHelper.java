@@ -2,12 +2,11 @@ package passoffTests.myTests;
 
 import server.ServerException;
 import server.dataAccess.DatabaseSQL;
-import server.models.AuthToken;
-import server.models.GameData;
-import server.models.UserData;
+import models.AuthToken;
+import models.GameData;
+import models.UserData;
 
 import java.sql.SQLException;
-import java.util.UUID;
 
 /**
  * This class is to be used to easily clean up test data while testing database functionality. Uses the DatabaseSQL methods but alters data passed in

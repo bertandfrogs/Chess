@@ -1,14 +1,13 @@
 package passoffTests.myTests;
 
-import chess.Game;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import server.dataAccess.DataAccess;
 import server.dataAccess.DataAccessException;
-import server.models.AuthToken;
-import server.models.GameData;
-import server.models.UserData;
+import models.AuthToken;
+import models.GameData;
+import models.UserData;
 
 public class DataAccessTests {
     DataAccess dataAccess;

@@ -1,13 +1,12 @@
 package server.dataAccess;
 
 import server.ServerException;
-import server.models.AuthToken;
-import server.models.GameData;
-import server.models.UserData;
+import models.AuthToken;
+import models.GameData;
+import models.UserData;
 
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * Represents all the functions that can be called on the database.

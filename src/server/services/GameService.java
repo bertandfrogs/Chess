@@ -2,13 +2,10 @@ package server.services;
 
 import chess.interfaces.ChessGame;
 import server.ServerException;
-import server.dataAccess.DataAccess;
-import server.dataAccess.DataAccessException;
 import server.dataAccess.DatabaseSQL;
-import server.models.GameData;
+import models.GameData;
 
 import java.util.Collection;
-import java.util.Objects;
 
 /**
  * Manages the requests and responses for all the Game endpoints in the server.

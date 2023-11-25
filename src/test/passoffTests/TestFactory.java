@@ -1,7 +1,8 @@
 package passoffTests;
 
-import chess.interfaces.*;
 import chess.pieces.*;
+import chess.interfaces.*;
+
 import chess.Board;
 import chess.Game;
 import chess.Move;

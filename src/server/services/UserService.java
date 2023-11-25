@@ -1,11 +1,9 @@
 package server.services;
 
 import server.ServerException;
-import server.dataAccess.DataAccess;
-import server.dataAccess.DataAccessException;
 import server.dataAccess.DatabaseSQL;
-import server.models.AuthToken;
-import server.models.UserData;
+import models.AuthToken;
+import models.UserData;
 
 /**
  * Manages the requests and responses to and from the server for the User related endpoints (Register User)

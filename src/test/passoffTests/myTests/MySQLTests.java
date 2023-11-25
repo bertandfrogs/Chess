@@ -1,14 +1,11 @@
 package passoffTests.myTests;
 
-import org.eclipse.jetty.http.HttpTokens;
 import org.junit.jupiter.api.*;
 import server.ServerException;
-import server.dataAccess.DatabaseSQL;
-import server.models.AuthToken;
-import server.models.GameData;
-import server.models.UserData;
+import models.AuthToken;
+import models.GameData;
+import models.UserData;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class MySQLTests {

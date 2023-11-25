@@ -1,11 +1,9 @@
 package server.services;
 
 import server.ServerException;
-import server.dataAccess.DataAccess;
-import server.dataAccess.DataAccessException;
 import server.dataAccess.DatabaseSQL;
-import server.models.AuthToken;
-import server.models.UserData;
+import models.AuthToken;
+import models.UserData;
 import spark.Request;
 
 public class AuthService extends Service {

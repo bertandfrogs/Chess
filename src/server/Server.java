@@ -1,22 +1,17 @@
 package server;
 
 import com.google.gson.Gson;
-import org.slf4j.Logger;
-import server.dataAccess.DataAccess;
-import server.dataAccess.DataAccessException;
 import server.dataAccess.DatabaseSQL;
-import server.models.AuthToken;
-import server.models.GameData;
+import models.AuthToken;
+import models.GameData;
 import server.services.GameJoinRequest;
-import server.models.UserData;
+import models.UserData;
 import server.services.AdminService;
 import server.services.AuthService;
 import server.services.GameService;
 import server.services.UserService;
 import spark.*;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
 

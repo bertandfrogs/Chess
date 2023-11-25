@@ -1,17 +1,14 @@
 package passoffTests.myTests;
 
 import chess.interfaces.ChessGame;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import server.ServerException;
-import server.dataAccess.DataAccess;
 import server.dataAccess.DataAccessException;
-import server.dataAccess.DatabaseSQL;
-import server.models.AuthToken;
-import server.models.GameData;
-import server.models.UserData;
+import models.AuthToken;
+import models.GameData;
+import models.UserData;
 import server.services.AdminService;
 import server.services.AuthService;
 import server.services.GameService;
@@ -19,7 +16,6 @@ import server.services.UserService;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 
 public class ServiceTests {
     MySQLTestHelper dataAccess;

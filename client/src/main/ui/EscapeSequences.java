@@ -35,7 +35,7 @@ public class EscapeSequences {
     public static final String SET_TEXT_COLOR_BLUE = SET_TEXT_COLOR + "12m";
     public static final String SET_TEXT_COLOR_MAGENTA = SET_TEXT_COLOR + "5m";
     public static final String SET_TEXT_COLOR_WHITE = SET_TEXT_COLOR + "15m";
-    public static final String RESET_TEXT_COLOR = SET_TEXT_COLOR + "0m";
+    public static final String RESET_TEXT_COLOR = UNICODE_ESCAPE + "[39m";
 
     public static final String SET_BG_COLOR_BLACK = SET_BG_COLOR + "0m";
     public static final String SET_BG_COLOR_LIGHT_GREY = SET_BG_COLOR + "242m";
@@ -47,21 +47,19 @@ public class EscapeSequences {
     public static final String SET_BG_COLOR_BLUE = SET_BG_COLOR + "12m";
     public static final String SET_BG_COLOR_MAGENTA = SET_BG_COLOR + "5m";
     public static final String SET_BG_COLOR_WHITE = SET_BG_COLOR + "15m";
-    public static final String RESET_BG_COLOR = SET_BG_COLOR + "0m";
+    public static final String RESET_BG_COLOR = UNICODE_ESCAPE + "49m";
 
-    public static final String WHITE_KING = " ♔ ";
-    public static final String WHITE_QUEEN = " ♕ ";
-    public static final String WHITE_BISHOP = " ♗ ";
-    public static final String WHITE_KNIGHT = " ♘ ";
-    public static final String WHITE_ROOK = " ♖ ";
-    public static final String WHITE_PAWN = " ♙ ";
-    public static final String BLACK_KING = " ♚ ";
-    public static final String BLACK_QUEEN = " ♛ ";
-    public static final String BLACK_BISHOP = " ♝ ";
-    public static final String BLACK_KNIGHT = " ♞ ";
-    public static final String BLACK_ROOK = " ♜ ";
-    public static final String BLACK_PAWN = " ♟ ";
-    public static final String EMPTY = " \u2003 ";
+    public static final String BLACK_PIECE_COLOR = UNICODE_ESCAPE + "[31m";
+    public static final String WHITE_PIECE_COLOR = RESET_TEXT_COLOR;
+
+    public static final String KING_ICON = " ♚ ";
+    public static final String QUEEN_ICON = " ♛ ";
+    public static final String BISHOP_ICON = " ♝ ";
+    public static final String KNIGHT_ICON = " ♞ ";
+    public static final String ROOK_ICON = " ♜ ";
+    public static final String PAWN_ICON = " ♟ ";
+    public static final String SPACER = "\u2003";
+    public static final String EMPTY_SQUARE = " " + SPACER + " ";
 
     public static String moveCursorToLocation(int x, int y) { return UNICODE_ESCAPE + "[" + y + ";" + x + "H"; }
 }

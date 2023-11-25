@@ -1,11 +1,9 @@
 package server.dataAccess;
 
 import chess.Game;
-import server.Server;
-import server.ServerException;
-import server.models.AuthToken;
-import server.models.GameData;
-import server.models.UserData;
+import models.AuthToken;
+import models.GameData;
+import models.UserData;
 
 import java.util.Collection;
 import java.util.HashMap;
