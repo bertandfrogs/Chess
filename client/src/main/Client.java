@@ -5,6 +5,7 @@ import chess.pieces.Piece;
 import ui.EscapeSequences;
 
 public class Client {
+    static boolean loggedIn = false;
 
     public static void main(String[] args) {
         Game testGame = new Game();
@@ -12,6 +13,22 @@ public class Client {
         System.out.print(getBoardAsString((Board)testGame.getBoard(), ChessGame.TeamColor.WHITE));
         System.out.println();
         System.out.print(getBoardAsString((Board)testGame.getBoard(), ChessGame.TeamColor.BLACK));
+    }
+
+    private static String printMenu() {
+        StringBuilder menuText = new StringBuilder();
+
+        if(loggedIn) {
+
+        }
+        else {
+            menuText.append("\tregister <USERNAME> <PASSWORD> <EMAIL> - to create a new account\n");
+            menuText.append("\tlogin <username> <password> - to log in as an existing user\n");
+            menuText.append("\tquit - exit out of the game\n");
+            menuText.append("\thelp - show commands\n");
+        }
+
+        return menuText.toString();
     }
 
     public static String getBoardAsString(Board board, ChessGame.TeamColor colorDown) {
@@ -22,7 +39,7 @@ public class Client {
         int[] cols = new int[]{1,2,3,4,5,6,7,8};
 
         if(colorDown == ChessGame.TeamColor.BLACK) {
-            // swap index direction
+            // swap index direction (white on top, black on bottom)
             int[] temp = rows.clone();
             rows = cols;
             cols = temp;
@@ -72,7 +89,6 @@ public class Client {
 
     public static String pieceToStringUnicode(Piece piece) {
         String result;
-        String ANSI_RED_TXT = "\u001B[31m";
 
         if(piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
             result = EscapeSequences.BLACK_PIECE_COLOR;
