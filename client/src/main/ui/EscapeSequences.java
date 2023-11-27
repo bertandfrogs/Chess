@@ -54,12 +54,16 @@ public class EscapeSequences {
 
     public static final String KING_ICON = " ♚ ";
     public static final String QUEEN_ICON = " ♛ ";
+    public static final String ROOK_ICON = " ♜ ";
     public static final String BISHOP_ICON = " ♝ ";
     public static final String KNIGHT_ICON = " ♞ ";
-    public static final String ROOK_ICON = " ♜ ";
-    public static final String PAWN_ICON = " ♟ ";
+    public static final String PAWN_ICON = " ♙ "; // using the white pawn, the black pawn needs to be text instead of emoji
     public static final String SPACER = "\u2003";
     public static final String EMPTY_SQUARE = " " + SPACER + " ";
 
     public static String moveCursorToLocation(int x, int y) { return UNICODE_ESCAPE + "[" + y + ";" + x + "H"; }
+
+    public static String getCustomTextColorString(int colorIndex) {
+        return SET_TEXT_COLOR + colorIndex + "m";
+    }
 }

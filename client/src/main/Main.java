@@ -227,6 +227,5 @@ public class Main {
     private static void printBoard() {
         Board board = (Board) game.getBoard();
         System.out.println();
-//        System.out.println(board.toStringUnicode());
     }
 }
