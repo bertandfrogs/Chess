@@ -50,7 +50,16 @@ public class EscapeSequences {
     public static final String RESET_BG_COLOR = UNICODE_ESCAPE + "49m";
 
     public static final String BLACK_PIECE_COLOR = UNICODE_ESCAPE + "[31m"; // Red
-    public static final String WHITE_PIECE_COLOR = RESET_TEXT_COLOR;
+    public static final String WHITE_PIECE_COLOR = UNICODE_ESCAPE + "[39m";
+
+    // My console color theme
+    public static final String THEME_PRIMARY_LIGHT = SET_TEXT_COLOR + "194m";
+    public static final String THEME_PRIMARY = SET_TEXT_COLOR + "121m";
+    public static final String THEME_ACCENT_1 = SET_TEXT_COLOR + "43m";
+    public static final String THEME_ACCENT_2 = SET_TEXT_COLOR + "73m";
+    public static final String THEME_DARK = SET_TEXT_COLOR + "23m"; //""97m";
+    public static final String THEME_WARNING = SET_TEXT_COLOR + "208m";
+    public static final String THEME_ERROR = SET_TEXT_COLOR + "196m";
 
     public static final String KING_ICON = " ♚ ";
     public static final String QUEEN_ICON = " ♛ ";

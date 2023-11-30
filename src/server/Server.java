@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import server.dataAccess.DatabaseSQL;
 import models.AuthToken;
 import models.GameData;
-import server.services.GameJoinRequest;
+import service.GameJoinRequest;
 import models.UserData;
 import server.services.AdminService;
 import server.services.AuthService;
@@ -147,7 +147,7 @@ public class Server {
     public Object listGames(Request req, Response res) throws ServerException {
         AuthService.getAuthorization(req);
         var gameList = gameService.listGames();
-        return responseJSON("games", gameList.toArray());
+        return responseJSON("games", GameService.toList(gameList));
     }
 
     /**

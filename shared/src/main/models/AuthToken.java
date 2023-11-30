@@ -38,4 +38,9 @@ public class AuthToken {
         return (authToken != null && authToken.equals(otherAuthToken.authToken))
                 && (username != null && username.equals(otherAuthToken.username));
     }
+
+    @Override
+    public String toString() {
+        return "authToken: \"" + this.authToken + "\", username: \"" + this.username + "\"";
+    }
 }

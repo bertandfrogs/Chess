@@ -1,42 +1,42 @@
 import chess.*;
 import chess.interfaces.ChessGame;
 import chess.pieces.Piece;
-import com.google.gson.Gson;
-import models.AuthToken;
-import models.UserData;
-import ui.EscapeSequences;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Scanner;
+import service.CreateGameResponse;
+import service.GameJoinResponse;
+import service.LoginResponse;
+import service.LogoutResponse;
+
+import ui.EscapeSequences;
+import static ui.EscapeSequences.*;
+
+import java.util.*;
+
 
 public class Client {
     // Class Variables
-    static boolean loggedIn = false;
     static boolean activeConsole = true;
-    static UserData user;
-    static AuthToken sessionToken;
+    static String activeUsername = "";
+    static String authToken;
     static final String url = "http://localhost:8080";
+    enum State {
+        logged_in,
+        logged_out,
+        playing_game,
+        observing_game
+    }
+    static State clientState = State.logged_out;
+    static ServerFacade server;
 
-    // COLOR VARIABLES (( ADD INTO ESCAPE CODE CLASS?? ))
-    static String commandTextColor = EscapeSequences.getCustomTextColorString(48);
-    static String commandParameterTextColor = EscapeSequences.getCustomTextColorString(85);
-    static String definitionTextColor = EscapeSequences.getCustomTextColorString(37);
-    static String minorErrorTextColor = EscapeSequences.getCustomTextColorString(166);
-    static String majorErrorTextColor = EscapeSequences.getCustomTextColorString(160);
-    static String consoleUserStatusTextColor = EscapeSequences.getCustomTextColorString(135);
-    static String consoleEnterCommandColor = EscapeSequences.getCustomTextColorString(12);
-
+    public Client() {
+        server = new ServerFacade(url);
+    }
 
     public static void main(String[] args) throws Exception {
+        server = new ServerFacade(url);
+
         Game testGame = new Game();
         testGame.newGame();
-
-        String consoleUserStatus = "[not logged in]";
 
         // TODO: Print welcome message
 
@@ -45,9 +45,7 @@ public class Client {
         System.out.print(getBoardAsString((Board)testGame.getBoard(), ChessGame.TeamColor.BLACK));
 
         while (activeConsole) {
-            System.out.print(consoleUserStatusTextColor + consoleUserStatus
-                    + consoleEnterCommandColor + ": Enter a Command >>> "
-                    + EscapeSequences.RESET_ALL_FORMATTING);
+            printConsolePrompt();
 
             Scanner consoleInput = new Scanner(System.in);
             String inputLine = consoleInput.nextLine();
@@ -55,106 +53,265 @@ public class Client {
 
             String[] consoleCommand = inputLine.split("\s+");
 
-            switch(consoleCommand[0]) {
-                case "quit" ->  {
-                    activeConsole = false;
-                    if(loggedIn){
-                        // TODO: IF LOGGED IN, LOG OUT USER
-                    }
-                    System.out.println("Exiting. Thanks for playing!");
+            switch (clientState) {
+                case logged_out -> {
+                    parseLoggedOutCommands(consoleCommand);
                 }
-                case "register" -> {
-                    // get params: username, password, email
-                    if (consoleCommand.length == 4) {
-                        String username = consoleCommand[1];
-                        String password = consoleCommand[2];
-                        String email = consoleCommand[3];
-                        user = registerUser(username, password, email);
-                        consoleUserStatus = "[" + user.getUsername() + "]";
-                    }
-                    else {
-                        System.out.println(minorErrorTextColor + "Invalid format, use \"register <username> <password> <email>\"" + EscapeSequences.RESET_ALL_FORMATTING);
-                    }
+                case logged_in -> {
+                    parseLoggedInCommands(consoleCommand);
                 }
-                case "login" -> {
-                    // get params: username, password
-                    if (consoleCommand.length == 3) {
-                        String username = consoleCommand[1];
-                        String password = consoleCommand[2];
-                        System.out.println("Logged in user " + username + "!");
-                        loggedIn = true;
-
-                        consoleUserStatus = "[" + username + "]";
-                    }
-                    else {
-                        System.out.println(minorErrorTextColor + "Invalid format, use \"login <username> <password>\"" + EscapeSequences.RESET_ALL_FORMATTING);
-                    }
+                case playing_game -> {
+                    parsePlayerCommands(consoleCommand);
                 }
-                case "create" -> {
-                    // TODO: implement create
-                }
-                case "list" -> {
-                    // TODO: implement list
-                }
-                case "join" -> {
-                    // TODO: implement join
-                }
-                case "logout" -> {
-                    if(!loggedIn){
-                        System.out.println(minorErrorTextColor + "Not logged in.");
-                        break;
-                    }
-                    // TODO: send logout
-                    System.out.println("Logged out user ");
-                }
-                default -> {
-                    // includes "help"
-                    System.out.println(printMenu());
+                case observing_game -> {
+                    parseObserverCommands(consoleCommand);
                 }
             }
         }
     }
 
-    private static UserData registerUser(String username, String password, String email) throws Exception {
-        UserData newUser = new UserData(username, password, email);
-
-        // send the request to the server
-        var body = Map.of("username", username, "password", password, "email", email);
-
-        HttpURLConnection connection = sendRequest(url + "/user", "POST", body.toString());
-//        receiveResponse(connection);
-
-        sessionToken = readResponseBody(connection, AuthToken.class);
-
-        System.out.println("Registered user " + username + "!");
-        loggedIn = true;
-        return newUser;
+    private static void parseLoggedOutCommands(String[] input) throws Exception {
+        switch(input[0]) {
+            case "quit" ->  {
+                activeConsole = false;
+                printActionSuccess("Exiting. Thanks for playing!");
+            }
+            case "register" -> {
+                // get params: username, password, email
+                if (input.length == 4) {
+                    String username = input[1];
+                    String password = input[2];
+                    String email = input[3];
+                    try {
+                        LoginResponse response = server.registerUser(username, password, email);
+                        authToken = response.authToken;
+                        clientState = State.logged_in;
+                        activeUsername = username;
+                        printActionSuccess("Registered user " + username + "! You are now logged in.");
+                    }
+                    catch (Exception e) {
+                        if(e.getMessage().contains("403")) {
+                            printError("Couldn't register user: Username is already taken.");
+                        }
+                        else {
+                            printError("Couldn't register user. Error: " + e.getMessage());
+                        }
+                    }
+                }
+                else {
+                    printWarning("Invalid format, use \"register <username> <password> <email>\"");
+                }
+            }
+            case "login" -> {
+                // get params: username, password
+                if (input.length == 3) {
+                    String username = input[1];
+                    String password = input[2];
+                    try {
+                        LoginResponse response = server.loginUser(username, password);
+                        authToken = response.authToken;
+                        clientState = State.logged_in;
+                        activeUsername = username;
+                        printActionSuccess("Logged in user " + username + "!");
+                    }
+                    catch (Exception e) {
+                        if(e.getMessage().contains("401")) {
+                            printError("Couldn't log in: Invalid username or password.");
+                        }
+                        else {
+                            printError("Couldn't log in. Error: " + e.getMessage());
+                        }
+                    }
+                }
+                else {
+                    printWarning("Invalid format, use \"login <username> <password>\"");
+                }
+            }
+            case "create", "list", "join", "observe", "logout" -> {
+                printWarning("Not logged in. Enter \"help\" for valid commands.");
+            }
+            case "help" -> {
+                printMenu();
+            }
+            default -> {
+                printWarning("Unknown command. Enter \"help\" for valid commands.");
+            }
+        }
     }
 
-    private static String printMenu() {
-        StringBuilder menuText = new StringBuilder();
+    private static void parseLoggedInCommands(String[] input) throws Exception {
+        switch(input[0]) {
+            case "quit" ->  {
+                activeConsole = false;
+                server.logoutUser(authToken);
+                printActionSuccess("Exiting. Thanks for playing!");
+            }
+            case "register" -> {
+                printWarning("User " + activeUsername + " is already logged in. Please log out to register a different user.");
+            }
+            case "login" -> {
+                printWarning("User " + activeUsername + " is already logged in.");
+            }
+            case "create" -> {
+                // get params: gameName
+                if (input.length == 2) {
+                    String gameName = input[1];
+                    try {
+                        CreateGameResponse response = server.createGame(authToken, gameName);
+                        printActionSuccess("Created new game with gameID: " + response.gameID);
+                    }
+                    catch (Exception e) {
+                        if(e.getMessage().contains("401")) {
+                            printError("Couldn't create game: Unauthorized.");
+                        }
+                        else {
+                            printError("Couldn't create game. Error: " + e.getMessage());
+                        }
+                    }
+                }
+                else {
+                    printWarning("Invalid format, use \"create <gameName>\" (one word)");
+                }
+            }
+            case "list" -> {
+                // TODO: implement list
+            }
+            case "join" -> {
+                if(input.length == 3 && inputIsInteger(input[1])) {
+                    int gameID = Integer.parseInt(input[1]);
+                    String playerColorString = input[2];
+                    ChessGame.TeamColor color = null;
+                    if(playerColorString.equalsIgnoreCase("BLACK")){
+                        color = ChessGame.TeamColor.BLACK;
+                    }
+                    else if(playerColorString.equalsIgnoreCase("WHITE")) {
+                        color = ChessGame.TeamColor.WHITE;
+                    }
+                    try {
+                        GameJoinResponse response = server.joinGame(authToken, gameID, color);
+                        String playerRole = (color != null) ? color.toString() : "observer";
+                        printActionSuccess("Joined game " + gameID + " as " + playerRole);
+                    }
+                    catch (Exception e) {
+                        if(e.getMessage().contains("401")) {
+                            printError("Couldn't join game: Unauthorized.");
+                        }
+                        else {
+                            printError("Couldn't join game. Error: " + e.getMessage());
+                        }
+                    }
+                }
+                else {
+                    printWarning("Invalid format, use \"join <gameID> <BLACK|WHITE>\" (gameID is a number)");
+                }
+            }
+            case "observe" -> {
+                if(input.length == 2) {
+                    int gameID = Integer.parseInt(input[1]);
 
-        menuText.append("\n").append(EscapeSequences.SET_TEXT_ITALIC + EscapeSequences.SET_TEXT_COLOR_GREEN).append("Valid Commands:\n");
-        if(loggedIn) {
-            menuText.append(formatMenuItem("create", "<name>", "create a new game"));
-            menuText.append(formatMenuItem("list", "", "show all games"));
-            menuText.append(formatMenuItem("join", "<gameID> [WHITE|BLACK|<empty>]", "join an existing game as the white or black player, or just to observe"));
-            menuText.append(formatMenuItem("logout", "", "log out of the game"));
+                    try {
+                        GameJoinResponse response = server.joinGame(authToken, gameID, null);
+                        printActionSuccess("Joined game " + gameID + " as observer");
+                    }
+                    catch (Exception e) {
+                        if(e.getMessage().contains("401")) {
+                            printError("Couldn't join game: Unauthorized.");
+                        }
+                        else {
+                            printError("Couldn't join game. Error: " + e.getMessage());
+                        }
+                    }
+                }
+                else {
+                    printWarning("Invalid format, use \"observe <gameID>\"");
+                }
+            }
+            case "logout" -> {
+                try {
+                    LogoutResponse response = server.logoutUser(authToken);
+                    printActionSuccess("Logged out user " + activeUsername + ".");
+                    authToken = null;
+                    activeUsername = "";
+                    clientState = State.logged_out;
+                }
+                catch (Exception e) {
+                    if(e.getMessage().contains("401")) {
+                        printError("Couldn't log out: Invalid session token.");
+                    }
+                    else {
+                        printError("Couldn't log out. Error: " + e.getMessage());
+                    }
+                }
+            }
+            case "help" -> {
+                printMenu();
+            }
+            default -> {
+                printWarning("Unknown command. Enter \"help\" for valid commands.");
+            }
         }
-        else {
-            menuText.append(formatMenuItem("register", "<username> <password> <email>", "create a new account"));
-            menuText.append(formatMenuItem("login", "<username> <password>", "log in as an existing user"));
-        }
-        menuText.append(formatMenuItem("quit", "", "exit out of the console"));
-        menuText.append(formatMenuItem("help", "", "show this menu"));
-
-        return menuText.toString();
     }
 
-    private static String formatMenuItem(String command, String params, String definition) {
-        return "\t" + commandTextColor + command + " "
-                + commandParameterTextColor + params
-                + definitionTextColor + " - " + definition + "\n";
+    private static void parsePlayerCommands(String[] input) throws Exception {
+        // TODO: implement
+    }
+
+    private static void parseObserverCommands(String[] input) throws Exception {
+        // TODO: implement
+    }
+
+    // Helper methods for console output
+    private static void printConsolePrompt() {
+        String userStatus = (!activeUsername.isEmpty()) ? activeUsername : "Logged Out";
+
+        System.out.print("\n" + THEME_DARK + "[" + userStatus + "]"
+                + THEME_PRIMARY + " Enter a Command >>> "
+                + EscapeSequences.THEME_PRIMARY_LIGHT);
+    }
+
+    private static void printMenu() {
+        printFormatted("Valid Commands:", THEME_PRIMARY, SET_TEXT_ITALIC);
+        if(clientState == State.logged_in) {
+            printMenuItem("create", "<name>", "create a new game");
+            printMenuItem("list", "", "show all games");
+            printMenuItem("join", "<gameID> [WHITE|BLACK]", "join an existing game as white or black");
+            printMenuItem("observe", "<gameID>", "observe an existing game");
+            printMenuItem("logout", "", "log out of the game");
+        }
+        else if (clientState == State.logged_out){
+            printMenuItem("register", "<username> <password> <email>", "create a new account");
+            printMenuItem("login", "<username> <password>", "log in as an existing user");
+        }
+        else if (clientState == State.playing_game){
+            // TODO: implement
+        }
+        else if (clientState == State.observing_game){
+            // TODO: implement
+        }
+        printMenuItem("quit", "", "exit out of the console");
+        printMenuItem("help", "", "show this menu");
+    }
+
+    private static void printFormatted(String message, String color, String style) {
+        System.out.println(style + color + message + RESET_ALL_FORMATTING);
+    }
+
+    private static void printMenuItem(String command, String params, String definition) {
+        System.out.println("\t" + THEME_PRIMARY_LIGHT + command + " "
+                + THEME_ACCENT_2 + params
+                + THEME_PRIMARY + " - " + definition + RESET_ALL_FORMATTING);
+    }
+
+    private static void printActionSuccess(String message) {
+        System.out.println(SET_TEXT_ITALIC + THEME_ACCENT_1 + message + RESET_ALL_FORMATTING);
+    }
+
+    private static void printWarning(String message) {
+        printFormatted(message, THEME_WARNING, "");
+    }
+
+    private static void printError(String message) {
+        printFormatted(message, THEME_ERROR, "");
     }
 
     public static String getBoardAsString(Board board, ChessGame.TeamColor colorDown) {
@@ -248,50 +405,13 @@ public class Client {
         };
     }
 
-    private static HttpURLConnection sendRequest(String url, String method, String body) throws Exception {
-        URI uri = new URI(url);
-        HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
-        http.setRequestMethod(method);
-//        http.setReadTimeout();
-        if (method.equals("POST")) {
-            http.setDoOutput(true);
-        }
-        writeRequestBody(body, http);
-        http.connect();
-        System.out.printf("= Request =========\n[%s] %s\n\n%s\n\n", method, url, body);
-        return http;
-    }
-
-    private static void writeRequestBody(String body, HttpURLConnection http) throws Exception {
-        if (!body.isEmpty()) {
-            http.setDoOutput(true);
-            try (var outputStream = http.getOutputStream()) {
-                outputStream.write(body.getBytes());
-            }
+    static boolean inputIsInteger(String input) {
+        try {
+            Integer.parseInt(input);
+            return true;
+        } catch (NumberFormatException nfe) {
+            return false;
         }
     }
-
-    private static void receiveResponse(HttpURLConnection http) throws Exception {
-        var statusCode = http.getResponseCode();
-        var statusMessage = http.getResponseMessage();
-
-        Object responseBody = readResponseBody(http, Map.class);
-        System.out.printf("= Response =========\n[%d] %s\n\n%s\n\n", statusCode, statusMessage, responseBody);
-    }
-
-    private static <T> T readResponseBody(HttpURLConnection http, Class<T> classType) throws Exception {
-        var statusCode = http.getResponseCode();
-        var statusMessage = http.getResponseMessage();
-
-        T responseBody;
-        try (InputStream respBody = http.getInputStream()) {
-            InputStreamReader inputStreamReader = new InputStreamReader(respBody);
-            responseBody = new Gson().fromJson(inputStreamReader, classType);
-        }
-
-        System.out.printf("= Response =========\n[%d] %s\n\n%s\n\n", statusCode, statusMessage, responseBody.toString());
-        return responseBody;
-    }
-
 }
 

@@ -1,6 +1,7 @@
-package server.services;
+package service;
 
 import chess.interfaces.ChessGame;
+import com.google.gson.Gson;
 
 /**
  * The purpose of this class is to provide a structure for the JSON serialization of the join game HTTP request.
@@ -17,5 +18,10 @@ public class GameJoinRequest {
     public GameJoinRequest(ChessGame.TeamColor playerColor, int gameID) {
         this.playerColor = playerColor;
         this.gameID = gameID;
+    }
+
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 }

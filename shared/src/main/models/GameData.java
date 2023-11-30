@@ -116,8 +116,10 @@ public class GameData {
         map.put("whiteUsername", whiteUsername);
         map.put("blackUsername", blackUsername);
         map.put("gameName", gameName);
-        JsonObject gameJson = JsonParser.parseString(game.toString()).getAsJsonObject();
-        map.put("game", gameJson);
+        if(game != null) {
+            JsonObject gameJson = JsonParser.parseString(game.toString()).getAsJsonObject();
+            map.put("game", gameJson);
+        }
         return new Gson().toJson(map);
     }
 }

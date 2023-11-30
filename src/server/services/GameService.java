@@ -2,10 +2,14 @@ package server.services;
 
 import chess.interfaces.ChessGame;
 import server.ServerException;
+import server.dataAccess.DataAccess;
 import server.dataAccess.DatabaseSQL;
 import models.GameData;
+import service.GameResponse;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Manages the requests and responses for all the Game endpoints in the server.
@@ -23,6 +27,14 @@ public class GameService extends Service {
      */
     public Collection<GameData> listGames() throws ServerException {
         return dataAccess.listGames();
+    }
+
+    public static List<GameResponse> toList(Collection<GameData> games) {
+        ArrayList<GameResponse> list = new ArrayList<>();
+        for (GameData game : games) {
+            list.add(new GameResponse(game));
+        }
+        return list;
     }
 
     /**
