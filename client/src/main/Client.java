@@ -65,7 +65,7 @@ public class Client {
         switch(input[0]) {
             case "quit" ->  {
                 activeConsole = false;
-                printActionSuccess("Exiting. Thanks for playing!");
+                printActionSuccess("Exiting program. Bye!");
             }
             case "register" -> {
                 // get params: username, password, email
@@ -79,6 +79,7 @@ public class Client {
                         clientState = State.logged_in;
                         activeUsername = username;
                         printActionSuccess("Registered user " + username + "! You are now logged in.");
+                        printMenu();
                     }
                     catch (Exception e) {
                         if(e.getMessage().contains("403")) {
@@ -104,6 +105,7 @@ public class Client {
                         clientState = State.logged_in;
                         activeUsername = username;
                         printActionSuccess("Logged in user " + username + "!");
+                        printMenu();
                     }
                     catch (ResponseException e) {
                         if(e.getMessage().contains("401")) {
@@ -139,7 +141,7 @@ public class Client {
                 authToken = null;
                 activeUsername = "";
                 clientState = State.logged_out;
-                printActionSuccess("Exiting. Thanks for playing!");
+                printActionSuccess("Exiting program. Bye!");
             }
             case "register" -> {
                 printWarning("User " + activeUsername + " is already logged in. Please log out to register a different user.");
@@ -207,10 +209,14 @@ public class Client {
                             clientState = State.playing_game_black;
                         }
                         printActionSuccess("Joined game " + gameID + " as " + playerRole);
+                        parsePlayerCommands(new String[]{"help"});
                     }
                     catch (Exception e) {
                         if(e.getMessage().contains("401")) {
                             printError("Couldn't join game: Unauthorized.");
+                        }
+                        else if(e.getMessage().contains("403")) {
+                            printError("Couldn't join game: Position already taken.");
                         }
                         else {
                             printError("Couldn't join game. Error: " + e.getMessage());
@@ -229,8 +235,7 @@ public class Client {
                         GameJoinResponse response = server.joinGame(authToken, gameID, null);
                         printActionSuccess("Joined game " + gameID + " as observer");
                         clientState = State.observing_game;
-                        String[] moveToObserver = new String[]{"help"};
-                        parsePlayerCommands(moveToObserver);
+                        parsePlayerCommands(new String[]{"help"});
                     }
                     catch (Exception e) {
                         if(e.getMessage().contains("401")) {
@@ -275,17 +280,15 @@ public class Client {
         Game testGame = new Game();
         testGame.newGame();
 
-        System.out.print(getBoardAsString((Board)testGame.getBoard(), ChessGame.TeamColor.WHITE));
-        System.out.println();
-        System.out.print(getBoardAsString((Board)testGame.getBoard(), ChessGame.TeamColor.BLACK));
-
-        // TODO: implement
+        // TODO: implement game commands
         switch(input[0]) {
             case "quit" ->  {
                 clientState = State.logged_in;
                 printActionSuccess("Exiting Game. Thanks for playing!");
+                printMenu();
             }
             case "help" -> {
+                printBoard(testGame);
                 printMenu();
             }
             default -> {
@@ -298,18 +301,16 @@ public class Client {
         Game testGame = new Game();
         testGame.newGame();
 
-        System.out.print(getBoardAsString((Board)testGame.getBoard(), ChessGame.TeamColor.WHITE));
-        System.out.println();
-        System.out.print(getBoardAsString((Board)testGame.getBoard(), ChessGame.TeamColor.BLACK));
-
         // TODO: implement
         switch(input[0]) {
             case "quit" ->  {
                 clientState = State.logged_in;
                 printActionSuccess("Exiting Game. Thanks for watching!");
+                printMenu();
             }
             case "help" -> {
                 printMenu();
+                printBoard(testGame);
             }
             default -> {
                 printWarning("Unknown command. Enter \"help\" for valid commands.");
@@ -334,19 +335,35 @@ public class Client {
             printMenuItem("join", "<gameID> [WHITE|BLACK]", "join an existing game as white or black");
             printMenuItem("observe", "<gameID>", "observe an existing game");
             printMenuItem("logout", "", "log out of the game");
+            printMenuItem("quit", "", "exit out of the console");
         }
         else if (clientState == State.logged_out){
             printMenuItem("register", "<username> <password> <email>", "create a new account");
             printMenuItem("login", "<username> <password>", "log in as an existing user");
+            printMenuItem("quit", "", "exit out of the console");
         }
         else if (clientState == State.playing_game_white || clientState == State.playing_game_black){
+            printMenuItem("quit", "", "leave current game");
             // TODO: implement
         }
         else if (clientState == State.observing_game){
+            printMenuItem("quit", "", "leave current game");
             // TODO: implement
         }
-        printMenuItem("quit", "", "exit out of the console");
+
         printMenuItem("help", "", "show this menu");
+    }
+
+    private static void printBoard(Game game) {
+        if(clientState == State.playing_game_white) {
+            System.out.print(getBoardAsString((Board)game.getBoard(), ChessGame.TeamColor.WHITE));
+        }
+        else if(clientState == State.playing_game_black) {
+            System.out.print(getBoardAsString((Board)game.getBoard(), ChessGame.TeamColor.BLACK));
+        }
+        else {
+            System.out.print(getBoardAsString((Board)game.getBoard(), ChessGame.TeamColor.WHITE));
+        }
     }
 
     private static void printFormatted(String message, String color, String style) {
@@ -361,6 +378,7 @@ public class Client {
 
     private static void printGameList(ArrayList<GameResponse> games) {
         printFormatted("Game List:", THEME_PRIMARY, SET_TEXT_ITALIC);
+        System.out.print(THEME_ACCENT_2);
         System.out.printf("-----------------------------------------------------%n");
         System.out.printf("| %-4s | %-12s | %-12s | %-12s |%n", "ID", "Game Name", "White Player", "Black Player");
         System.out.printf("-----------------------------------------------------%n");
@@ -369,6 +387,7 @@ public class Client {
             System.out.printf("| %-4d | %-12s | %-12s | %-12s |%n", game.gameID, game.gameName, (game.whiteUsername != null) ? game.whiteUsername : "", (game.blackUsername != null) ? game.blackUsername : "");
         }
         System.out.printf("-----------------------------------------------------%n");
+        System.out.print(RESET_ALL_FORMATTING);
     }
 
     private static void printActionSuccess(String message) {

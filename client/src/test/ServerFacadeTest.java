@@ -1,5 +1,6 @@
 import chess.interfaces.ChessGame;
 import models.UserData;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,7 +9,7 @@ import service.LoginResponse;
 import service.ResponseException;
 
 public class ServerFacadeTest {
-    ServerFacade serverFacade;
+    static ServerFacade serverFacade;
     final String url = "http://localhost:8080";
     UserData testUser = new UserData("beany", "12345", "beany1212");
     UserData registeredUser = new UserData("duck", "quack", "duck@duck.com");
@@ -25,6 +26,11 @@ public class ServerFacadeTest {
         serverFacade.logoutUser(responseLoggedOut.authToken);
         var responseLoggedIn = serverFacade.registerUser(loggedInUser.getUsername(), loggedInUser.getPassword(), loggedInUser.getEmail());
         loggedInAuth = responseLoggedIn.authToken;
+    }
+
+    @AfterAll
+    static void cleanup() throws ResponseException {
+        serverFacade.clearDb();
     }
 
     @Test
