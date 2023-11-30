@@ -48,7 +48,7 @@ public class DatabaseSQL implements DataAccessInterface {
                     gameName VARCHAR(255),
                     game VARCHAR(4000),
                     PRIMARY KEY (gameID),
-                    INDEX (gameName)
+                    INDEX (gameID)
                 )""")) {
                 createGamesTable.executeUpdate();
             }
@@ -131,9 +131,14 @@ public class DatabaseSQL implements DataAccessInterface {
             try (var preparedStatement = conn.prepareStatement("DELETE from users")) {
                 preparedStatement.executeUpdate();
             }
-            try (var preparedStatement = conn.prepareStatement("DELETE from games")) {
+            // this sequence of statements resets the game id index back to 1
+            try (var preparedStatement = conn.prepareStatement("ALTER table games AUTO_INCREMENT=1")) {
                 preparedStatement.executeUpdate();
             }
+            try (var preparedStatement = conn.prepareStatement("truncate table games")) {
+                preparedStatement.executeUpdate();
+            }
+
             try (var preparedStatement = conn.prepareStatement("DELETE from sessions")) {
                 preparedStatement.executeUpdate();
             }

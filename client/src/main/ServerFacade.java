@@ -2,12 +2,11 @@ import chess.interfaces.ChessGame;
 import com.google.gson.Gson;
 import service.*;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
 import java.util.Map;
 
 public class ServerFacade {
@@ -17,37 +16,46 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public LoginResponse registerUser(String username, String password, String email) throws Exception {
+    public LoginResponse registerUser(String username, String password, String email) throws ResponseException {
         var body = Map.of("username", username, "password", password, "email", email);
         return this.request("/user", "POST", body.toString(), null, LoginResponse.class);
     }
 
-    public LoginResponse loginUser(String username, String password) throws Exception {
+    public LoginResponse loginUser(String username, String password) throws ResponseException {
         var body = Map.of("username", username, "password", password);
         return this.request("/session", "POST", body.toString(), null, LoginResponse.class);
     }
 
-    public LogoutResponse logoutUser(String authToken) throws Exception {
+    public LogoutResponse logoutUser(String authToken) throws ResponseException {
         return this.request("/session", "DELETE", null, authToken, LogoutResponse.class);
     }
 
-    public CreateGameResponse createGame(String authToken, String gameName) throws Exception {
+    public CreateGameResponse createGame(String authToken, String gameName) throws ResponseException {
         var body = Map.of("gameName", gameName);
         return this.request("/game", "POST", body.toString(), authToken, CreateGameResponse.class);
     }
 
-    public ListGamesResponse listGames(String authToken) throws Exception {
-        return this.request("/game", "GET", "", authToken, ListGamesResponse.class);
+    public ListGamesResponse listGames(String authToken) throws ResponseException {
+        return this.request("/game", "GET", null, authToken, ListGamesResponse.class);
     }
 
-    public GameJoinResponse joinGame(String authToken, int gameID, ChessGame.TeamColor color) throws Exception {
+    public GameJoinResponse joinGame(String authToken, int gameID, ChessGame.TeamColor color) throws ResponseException {
         var body = new GameJoinRequest(color, gameID);
         return this.request("/game", "PUT", body.toString(), authToken, GameJoinResponse.class);
     }
 
-    private <T> T request(String path, String method, String body, String authToken, Class<T> classType) throws Exception {
-        HttpURLConnection connection = sendRequest(serverUrl + path, method, body, authToken);
-        return readResponseBody(connection, classType);
+    public void clearDb() throws ResponseException {
+        var response = this.request("/db", "DELETE", null, null, Map.class);
+    }
+
+    private <T> T request(String path, String method, String body, String authToken, Class<T> classType) throws ResponseException {
+        try {
+            HttpURLConnection connection = sendRequest(serverUrl + path, method, body, authToken);
+            return readResponseBody(connection, classType);
+        }
+        catch (Exception e) {
+            throw new ResponseException(500, e.getMessage());
+        }
     }
 
     private static HttpURLConnection sendRequest(String url, String method, String body, String authToken) throws Exception {
@@ -61,7 +69,7 @@ public class ServerFacade {
 
         writeRequestBody(body, http);
         http.connect();
-        System.out.printf("= Request =========\n[%s] %s\n\n%s\n\n", method, url, body);
+//        System.out.printf("= Request =========\n[%s] %s\n\n%s\n\n", method, url, body);
         return http;
     }
 
@@ -74,17 +82,19 @@ public class ServerFacade {
         }
     }
 
-    private static <T> T readResponseBody(HttpURLConnection http, Class<T> classType) throws Exception {
+    private static <T> T readResponseBody(HttpURLConnection http, Class<T> classType) throws ResponseException, IOException {
         var statusCode = http.getResponseCode();
         var statusMessage = http.getResponseMessage();
 
-        T responseBody;
         try (InputStream respBody = http.getInputStream()) {
             InputStreamReader inputStreamReader = new InputStreamReader(respBody);
-            responseBody = new Gson().fromJson(inputStreamReader, classType);
+            if(http.getResponseCode() == 200){
+                if(classType != null) {
+                    return new Gson().fromJson(inputStreamReader, classType);
+                }
+                return null;
+            }
+            throw new ResponseException(http.getResponseCode(), inputStreamReader.toString());
         }
-
-        System.out.printf("= Response =========\n[%d] %s\n\n%s\n\n", statusCode, statusMessage, responseBody.toString());
-        return responseBody;
     }
 }

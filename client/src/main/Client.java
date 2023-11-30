@@ -2,16 +2,12 @@ import chess.*;
 import chess.interfaces.ChessGame;
 import chess.pieces.Piece;
 
-import service.CreateGameResponse;
-import service.GameJoinResponse;
-import service.LoginResponse;
-import service.LogoutResponse;
+import service.*;
 
 import ui.EscapeSequences;
 import static ui.EscapeSequences.*;
 
 import java.util.*;
-
 
 public class Client {
     // Class Variables
@@ -22,7 +18,8 @@ public class Client {
     enum State {
         logged_in,
         logged_out,
-        playing_game,
+        playing_game_white,
+        playing_game_black,
         observing_game
     }
     static State clientState = State.logged_out;
@@ -35,14 +32,8 @@ public class Client {
     public static void main(String[] args) throws Exception {
         server = new ServerFacade(url);
 
-        Game testGame = new Game();
-        testGame.newGame();
-
-        // TODO: Print welcome message
-
-        System.out.print(getBoardAsString((Board)testGame.getBoard(), ChessGame.TeamColor.WHITE));
-        System.out.println();
-        System.out.print(getBoardAsString((Board)testGame.getBoard(), ChessGame.TeamColor.BLACK));
+        printFormatted("Welcome to Chess!", THEME_ACCENT_2, SET_TEXT_BOLD);
+        printMenu();
 
         while (activeConsole) {
             printConsolePrompt();
@@ -60,7 +51,7 @@ public class Client {
                 case logged_in -> {
                     parseLoggedInCommands(consoleCommand);
                 }
-                case playing_game -> {
+                case playing_game_black, playing_game_white -> {
                     parsePlayerCommands(consoleCommand);
                 }
                 case observing_game -> {
@@ -70,7 +61,7 @@ public class Client {
         }
     }
 
-    private static void parseLoggedOutCommands(String[] input) throws Exception {
+    private static void parseLoggedOutCommands(String[] input) {
         switch(input[0]) {
             case "quit" ->  {
                 activeConsole = false;
@@ -114,7 +105,7 @@ public class Client {
                         activeUsername = username;
                         printActionSuccess("Logged in user " + username + "!");
                     }
-                    catch (Exception e) {
+                    catch (ResponseException e) {
                         if(e.getMessage().contains("401")) {
                             printError("Couldn't log in: Invalid username or password.");
                         }
@@ -144,6 +135,10 @@ public class Client {
             case "quit" ->  {
                 activeConsole = false;
                 server.logoutUser(authToken);
+                printActionSuccess("Logged out user " + activeUsername + ".");
+                authToken = null;
+                activeUsername = "";
+                clientState = State.logged_out;
                 printActionSuccess("Exiting. Thanks for playing!");
             }
             case "register" -> {
@@ -174,7 +169,16 @@ public class Client {
                 }
             }
             case "list" -> {
-                // TODO: implement list
+                GameResponse[] games = server.listGames(authToken).games;
+
+                if(games.length == 0) {
+                    printWarning("There are no games. Enter \"create <gameName>\" to make one!");
+                }
+                else {
+                    ArrayList<GameResponse> gamesAsList = new ArrayList<>(Arrays.stream(games).toList());
+                    gamesAsList.sort(Comparator.comparingInt(a -> a.gameID));
+                    printGameList(gamesAsList);
+                }
             }
             case "join" -> {
                 if(input.length == 3 && inputIsInteger(input[1])) {
@@ -189,7 +193,19 @@ public class Client {
                     }
                     try {
                         GameJoinResponse response = server.joinGame(authToken, gameID, color);
-                        String playerRole = (color != null) ? color.toString() : "observer";
+                        String playerRole;
+                        if(color == null) {
+                            playerRole = "observer";
+                            clientState = State.observing_game;
+                        }
+                        else if (color == ChessGame.TeamColor.WHITE) {
+                            playerRole = "WHITE";
+                            clientState = State.playing_game_white;
+                        }
+                        else {
+                            playerRole = "BLACK";
+                            clientState = State.playing_game_black;
+                        }
                         printActionSuccess("Joined game " + gameID + " as " + playerRole);
                     }
                     catch (Exception e) {
@@ -212,6 +228,9 @@ public class Client {
                     try {
                         GameJoinResponse response = server.joinGame(authToken, gameID, null);
                         printActionSuccess("Joined game " + gameID + " as observer");
+                        clientState = State.observing_game;
+                        String[] moveToObserver = new String[]{"help"};
+                        parsePlayerCommands(moveToObserver);
                     }
                     catch (Exception e) {
                         if(e.getMessage().contains("401")) {
@@ -253,11 +272,49 @@ public class Client {
     }
 
     private static void parsePlayerCommands(String[] input) throws Exception {
+        Game testGame = new Game();
+        testGame.newGame();
+
+        System.out.print(getBoardAsString((Board)testGame.getBoard(), ChessGame.TeamColor.WHITE));
+        System.out.println();
+        System.out.print(getBoardAsString((Board)testGame.getBoard(), ChessGame.TeamColor.BLACK));
+
         // TODO: implement
+        switch(input[0]) {
+            case "quit" ->  {
+                clientState = State.logged_in;
+                printActionSuccess("Exiting Game. Thanks for playing!");
+            }
+            case "help" -> {
+                printMenu();
+            }
+            default -> {
+                printWarning("Unknown command. Enter \"help\" for valid commands.");
+            }
+        }
     }
 
     private static void parseObserverCommands(String[] input) throws Exception {
+        Game testGame = new Game();
+        testGame.newGame();
+
+        System.out.print(getBoardAsString((Board)testGame.getBoard(), ChessGame.TeamColor.WHITE));
+        System.out.println();
+        System.out.print(getBoardAsString((Board)testGame.getBoard(), ChessGame.TeamColor.BLACK));
+
         // TODO: implement
+        switch(input[0]) {
+            case "quit" ->  {
+                clientState = State.logged_in;
+                printActionSuccess("Exiting Game. Thanks for watching!");
+            }
+            case "help" -> {
+                printMenu();
+            }
+            default -> {
+                printWarning("Unknown command. Enter \"help\" for valid commands.");
+            }
+        }
     }
 
     // Helper methods for console output
@@ -282,7 +339,7 @@ public class Client {
             printMenuItem("register", "<username> <password> <email>", "create a new account");
             printMenuItem("login", "<username> <password>", "log in as an existing user");
         }
-        else if (clientState == State.playing_game){
+        else if (clientState == State.playing_game_white || clientState == State.playing_game_black){
             // TODO: implement
         }
         else if (clientState == State.observing_game){
@@ -300,6 +357,18 @@ public class Client {
         System.out.println("\t" + THEME_PRIMARY_LIGHT + command + " "
                 + THEME_ACCENT_2 + params
                 + THEME_PRIMARY + " - " + definition + RESET_ALL_FORMATTING);
+    }
+
+    private static void printGameList(ArrayList<GameResponse> games) {
+        printFormatted("Game List:", THEME_PRIMARY, SET_TEXT_ITALIC);
+        System.out.printf("-----------------------------------------------------%n");
+        System.out.printf("| %-4s | %-12s | %-12s | %-12s |%n", "ID", "Game Name", "White Player", "Black Player");
+        System.out.printf("-----------------------------------------------------%n");
+
+        for (GameResponse game : games){
+            System.out.printf("| %-4d | %-12s | %-12s | %-12s |%n", game.gameID, game.gameName, (game.whiteUsername != null) ? game.whiteUsername : "", (game.blackUsername != null) ? game.blackUsername : "");
+        }
+        System.out.printf("-----------------------------------------------------%n");
     }
 
     private static void printActionSuccess(String message) {
