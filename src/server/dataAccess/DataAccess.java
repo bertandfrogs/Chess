@@ -126,7 +126,7 @@ public class DataAccess implements DataAccessInterface {
     @Override
     public GameData createGame(String gameName) {
         newGameId++;
-        GameData game = new GameData(newGameId, null, null, gameName, new Game());
+        GameData game = new GameData(newGameId, null, null, gameName, Game.State.pregame, new Game());
         games.put(newGameId, game);
         return game;
     }

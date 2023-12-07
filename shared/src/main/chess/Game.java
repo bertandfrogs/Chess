@@ -16,10 +16,33 @@ import java.util.*;
 public class Game implements chess.interfaces.ChessGame {
     private TeamColor teamTurn = TeamColor.WHITE;
     private Board chessBoard = new Board();
+    public enum State {
+        pregame,
+        active,
+        finished
+    }
+    public static State stringToState(String str){
+        return switch (str) {
+            case "active" -> Game.State.active;
+            case "finished" -> Game.State.finished;
+            default -> Game.State.pregame;
+        };
+    }
+
+    private State gameState = State.pregame;
 
     public void newGame() {
         chessBoard.resetBoard();
         setTeamTurn(TeamColor.WHITE);
+        setState(State.pregame);
+    }
+
+    public State getState() {
+        return gameState;
+    }
+
+    public void setState(State gameState) {
+        this.gameState = gameState;
     }
 
     @Override
@@ -325,6 +348,8 @@ public class Game implements chess.interfaces.ChessGame {
         Map<Object, Object> boardMap = new HashMap<>();
 
         jsonMap.put("turn", teamTurn);
+
+        jsonMap.put("gameState", (gameState != null) ? gameState.name() : "");
 
         if(chessBoard != null && !chessBoard.getPieces().isEmpty()) {
             for(Map.Entry<Integer, Piece> entry : chessBoard.getPieces().entrySet()) {

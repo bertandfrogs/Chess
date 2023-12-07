@@ -46,9 +46,9 @@ public class DatabaseSQL implements DataAccessInterface {
                     whiteUsername VARCHAR(255),
                     blackUsername VARCHAR(255),
                     gameName VARCHAR(255),
+                    gameState VARCHAR(64),
                     game VARCHAR(4000),
-                    PRIMARY KEY (gameID),
-                    INDEX (gameID)
+                    PRIMARY KEY (gameID)
                 )""")) {
                 createGamesTable.executeUpdate();
             }
@@ -112,9 +112,10 @@ public class DatabaseSQL implements DataAccessInterface {
                         var whiteUsername = resultSet.getString("whiteUsername");
                         var blackUsername = resultSet.getString("blackUsername");
                         var gameName = resultSet.getString("gameName");
+                        var gameState = resultSet.getString("gameState");
                         var gameJSON = resultSet.getString("game");
                         GameDeserializer gd = new GameDeserializer();
-                        games.put(gameID, new GameData(gameID, whiteUsername, blackUsername, gameName, gd.deserialize(gameJSON)));
+                        games.put(gameID, new GameData(gameID, whiteUsername, blackUsername, gameName, Game.stringToState(gameState), gd.deserialize(gameJSON)));
                     }
                 }
             }
@@ -301,7 +302,7 @@ public class DatabaseSQL implements DataAccessInterface {
     public GameData createGame(String gameName) throws ServerException {
         try (var conn = getConnection()) {
             try (var preparedStatement = conn.prepareStatement("""
-            INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (NULL, NULL, ?, ?)
+            INSERT INTO games (whiteUsername, blackUsername, gameName, gameState, game) VALUES (NULL, NULL, ?, "pregame", ?)
             """, Statement.RETURN_GENERATED_KEYS)) {
                 Game newGame = new Game();
                 preparedStatement.setString(1, gameName);
@@ -312,7 +313,7 @@ public class DatabaseSQL implements DataAccessInterface {
                 int newID;
                 if (result.next()) {
                     newID = result.getInt(1);
-                    return new GameData(newID, null, null, gameName, newGame);
+                    return new GameData(newID, null, null, gameName, Game.State.pregame, newGame);
                 }
                 else {
                     throw new ServerException(500, "couldn't create game");
@@ -336,10 +337,11 @@ public class DatabaseSQL implements DataAccessInterface {
                         var whiteUsername = resultSet.getString("whiteUsername");
                         var blackUsername = resultSet.getString("blackUsername");
                         var gameName = resultSet.getString("gameName");
+                        var gameState = resultSet.getString("gameState");
                         var gameJSON = resultSet.getString("game");
                         GameDeserializer gd = new GameDeserializer();
                         Game game = gd.deserialize(gameJSON);
-                        foundGame = new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+                        foundGame = new GameData(gameID, whiteUsername, blackUsername, gameName, Game.stringToState(gameState), game);
                     }
                     return foundGame;
                 }
@@ -362,14 +364,15 @@ public class DatabaseSQL implements DataAccessInterface {
             try (var conn = getConnection()) {
                 try (var preparedStatement = conn.prepareStatement("""
                      UPDATE games
-                     SET whiteUsername=?, blackUsername=?, gameName=?, game=?
+                     SET whiteUsername=?, blackUsername=?, gameName=?, gameState=?, game=?
                      WHERE gameID=?
                      """)) {
                     preparedStatement.setString(1, game.getWhiteUsername());
                     preparedStatement.setString(2, game.getBlackUsername());
                     preparedStatement.setString(3, game.getGameName());
-                    preparedStatement.setString(4, game.getGame().toString());
-                    preparedStatement.setInt(5, game.getGameId());
+                    preparedStatement.setString(4, game.getGameState().name());
+                    preparedStatement.setString(5, game.getGame().toString());
+                    preparedStatement.setInt(6, game.getGameId());
 
                     preparedStatement.executeUpdate();
 

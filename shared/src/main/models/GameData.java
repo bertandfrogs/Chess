@@ -33,16 +33,19 @@ public class GameData {
      */
     String gameName;
 
+    Game.State gameState;
+
     /**
      * The instantiation of the chess game.
      */
     Game game;
 
-    public GameData(int gameID, String whiteUsername, String blackUsername, String gameName, Game game) {
+    public GameData(int gameID, String whiteUsername, String blackUsername, String gameName, Game.State gameState, Game game) {
         this.gameID = gameID;
         this.whiteUsername = whiteUsername;
         this.blackUsername = blackUsername;
         this.gameName = gameName;
+        this.gameState = gameState;
         this.game = game;
     }
 
@@ -76,6 +79,14 @@ public class GameData {
 
     public void setGameName(String gameName) {
         this.gameName = gameName;
+    }
+
+    public Game.State getGameState() {
+        return gameState;
+    }
+
+    public void setGameState(Game.State gameState) {
+        this.gameState = gameState;
     }
 
     public Game getGame() {

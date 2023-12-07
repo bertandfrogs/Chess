@@ -280,9 +280,8 @@ public class Client {
         Game testGame = new Game();
         testGame.newGame();
 
-        // TODO: implement game commands
         switch(input[0]) {
-            case "quit" ->  {
+            case "leave" ->  {
                 clientState = State.logged_in;
                 printActionSuccess("Exiting Game. Thanks for playing!");
                 printMenu();
@@ -291,9 +290,19 @@ public class Client {
                 printBoard(testGame);
                 printMenu();
             }
-            default -> {
-                printWarning("Unknown command. Enter \"help\" for valid commands.");
+            case "redraw" -> {
+                // gets from its own Game object
             }
+            case "move" -> {
+                // should check if it's valid with its own Game object, then call the server
+            }
+            case "resign" -> {
+                // calls the server
+            }
+            case "moves" -> {
+                // can get this from its own Game object
+            }
+            default -> printWarning("Unknown command. Enter \"help\" for valid commands.");
         }
     }
 
@@ -301,7 +310,6 @@ public class Client {
         Game testGame = new Game();
         testGame.newGame();
 
-        // TODO: implement
         switch(input[0]) {
             case "quit" ->  {
                 clientState = State.logged_in;
@@ -377,16 +385,19 @@ public class Client {
     }
 
     private static void printGameList(ArrayList<GameResponse> games) {
+        final String line = "-----------------------------------------------------%n";
         printFormatted("Game List:", THEME_PRIMARY, SET_TEXT_ITALIC);
         System.out.print(THEME_ACCENT_2);
-        System.out.printf("-----------------------------------------------------%n");
-        System.out.printf("| %-4s | %-12s | %-12s | %-12s |%n", "ID", "Game Name", "White Player", "Black Player");
-        System.out.printf("-----------------------------------------------------%n");
+        System.out.printf(line);
+        System.out.printf("| %-4s | %-12s | %-12s | %-12s | %-12s |%n",
+                "ID", "Game Name", "White Player", "Black Player", "Game State");
+        System.out.printf(line);
 
         for (GameResponse game : games){
-            System.out.printf("| %-4d | %-12s | %-12s | %-12s |%n", game.gameID, game.gameName, (game.whiteUsername != null) ? game.whiteUsername : "", (game.blackUsername != null) ? game.blackUsername : "");
+            System.out.printf("| %-4d | %-12s | %-12s | %-12s | %-12s |%n",
+                    game.gameID, game.gameName, (game.whiteUsername != null) ? game.whiteUsername : "", (game.blackUsername != null) ? game.blackUsername : "", (game.gameState != null) ? game.gameState : "");
         }
-        System.out.printf("-----------------------------------------------------%n");
+        System.out.printf(line);
         System.out.print(RESET_ALL_FORMATTING);
     }
 

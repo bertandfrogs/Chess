@@ -1,10 +1,12 @@
 package passoffTests.myTests;
 
+import chess.Game;
 import org.junit.jupiter.api.*;
 import server.ServerException;
 import models.AuthToken;
 import models.GameData;
 import models.UserData;
+import server.dataAccess.GameDeserializer;
 
 import java.util.Collection;
 
@@ -33,6 +35,14 @@ public class MySQLTests {
     @AfterAll
     static void cleanup() throws ServerException {
         db.clear();
+    }
+
+    @Test
+    void testGameDeserializer() throws ServerException {
+        Game testGame = new Game();
+        testGame.newGame();
+        String testGameJson = testGame.toString();
+        Game testGameDeserialized = new GameDeserializer().deserialize(testGameJson);
     }
 
     @Test

@@ -79,6 +79,6 @@ public class MySQLTestHelper extends DatabaseSQL {
 
     @Override
     public GameData updateGame(GameData game) throws ServerException {
-        return super.updateGame(new GameData(game.getGameId(), game.getWhiteUsername(), game.getBlackUsername(), testString(game.getGameName()), game.getGame()));
+        return super.updateGame(new GameData(game.getGameId(), game.getWhiteUsername(), game.getBlackUsername(), testString(game.getGameName()), game.getGameState(), game.getGame()));
     }
 }

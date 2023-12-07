@@ -21,7 +21,7 @@ public class GameDeserializer {
         Game game = new Game();
         Board board = new Board();
         Scanner scanner = new Scanner(json);
-        scanner.useDelimiter("\"\\W*\"");
+        scanner.useDelimiter("\"[:{},]*\"|\"}+$");
 
         scanner.next(); // skips over "turn"
         String teamTurn = scanner.next();
@@ -34,6 +34,11 @@ public class GameDeserializer {
         else {
             throw new ServerException(500, "Invalid team turn: " + teamTurn);
         }
+
+        scanner.next(); // skips over "gameState"
+        String gameState = scanner.next();
+
+        game.setState(Game.stringToState(gameState));
 
         scanner.next(); // skips over "board"
 

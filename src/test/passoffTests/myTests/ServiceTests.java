@@ -208,7 +208,7 @@ public class ServiceTests {
     void listGames() throws ServerException {
         // create a single new game (empty)
         GameData newGame = gameService.createGame("New Game");
-        GameData expectedNewGame = new GameData(newGame.getGameId(), null, null, newGame.getGameName(), newGame.getGame());
+        GameData expectedNewGame = new GameData(newGame.getGameId(), null, null, newGame.getGameName(), newGame.getGameState(), newGame.getGame());
 
         Collection<GameData> expectedList = new ArrayList<>();
         expectedList.add(expectedNewGame);
