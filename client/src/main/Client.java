@@ -320,9 +320,7 @@ public class Client {
                 printMenu();
                 printBoard(testGame);
             }
-            default -> {
-                printWarning("Unknown command. Enter \"help\" for valid commands.");
-            }
+            default -> printWarning("Unknown command. Enter \"help\" for valid commands.");
         }
     }
 

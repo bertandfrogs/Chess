@@ -312,7 +312,6 @@ public class StandardAPITests {
                 "Player present on a game that no player joined");
     }
 
-
     @Test
     @Order(13)
     @DisplayName("Watch Bad Authentication")
