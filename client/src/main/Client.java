@@ -1,6 +1,7 @@
 import chess.*;
 import chess.interfaces.ChessGame;
 
+import jakarta.websocket.DeploymentException;
 import service.*;
 
 import ui.ConsoleOutput;
@@ -8,15 +9,16 @@ import utils.ClientState;
 
 import static ui.EscapeSequences.*;
 
+import java.io.Console;
 import java.util.*;
 
 public class Client {
     // Class Variables
     static boolean activeConsole = true;
+    static Console consoleInput = System.console();
     static String activeUsername = "";
     static String authToken;
     static Game clientGame;
-    static boolean loadGame = false;
     static final String urlHTTP = "http://localhost:8080";
     static final String urlWS = "ws://localhost:8080/connect";
     static ClientState clientState = ClientState.logged_out;
@@ -24,96 +26,99 @@ public class Client {
     static ServerFacade server;
 
     public static void main(String[] args) throws Exception {
-        server = new ServerFacade(urlHTTP);
-        websocket = new WebSocketClient(urlWS);
+        try {
+            server = new ServerFacade(urlHTTP);
+            websocket = new WebSocketClient(urlWS);
 
-        ConsoleOutput.printFormatted("Welcome to Chess!", THEME_ACCENT_2, SET_TEXT_BOLD);
-        ConsoleOutput.printMenu(clientState);
+            ConsoleOutput.printFormatted("Welcome to Chess!", THEME_ACCENT_2, SET_TEXT_BOLD);
+            ConsoleOutput.printMenu(ClientState.logged_out);
 
-        // a loop that continuously gets input from the console
-        while (activeConsole) {
-            ConsoleOutput.printConsolePrompt(activeUsername);
+            // a loop that continuously gets input from the console
+            while (activeConsole) {
+                String userInput = consoleInput.readLine(ConsoleOutput.mainConsolePrompt(activeUsername));
 
-            Scanner consoleInput = new Scanner(System.in);
-            String inputLine = consoleInput.nextLine();
-            inputLine = inputLine.toLowerCase();
+                userInput = userInput.toLowerCase();
 
-            String[] consoleCommand = inputLine.split("\s+");
-
-            switch (clientState) {
-                case logged_out -> {
-                    parseLoggedOutCommands(consoleCommand);
-                }
-                case logged_in -> {
-                    parseLoggedInCommands(consoleCommand);
-                }
-                case playing_game_black, playing_game_white -> {
-                    parsePlayerCommands(consoleCommand);
-                }
-                case observing_game -> {
-                    parseObserverCommands(consoleCommand);
+                switch (clientState) {
+                    case logged_out -> {
+                        parseLoggedOutCommands(userInput);
+                    }
+                    case logged_in -> {
+                        parseLoggedInCommands(userInput);
+                    }
+                    case playing_game_black, playing_game_white -> {
+                        parsePlayerCommands(userInput);
+                    }
+                    case observing_game -> {
+                        parseObserverCommands(userInput);
+                    }
                 }
             }
+        } catch (DeploymentException e) {
+            ConsoleOutput.printError("Could not connect to server, it may not be running.");
         }
     }
 
-    private static void parseLoggedOutCommands(String[] input) {
-        switch(input[0]) {
-            case "quit" ->  {
+    private static void parseLoggedOutCommands(String input) {
+        switch(input) {
+            case "quit", "leave", "exit" ->  {
                 activeConsole = false;
                 ConsoleOutput.printActionSuccess("Exiting program. Bye!");
             }
             case "register" -> {
-                // get params: username, password, email
-                if (input.length == 4) {
-                    String username = input[1];
-                    String password = input[2];
-                    String email = input[3];
-                    try {
-                        LoginResponse response = server.registerUser(username, password, email);
-                        authToken = response.authToken;
-                        clientState = ClientState.logged_in;
-                        activeUsername = username;
-                        ConsoleOutput.printActionSuccess("Registered user " + username + "! You are now logged in.");
-                        ConsoleOutput.printMenu(clientState);
-                    }
-                    catch (Exception e) {
-                        if(e.getMessage().contains("403")) {
-                            ConsoleOutput.printError("Couldn't register user: Username is already taken.");
-                        }
-                        else {
-                            ConsoleOutput.printError("Couldn't register user. Error: " + e.getMessage());
-                        }
-                    }
+                // ask them for username, password, and email
+                ConsoleOutput.printFormatted("Register New User (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
+
+                String username = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter desired username: "));
+                if(checkIfCanceled(username, input)) return;
+
+                String password = String.valueOf(consoleInput.readPassword(ConsoleOutput.formatConsolePrompt("> Enter desired password: ")));
+                if(checkIfCanceled(password, input)) return;
+
+                String email = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter your email: "));
+                if(checkIfCanceled(email, input)) return;
+
+                try {
+                    LoginResponse response = server.registerUser(username, password, email);
+                    authToken = response.authToken;
+                    clientState = ClientState.logged_in;
+                    activeUsername = username;
+                    ConsoleOutput.printActionSuccess("Registered user " + username + "! You are now logged in.");
+                    ConsoleOutput.printMenu(clientState);
                 }
-                else {
-                    ConsoleOutput.printWarning("Invalid format, use \"register <username> <password> <email>\"");
+                catch (Exception e) {
+                    if(e.getMessage().contains("403")) {
+                        ConsoleOutput.printError("Couldn't register user: Username is already taken.");
+                    }
+                    else {
+                        ConsoleOutput.printError("Couldn't register user. Error: " + e.getMessage());
+                    }
                 }
             }
             case "login" -> {
-                // get params: username, password
-                if (input.length == 3) {
-                    String username = input[1];
-                    String password = input[2];
-                    try {
-                        LoginResponse response = server.loginUser(username, password);
-                        authToken = response.authToken;
-                        clientState = ClientState.logged_in;
-                        activeUsername = username;
-                        ConsoleOutput.printActionSuccess("Logged in user " + username + "!");
-                        ConsoleOutput.printMenu(clientState);
-                    }
-                    catch (ResponseException e) {
-                        if(e.getMessage().contains("401")) {
-                            ConsoleOutput.printError("Couldn't log in: Invalid username or password.");
-                        }
-                        else {
-                            ConsoleOutput.printError("Couldn't log in. Error: " + e.getMessage());
-                        }
-                    }
+                // ask them for username and password
+                ConsoleOutput.printFormatted("Login User (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
+                String username = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter username: "));
+                if(checkIfCanceled(username, input)) return;
+
+                String password = String.valueOf(consoleInput.readPassword(ConsoleOutput.formatConsolePrompt("> Enter password: ")));
+                if(checkIfCanceled(password, input)) return;
+
+                try {
+                    LoginResponse response = server.loginUser(username, password);
+                    authToken = response.authToken;
+                    clientState = ClientState.logged_in;
+                    activeUsername = username;
+                    ConsoleOutput.printActionSuccess("Logged in user " + username + "!");
+                    ConsoleOutput.printMenu(clientState);
                 }
-                else {
-                    ConsoleOutput.printWarning("Invalid format, use \"login <username> <password>\"");
+                catch (ResponseException e) {
+                    if(e.getMessage().contains("401")) {
+                        ConsoleOutput.printError("Couldn't log in: Invalid username or password.");
+                    }
+                    else {
+                        ConsoleOutput.printError("Couldn't log in. Error: " + e.getMessage());
+                    }
                 }
             }
             case "create", "list", "join", "observe", "logout" -> {
@@ -128,9 +133,9 @@ public class Client {
         }
     }
 
-    private static void parseLoggedInCommands(String[] input) throws Exception {
-        switch(input[0]) {
-            case "quit" ->  {
+    private static void parseLoggedInCommands(String input) throws Exception {
+        switch(input) {
+            case "quit", "leave", "exit" ->  {
                 activeConsole = false;
                 server.logoutUser(authToken);
                 ConsoleOutput.printActionSuccess("Logged out user " + activeUsername + ".");
@@ -147,23 +152,21 @@ public class Client {
             }
             case "create" -> {
                 // get params: gameName
-                if (input.length == 2) {
-                    String gameName = input[1];
-                    try {
-                        CreateGameResponse response = server.createGame(authToken, gameName);
-                        ConsoleOutput.printActionSuccess("Created new game with gameID: " + response.gameID);
-                    }
-                    catch (Exception e) {
-                        if(e.getMessage().contains("401")) {
-                            ConsoleOutput.printError("Couldn't create game: Unauthorized.");
-                        }
-                        else {
-                            ConsoleOutput.printError("Couldn't create game. Error: " + e.getMessage());
-                        }
-                    }
+                ConsoleOutput.printFormatted("Create Game (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
+                String gameName = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter game name: "));
+                if(checkIfCanceled(gameName, input)) return;
+
+                try {
+                    CreateGameResponse response = server.createGame(authToken, gameName);
+                    ConsoleOutput.printActionSuccess("Created new game with gameID: " + response.gameID);
                 }
-                else {
-                    ConsoleOutput.printWarning("Invalid format, use \"create <gameName>\" (one word)");
+                catch (Exception e) {
+                    if(e.getMessage().contains("401")) {
+                        ConsoleOutput.printError("Couldn't create game: Unauthorized.");
+                    }
+                    else {
+                        ConsoleOutput.printError("Couldn't create game. Error: " + e.getMessage());
+                    }
                 }
             }
             case "list" -> {
@@ -179,73 +182,77 @@ public class Client {
                 }
             }
             case "join" -> {
-                if(input.length == 3 && inputIsInteger(input[1])) {
-                    int gameID = Integer.parseInt(input[1]);
-                    String playerColorString = input[2];
-                    ChessGame.TeamColor color = null;
-                    if(playerColorString.equalsIgnoreCase("BLACK")){
-                        color = ChessGame.TeamColor.BLACK;
-                    }
-                    else if(playerColorString.equalsIgnoreCase("WHITE")) {
-                        color = ChessGame.TeamColor.WHITE;
-                    }
-                    try {
-                        GameJoinResponse response = server.joinGame(authToken, gameID, color);
-                        String playerRole;
-                        if(color == null) {
-                            playerRole = "observer";
-                            clientState = ClientState.observing_game;
-                        }
-                        else if (color == ChessGame.TeamColor.WHITE) {
-                            playerRole = "WHITE";
-                            clientState = ClientState.playing_game_white;
-                        }
-                        else {
-                            playerRole = "BLACK";
-                            clientState = ClientState.playing_game_black;
-                        }
-                        ConsoleOutput.printActionSuccess("Joined game " + gameID + " as " + playerRole);
-                        ConsoleOutput.printMenu(clientState);
-                        initializeClientGame(gameID); // this method is called when the client joins a game, so I thought it best to put this call here.
-                    }
-                    catch (Exception e) {
-                        if(e.getMessage().contains("401")) {
-                            ConsoleOutput.printError("Couldn't join game: Unauthorized.");
-                        }
-                        else if(e.getMessage().contains("403")) {
-                            ConsoleOutput.printError("Couldn't join game: Position already taken.");
-                        }
-                        else {
-                            ConsoleOutput.printError("Couldn't join game. Error: " + e.getMessage());
-                        }
-                    }
+                ConsoleOutput.printFormatted("Join Game (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
+
+                String gameToJoin = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter Game ID: "));
+                while(inputNotInteger(gameToJoin)) {
+                    if(checkIfCanceled(gameToJoin, input)) return;
+                    ConsoleOutput.printWarning("Game ID must be a number.");
+                    gameToJoin = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter Game ID: "));
                 }
-                else {
-                    ConsoleOutput.printWarning("Invalid format, use \"join <gameID> <BLACK|WHITE>\" (gameID is a number)");
+                int gameID = Integer.parseInt(gameToJoin);
+                
+                String playerColorString = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter Desired Player Color (Black/White): "));
+                ChessGame.TeamColor color = getTeamColorFromString(playerColorString);
+                while (color == null) {
+                    if (checkIfCanceled(playerColorString, input)) return;
+                    ConsoleOutput.printWarning("Invalid input. Please enter \"black\" or \"white\"");
+                    playerColorString = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter Desired Player Color (Black/White): "));
+                    color = getTeamColorFromString(playerColorString);
+                }
+
+                try {
+                    GameJoinResponse response = server.joinGame(authToken, gameID, color);
+                    clientState = switch (color) {
+                        case WHITE -> ClientState.playing_game_white;
+                        case BLACK -> ClientState.playing_game_black;
+                    };
+
+                    ConsoleOutput.printActionSuccess("Joined game " + gameID + " as " + color);
+                    ConsoleOutput.printMenu(clientState);
+                    initializeClientGame(gameID); // this method is called when the client joins a game, so I thought it best to put this call here.
+                }
+                catch (Exception e) {
+                    if(e.getMessage().contains("400")) {
+                        ConsoleOutput.printError("Couldn't join game: Game ID not found");
+                    }
+                    if(e.getMessage().contains("401")) {
+                        ConsoleOutput.printError("Couldn't join game: Unauthorized.");
+                    }
+                    else if(e.getMessage().contains("403")) {
+                        ConsoleOutput.printError("Couldn't join game: Position already taken.");
+                    }
+                    else {
+                        ConsoleOutput.printError("Couldn't join game. Error: " + e.getMessage());
+                    }
                 }
             }
             case "observe" -> {
-                if(input.length == 2) {
-                    int gameID = Integer.parseInt(input[1]);
+                ConsoleOutput.printFormatted("Observe Game (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
 
-                    try {
-                        GameJoinResponse response = server.joinGame(authToken, gameID, null);
-                        ConsoleOutput.printActionSuccess("Joined game " + gameID + " as observer");
-                        clientState = ClientState.observing_game;
-                        ConsoleOutput.printMenu(ClientState.observing_game);
-                        initializeClientGame(gameID);
-                    }
-                    catch (Exception e) {
-                        if(e.getMessage().contains("401")) {
-                            ConsoleOutput.printError("Couldn't join game: Unauthorized.");
-                        }
-                        else {
-                            ConsoleOutput.printError("Couldn't join game. Error: " + e.getMessage());
-                        }
-                    }
+                String gameToJoin = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter Game ID: "));
+                while(inputNotInteger(gameToJoin)) {
+                    if(checkIfCanceled(gameToJoin, input)) return;
+                    ConsoleOutput.printWarning("Game ID must be a number.");
+                    gameToJoin = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter Game ID: "));
                 }
-                else {
-                    ConsoleOutput.printWarning("Invalid format, use \"observe <gameID>\"");
+
+                int gameID = Integer.parseInt(gameToJoin);
+
+                try {
+                    GameJoinResponse response = server.joinGame(authToken, gameID, null);
+                    ConsoleOutput.printActionSuccess("Joined game " + gameID + " as observer");
+                    clientState = ClientState.observing_game;
+                    ConsoleOutput.printMenu(ClientState.observing_game);
+                    initializeClientGame(gameID);
+                }
+                catch (Exception e) {
+                    if(e.getMessage().contains("401")) {
+                        ConsoleOutput.printError("Couldn't join game: Unauthorized.");
+                    }
+                    else {
+                        ConsoleOutput.printError("Couldn't join game. Error: " + e.getMessage());
+                    }
                 }
             }
             case "logout" -> {
@@ -274,9 +281,9 @@ public class Client {
         }
     }
 
-    private static void parsePlayerCommands(String[] input) throws Exception {
-        switch(input[0]) {
-            case "leave" ->  {
+    private static void parsePlayerCommands(String input) throws Exception {
+        switch(input) {
+            case "leave", "quit", "exit" ->  {
                 clientState = ClientState.logged_in;
                 ConsoleOutput.printActionSuccess("Exiting Game. Thanks for playing!");
                 ConsoleOutput.printMenu(clientState);
@@ -307,22 +314,44 @@ public class Client {
         }
     }
 
-    private static void parseObserverCommands(String[] input) throws Exception {
+    private static void parseObserverCommands(String input) throws Exception {
         Game testGame = new Game();
         testGame.newGame();
 
-        switch(input[0]) {
-            case "quit" ->  {
+        switch(input) {
+            case "leave", "quit", "exit" ->  {
                 clientState = ClientState.logged_in;
                 ConsoleOutput.printActionSuccess("Exiting Game. Thanks for watching!");
                 ConsoleOutput.printMenu(clientState);
             }
-            case "help" -> {
+            case "help", "info" -> {
                 ConsoleOutput.printMenu(clientState);
                 ConsoleOutput.printBoard(testGame, clientState);
             }
             default -> ConsoleOutput.printWarning("Unknown command. Enter \"help\" for valid commands.");
         }
+    }
+
+    private static boolean checkIfCanceled(String input, String process) {
+        if(input.equalsIgnoreCase("cancel")) {
+            ConsoleOutput.printWarning("Canceled " + process + ".");
+            return true;
+        }
+        return false;
+    }
+
+    // returns the TeamColor object given a String input. Returns null if input is bad.
+    private static ChessGame.TeamColor getTeamColorFromString(String colorString) {
+        ChessGame.TeamColor color = null;
+
+        if(colorString.equalsIgnoreCase("BLACK")){
+            color = ChessGame.TeamColor.BLACK;
+        }
+        if(colorString.equalsIgnoreCase("WHITE")) {
+            color = ChessGame.TeamColor.WHITE;
+        }
+
+        return color;
     }
 
     // This method is called the very first time the client joins a game
@@ -331,12 +360,12 @@ public class Client {
         clientGame = new Game();
     }
 
-    static boolean inputIsInteger(String input) {
+    static boolean inputNotInteger(String input) {
         try {
             Integer.parseInt(input);
-            return true;
-        } catch (NumberFormatException nfe) {
             return false;
+        } catch (NumberFormatException nfe) {
+            return true;
         }
     }
 }

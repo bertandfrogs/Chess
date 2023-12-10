@@ -14,42 +14,48 @@ import static ui.EscapeSequences.*;
 public class ConsoleOutput {
 
     // Helper methods for console output
-    public static void printConsolePrompt(String activeUsername) {
+    public static String mainConsolePrompt(String activeUsername) {
         String userStatus = (!activeUsername.isEmpty()) ? activeUsername : "Logged Out";
 
-        System.out.print("\n" + THEME_DARK + "[" + userStatus + "]"
+        return(THEME_DARK + "[" + userStatus + "]"
                 + THEME_PRIMARY + " Enter a Command >>> "
                 + EscapeSequences.THEME_PRIMARY_LIGHT);
+    }
+
+    public static String formatConsolePrompt(String message) {
+        return (THEME_PRIMARY + message + RESET_ALL_FORMATTING);
     }
 
     public static void printMenu(ClientState clientState) {
         printFormatted("Valid Commands:", THEME_PRIMARY, SET_TEXT_ITALIC);
         if(clientState == ClientState.logged_in) {
-            printMenuItem("create", "<name>", "create a new game");
-            printMenuItem("list", "", "show all games");
-            printMenuItem("join", "<gameID> [WHITE|BLACK]", "join an existing game as white or black");
-            printMenuItem("observe", "<gameID>", "observe an existing game");
-            printMenuItem("logout", "", "log out of the game");
-            printMenuItem("quit", "", "exit out of the console");
+            printMenuItem("create", "create a new game");
+            printMenuItem("list", "show all games");
+            printMenuItem("join", "join an existing game as white or black");
+            printMenuItem("observe", "observe an existing game");
+            printMenuItem("logout", "log out user");
+            printMenuItem("quit", "exit out of the console");
         }
         else if (clientState == ClientState.logged_out){
-            printMenuItem("register", "<username> <password> <email>", "create a new account");
-            printMenuItem("login", "<username> <password>", "log in as an existing user");
-            printMenuItem("quit", "", "exit out of the console");
+            printMenuItem("register", "create a new account");
+            printMenuItem("login", "log in as an existing user");
+            printMenuItem("quit", "exit out of the console");
         }
         else if (clientState == ClientState.playing_game_white || clientState == ClientState.playing_game_black){
-            printMenuItem("leave", "", "leave current game");
+            printMenuItem("leave", "leave current game");
             // TODO: implement
         }
         else if (clientState == ClientState.observing_game){
-            printMenuItem("leave", "", "leave current game");
+            printMenuItem("leave", "leave current game");
             // TODO: implement
         }
 
-        printMenuItem("help", "", "show this menu");
+        printMenuItem("help", "show this menu");
+        System.out.println();
     }
 
     public static void printBoard(Game game, ClientState clientState) {
+        System.out.println();
         if(clientState == ClientState.playing_game_white) {
             System.out.print(getBoardAsString((Board)game.getBoard(), ChessGame.TeamColor.WHITE));
         }
@@ -62,16 +68,16 @@ public class ConsoleOutput {
     }
 
     public static void printFormatted(String message, String color, String style) {
-        System.out.println(style + color + message + RESET_ALL_FORMATTING);
+        System.out.println("\n" + style + color + message + RESET_ALL_FORMATTING);
     }
 
-    public static void printMenuItem(String command, String params, String definition) {
+    public static void printMenuItem(String command, String definition) {
         System.out.println("\t" + THEME_PRIMARY_LIGHT + command + " "
-                + THEME_ACCENT_2 + params
                 + THEME_PRIMARY + " - " + definition + RESET_ALL_FORMATTING);
     }
 
     public static void printGameList(ArrayList<GameResponse> games) {
+        System.out.println();
         final String line = "--------------------------------------------------------------------%n";
         printFormatted("Game List:", THEME_PRIMARY, SET_TEXT_ITALIC);
         System.out.print(THEME_ACCENT_2);
@@ -85,11 +91,11 @@ public class ConsoleOutput {
                     game.gameID, game.gameName, (game.whiteUsername != null) ? game.whiteUsername : "", (game.blackUsername != null) ? game.blackUsername : "", (game.gameState != null) ? game.gameState : "");
         }
         System.out.printf(line);
-        System.out.print(RESET_ALL_FORMATTING);
+        System.out.println(RESET_ALL_FORMATTING);
     }
 
     public static void printActionSuccess(String message) {
-        System.out.println(SET_TEXT_ITALIC + THEME_ACCENT_1 + message + RESET_ALL_FORMATTING);
+        System.out.println("\n" + SET_TEXT_ITALIC + THEME_ACCENT_1 + message + RESET_ALL_FORMATTING);
     }
 
     public static void printWarning(String message) {
@@ -151,7 +157,7 @@ public class ConsoleOutput {
         output.append(EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY);
         output.append("   ");
         for(int col : cols) { output.append(EscapeSequences.SPACER).append(colToLetter(col)).append(" "); }
-        output.append(EscapeSequences.RESET_ALL_FORMATTING).append("\n");
+        output.append(EscapeSequences.RESET_ALL_FORMATTING);
 
         return output.toString();
     }

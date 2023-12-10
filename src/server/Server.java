@@ -62,8 +62,6 @@ public class Server {
             System.out.println("Server Error: " + e.getMessage());
             System.exit(1);
         }
-
-        Spark.awaitInitialization();
     }
 
     /**
