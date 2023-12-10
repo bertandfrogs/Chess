@@ -1,3 +1,5 @@
+package utils;
+
 public class ClientException extends Exception {
     int code;
 

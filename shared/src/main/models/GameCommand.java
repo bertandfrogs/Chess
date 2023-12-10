@@ -8,9 +8,9 @@ import java.util.Objects;
  * Note: You can add to this class, but you should not alter the existing
  * methods.
  */
-public class UserGameCommand {
+public class GameCommand {
 
-    public UserGameCommand(String authToken) {
+    public GameCommand(String authToken) {
         this.authToken = authToken;
     }
 
@@ -38,9 +38,9 @@ public class UserGameCommand {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (!(o instanceof UserGameCommand))
+        if (!(o instanceof GameCommand))
             return false;
-        UserGameCommand that = (UserGameCommand) o;
+        GameCommand that = (GameCommand) o;
         return getCommandType() == that.getCommandType() && Objects.equals(getAuthString(), that.getAuthString());
     }
 
