@@ -1,4 +1,6 @@
-package models;
+package webSocketMessages.client;
+
+import com.google.gson.Gson;
 
 import java.util.Objects;
 
@@ -9,9 +11,12 @@ import java.util.Objects;
  * methods.
  */
 public class GameCommand {
+    Integer gameID;
 
-    public GameCommand(String authToken) {
+    public GameCommand(String authToken, CommandType type, int gameID) {
         this.authToken = authToken;
+        this.commandType = type;
+        this.gameID = gameID;
     }
 
     public enum CommandType {
@@ -47,5 +52,10 @@ public class GameCommand {
     @Override
     public int hashCode() {
         return Objects.hash(getCommandType(), getAuthString());
+    }
+
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 }

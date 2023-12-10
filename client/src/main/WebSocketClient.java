@@ -1,8 +1,8 @@
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 
-import models.GameCommand;
-import models.ServerMessage;
+import webSocketMessages.client.GameCommand;
+import webSocketMessages.server.ServerMessage;
 import ui.ConsoleOutput;
 
 import java.io.IOException;

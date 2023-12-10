@@ -6,6 +6,7 @@ import service.*;
 
 import ui.ConsoleOutput;
 import utils.ClientState;
+import webSocketMessages.client.JoinPlayer;
 
 import static ui.EscapeSequences.*;
 
@@ -207,7 +208,7 @@ public class Client {
                         case WHITE -> ClientState.playing_game_white;
                         case BLACK -> ClientState.playing_game_black;
                     };
-
+                    websocket.sendCommand(new JoinPlayer(authToken, gameID, color));
                     ConsoleOutput.printActionSuccess("Joined game " + gameID + " as " + color);
                     ConsoleOutput.printMenu(clientState);
                     initializeClientGame(gameID); // this method is called when the client joins a game, so I thought it best to put this call here.
