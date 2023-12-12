@@ -2,6 +2,9 @@ import com.google.gson.Gson;
 import jakarta.websocket.*;
 
 import webSocketMessages.client.GameCommand;
+import webSocketMessages.server.ErrorMessage;
+import webSocketMessages.server.LoadGame;
+import webSocketMessages.server.Notification;
 import webSocketMessages.server.ServerMessage;
 import ui.ConsoleOutput;
 
@@ -19,23 +22,28 @@ public class WebSocketClient extends Endpoint {
         this.session = container.connectToServer(this, webSocketURI);
 
         // TODO: implement the message handler
-        this.session.addMessageHandler((MessageHandler.Whole<String>) message -> {
-            try {
-                ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
-                switch (serverMessage.getServerMessageType()) {
-                    case LOAD_GAME -> {
-                        System.out.println("Server Message: Load Game");
+        this.session.addMessageHandler(new MessageHandler.Whole<String>() {
+            public void onMessage(String message){
+                try {
+                    ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+                    switch (serverMessage.getServerMessageType()) {
+                        case LOAD_GAME -> {
+                            LoadGame loadGame = new Gson().fromJson(message, LoadGame.class);
+                            System.out.println("Server Message: Load Game");
+                        }
+                        case NOTIFICATION -> {
+                            Notification notification = new Gson().fromJson(message, Notification.class);
+                            ConsoleOutput.printActionSuccess("**" + notification.message + "**");
+                        }
+                        case ERROR -> {
+                            ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
+                            ConsoleOutput.printError("**" + errorMessage.errorMessage + "**");
+                        }
                     }
-                    case NOTIFICATION -> {
-                        System.out.println("Server Message: Notification");
-                    }
-                    case ERROR -> {
-                        System.out.println("Server Message: Error");
-                    }
+                } catch (Exception e) {
+                    ConsoleOutput.printError("Error inside WebSocketFacade: Couldn't read server message.");
+                    ConsoleOutput.printError(e.getMessage());
                 }
-            } catch (Exception e) {
-                ConsoleOutput.printError("Error inside WebSocketFacade: Couldn't read server message.");
-                ConsoleOutput.printError(e.getMessage());
             }
         });
     }

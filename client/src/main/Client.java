@@ -36,24 +36,27 @@ public class Client {
 
             // a loop that continuously gets input from the console
             while (activeConsole) {
+                consoleInput.wait(250);
                 String userInput = consoleInput.readLine(ConsoleOutput.mainConsolePrompt(activeUsername));
+                if(userInput != null) {
+                    userInput = userInput.toLowerCase();
 
-                userInput = userInput.toLowerCase();
-
-                switch (clientState) {
-                    case logged_out -> {
-                        parseLoggedOutCommands(userInput);
-                    }
-                    case logged_in -> {
-                        parseLoggedInCommands(userInput);
-                    }
-                    case playing_game_black, playing_game_white -> {
-                        parsePlayerCommands(userInput);
-                    }
-                    case observing_game -> {
-                        parseObserverCommands(userInput);
+                    switch (clientState) {
+                        case logged_out -> {
+                            parseLoggedOutCommands(userInput);
+                        }
+                        case logged_in -> {
+                            parseLoggedInCommands(userInput);
+                        }
+                        case playing_game_black, playing_game_white -> {
+                            parsePlayerCommands(userInput);
+                        }
+                        case observing_game -> {
+                            parseObserverCommands(userInput);
+                        }
                     }
                 }
+
             }
         } catch (DeploymentException e) {
             ConsoleOutput.printError("Could not connect to server, it may not be running.");

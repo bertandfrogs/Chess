@@ -1,5 +1,7 @@
 package server.handlers;
 
+import chess.interfaces.ChessGame;
+import chess.interfaces.ChessMove;
 import com.google.gson.Gson;
 import models.AuthToken;
 import models.GameData;
@@ -14,13 +16,21 @@ import server.ServerException;
 import server.dataAccess.DataAccessException;
 import server.dataAccess.DatabaseSQL;
 import webSocketMessages.client.GameCommand;
+import webSocketMessages.client.JoinPlayer;
+import webSocketMessages.client.MakeMove;
 import webSocketMessages.server.ErrorMessage;
+import webSocketMessages.server.Notification;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * The WebSocketHandler class is used by the server to handle WebSocket messages.
+ * The client(s) can send WebSocket messages to the server when playing or observing a game.
+ * The server sends WebSocket messages to the clients (players and/or observers)
+ */
 @WebSocket
 public class WebSocketHandler {
     private final DatabaseSQL database;
@@ -40,7 +50,7 @@ public class WebSocketHandler {
         }
 
         private void send(String msg) throws Exception {
-            System.out.printf("Message to %s: %s%n", user.getUsername(), msg);
+            System.out.printf("Sending message to %s: %s%n", user.getUsername(), msg);
             session.getRemote().sendString(msg);
         }
 
@@ -129,14 +139,22 @@ public class WebSocketHandler {
             if (connection != null) {
                 switch (command.getCommandType()) {
                     case JOIN_PLAYER -> {
-                        System.out.println("received join message.");
-                        connection.send("joined the game");
-                        connections.broadcast(6, connection.user.getUsername(), "TEST MESSAGE!!!!!!");
-                    }// join(connection, readJson(message, JoinPlayerCommand.class));
-                    case JOIN_OBSERVER -> {}// observe(connection, command);
-                    case MAKE_MOVE -> {}// move(connection, readJson(message, MoveCommand.class));
-                    case LEAVE -> {}// leave(connection, command);
-                    case RESIGN -> {}// resign(connection, command);
+                        JoinPlayer joinPlayerCommand = readJson(message, JoinPlayer.class);
+                        joinPlayer(connection, joinPlayerCommand);
+                    }
+                    case JOIN_OBSERVER -> {
+                        joinObserver(connection, command);
+                    }
+                    case MAKE_MOVE -> {
+                        MakeMove makeMoveCommand = readJson(message, MakeMove.class);
+                        makeMove(connection, makeMoveCommand);
+                    }
+                    case LEAVE -> {
+                        leave(connection, command);
+                    }
+                    case RESIGN -> {
+                        resign(connection, command);
+                    }
                 }
             } else {
                 Connection.sendError(session.getRemote(), "unknown user");
@@ -181,28 +199,39 @@ public class WebSocketHandler {
     }
 
     // WebSocket Endpoints
-    // JOIN_PLAYER 	Integer gameID, ChessGame.TeamColor playerColor 	Used for a user to request to join a game.
-    private void joinPlayer() {
-
+    // JOIN_PLAYER -- Server sends WebSocket message to other players that a player has joined.
+    private void joinPlayer(Connection connection, JoinPlayer joinPlayerCommand) throws Exception {
+        connection.game = database.findGameById(joinPlayerCommand.getGameID());
+        String player = connection.user.getUsername();
+        if(player != null){
+            String joinMessage = player + " joined game as " + joinPlayerCommand.getPlayerColor();
+            Notification notificationMsg = new Notification(joinMessage);
+            connections.broadcast(joinPlayerCommand.getGameID(), "", notificationMsg.toString()); // TODO: sends message to everyone besides the user who joined
+        }
     }
 
-    // JOIN_OBSERVER 	Integer gameID 	Used to request to start observing a game.
-    private void joinObserver() {
-
+    // JOIN_OBSERVER -- Server sends WebSocket message to other players that an observer has joined.
+    private void joinObserver(Connection connection, GameCommand command) throws Exception {
+        String player = connection.user.getUsername();
+        if(player != null){
+            String joinMessage = player + " joined game as an observer.";
+            Notification notificationMsg = new Notification(joinMessage);
+            connections.broadcast(command.getGameID(), "", notificationMsg.toString()); // TODO: sends message to everyone besides the user who joined
+        }
     }
 
     // MAKE_MOVE 	Integer gameID, ChessMove move 	Used to request to make a move in a game.
-    private void makeMove(){
+    private void makeMove(Connection connection, MakeMove makeMoveCommand){
 
     }
 
     // LEAVE 	Integer gameID 	Tells the server you are leaving the game so it will stop sending you notifications.
-    private void leave() {
+    private void leave(Connection connection, GameCommand command) {
 
     }
 
     // RESIGN 	Integer gameID 	Forfeits the match and ends the game (no more moves can be made).
-    private void resign(){
+    private void resign(Connection connection, GameCommand command){
 
     }
 

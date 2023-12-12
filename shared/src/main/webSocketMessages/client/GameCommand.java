@@ -35,6 +35,10 @@ public class GameCommand {
         return authToken;
     }
 
+    public Integer getGameID() {
+        return gameID;
+    }
+
     public CommandType getCommandType() {
         return this.commandType;
     }

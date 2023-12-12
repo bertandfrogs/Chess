@@ -11,4 +11,8 @@ public class JoinPlayer extends GameCommand {
         super(authToken, CommandType.JOIN_PLAYER, gameID);
         this.playerColor = color;
     }
+
+    public ChessGame.TeamColor getPlayerColor() {
+        return playerColor;
+    }
 }
