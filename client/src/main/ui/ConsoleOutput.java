@@ -94,6 +94,14 @@ public class ConsoleOutput {
         System.out.println(RESET_ALL_FORMATTING);
     }
 
+    public static void printNotification(String message){
+        printFormatted("**" + message + "**", THEME_WARNING, SET_TEXT_ITALIC);
+    }
+
+    public static void printWebSocketError(String message){
+        printFormatted("**" + message + "**", THEME_ERROR, SET_TEXT_ITALIC);
+    }
+
     public static void printActionSuccess(String message) {
         System.out.println("\n" + SET_TEXT_ITALIC + THEME_ACCENT_1 + message + RESET_ALL_FORMATTING);
     }
@@ -158,6 +166,7 @@ public class ConsoleOutput {
         output.append("   ");
         for(int col : cols) { output.append(EscapeSequences.SPACER).append(colToLetter(col)).append(" "); }
         output.append(EscapeSequences.RESET_ALL_FORMATTING);
+        output.append("\n");
 
         return output.toString();
     }

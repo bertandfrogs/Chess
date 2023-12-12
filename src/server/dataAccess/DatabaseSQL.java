@@ -1,5 +1,7 @@
 package server.dataAccess;
 import chess.Game;
+import chess.adapters.ChessAdapter;
+import com.google.gson.Gson;
 import server.ServerException;
 import models.AuthToken;
 import models.GameData;
@@ -114,8 +116,9 @@ public class DatabaseSQL implements DataAccessInterface {
                         var gameName = resultSet.getString("gameName");
                         var gameState = resultSet.getString("gameState");
                         var gameJSON = resultSet.getString("game");
-                        GameDeserializer gd = new GameDeserializer();
-                        games.put(gameID, new GameData(gameID, whiteUsername, blackUsername, gameName, Game.stringToState(gameState), gd.deserialize(gameJSON)));
+                        Gson gson = ChessAdapter.getGson();
+
+                        games.put(gameID, new GameData(gameID, whiteUsername, blackUsername, gameName, Game.stringToState(gameState), gson.fromJson(gameJSON, Game.class)));
                     }
                 }
             }
@@ -305,6 +308,7 @@ public class DatabaseSQL implements DataAccessInterface {
             INSERT INTO games (whiteUsername, blackUsername, gameName, gameState, game) VALUES (NULL, NULL, ?, "pregame", ?)
             """, Statement.RETURN_GENERATED_KEYS)) {
                 Game newGame = new Game();
+                newGame.newGame();
                 preparedStatement.setString(1, gameName);
                 preparedStatement.setString(2, newGame.toString());
 
@@ -339,8 +343,8 @@ public class DatabaseSQL implements DataAccessInterface {
                         var gameName = resultSet.getString("gameName");
                         var gameState = resultSet.getString("gameState");
                         var gameJSON = resultSet.getString("game");
-                        GameDeserializer gd = new GameDeserializer();
-                        Game game = gd.deserialize(gameJSON);
+                        Gson gson = ChessAdapter.getGson();
+                        Game game = gson.fromJson(gameJSON, Game.class);
                         foundGame = new GameData(gameID, whiteUsername, blackUsername, gameName, Game.stringToState(gameState), game);
                     }
                     return foundGame;

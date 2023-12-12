@@ -1,6 +1,8 @@
 package passoffTests.myTests;
 
 import chess.Game;
+import chess.adapters.ChessAdapter;
+import com.google.gson.Gson;
 import org.junit.jupiter.api.*;
 import server.ServerException;
 import models.AuthToken;
@@ -42,7 +44,8 @@ public class MySQLTests {
         Game testGame = new Game();
         testGame.newGame();
         String testGameJson = testGame.toString();
-        Game testGameDeserialized = new GameDeserializer().deserialize(testGameJson);
+        Gson gson = ChessAdapter.getGson();
+        Game testGameDeserialized = gson.fromJson(testGameJson, Game.class);
     }
 
     @Test

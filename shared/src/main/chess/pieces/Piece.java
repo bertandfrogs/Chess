@@ -1,5 +1,6 @@
 package chess.pieces;
 
+import chess.Board;
 import chess.Move;
 import chess.Position;
 import chess.interfaces.ChessBoard;
@@ -9,13 +10,13 @@ import chess.interfaces.ChessPosition;
 
 import java.util.Collection;
 
-public abstract class Piece implements chess.interfaces.ChessPiece {
-    // the Piece class is abstract, the specific Pawn, Rook, Bishop, etc. classes need to be instantiated
+public class Piece implements chess.interfaces.ChessPiece {
+    // the Piece class is not meant to be used as it's just a base case, the specific Pawn, Rook, Bishop, etc. classes need to be instantiated
 
     ChessGame.TeamColor color;
     PieceType type;
-    protected ChessBoard board;
-    protected ChessPosition myPosition;
+    protected Board board;
+    protected Position myPosition;
 
     // constructor is used by children constructors
     Piece(ChessGame.TeamColor c, PieceType t) {
@@ -26,6 +27,11 @@ public abstract class Piece implements chess.interfaces.ChessPiece {
     @Override
     public PieceType getPieceType() {
         return type;
+    }
+
+    @Override
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        return null; // should not be used on its own.
     }
 
     @Override
@@ -54,11 +60,15 @@ public abstract class Piece implements chess.interfaces.ChessPiece {
     }
 
     public void setBoard(ChessBoard b) {
-        board = b;
+        board = (Board) b;
+    }
+
+    public ChessBoard getBoard() {
+        return board;
     }
 
     public void setMyPosition(ChessPosition myPos){
-        myPosition = myPos;
+        myPosition = (Position) myPos;
     }
 
     public ChessPosition getMyPosition() {
@@ -103,8 +113,7 @@ public abstract class Piece implements chess.interfaces.ChessPiece {
         if (o == null || getClass() != o.getClass()) return false;
         Piece piece = (Piece) o;
         return color == piece.color
-                && type == piece.type
-                && myPosition.equals(piece.myPosition);
+                && type == piece.type;
     }
 }
 

@@ -1,6 +1,7 @@
 package models;
 
 import chess.Game;
+import chess.adapters.ChessAdapter;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -131,6 +132,7 @@ public class GameData {
             JsonObject gameJson = JsonParser.parseString(game.toString()).getAsJsonObject();
             map.put("game", gameJson);
         }
-        return new Gson().toJson(map);
+        Gson gson = ChessAdapter.getGson();
+        return gson.toJson(map);
     }
 }

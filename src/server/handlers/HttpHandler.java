@@ -1,5 +1,6 @@
 package server.handlers;
 
+import chess.adapters.ChessAdapter;
 import com.google.gson.Gson;
 import models.AuthToken;
 import models.GameData;
@@ -129,7 +130,8 @@ public class HttpHandler {
         for (var i = 0; i+1 < props.length; i = i+2) {
             map.put(props[i], props[i+1]);
         }
-        return new Gson().toJson(map);
+        Gson gson = ChessAdapter.getGson();
+        return gson.toJson(map);
     }
 
     /**
@@ -140,7 +142,8 @@ public class HttpHandler {
      * @throws ServerException Throws an error if there is no Request body.
      */
     private static <T> T getBody(Request request, Class<T> classType) throws ServerException {
-        var body = new Gson().fromJson(request.body(), classType);
+        Gson gson = ChessAdapter.getGson();
+        var body = gson.fromJson(request.body(), classType);
         if (body == null) {
             throw new ServerException(400, "missing body");
         }

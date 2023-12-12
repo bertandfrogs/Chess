@@ -1,30 +1,26 @@
 package server.handlers;
 
-import chess.interfaces.ChessGame;
-import chess.interfaces.ChessMove;
+import chess.Game;
+import chess.adapters.ChessAdapter;
 import com.google.gson.Gson;
 import models.AuthToken;
 import models.GameData;
 import models.UserData;
-import org.eclipse.jetty.client.api.Connection;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import org.eclipse.jetty.websocket.api.Session;
 import server.ServerException;
-import server.dataAccess.DataAccessException;
 import server.dataAccess.DatabaseSQL;
 import webSocketMessages.client.GameCommand;
 import webSocketMessages.client.JoinPlayer;
 import webSocketMessages.client.MakeMove;
 import webSocketMessages.server.ErrorMessage;
+import webSocketMessages.server.LoadGame;
 import webSocketMessages.server.Notification;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The WebSocketHandler class is used by the server to handle WebSocket messages.
@@ -93,7 +89,7 @@ public class WebSocketHandler {
             var removeList = new ArrayList<Connection>();
             for (var c : connections.values()) {
                 if (c.session.isOpen()) {
-                    if (c.game.getGameId() == gameID && !c.user.getUsername().equals(excludeUsername)) {
+                    if (c.game != null && c.game.getGameId() == gameID && !c.user.getUsername().equals(excludeUsername)) {
                         c.send(msg);
                     }
                 } else {
@@ -111,7 +107,7 @@ public class WebSocketHandler {
         public String toString() {
             var sb = new StringBuilder("[\n");
             for (var c : connections.values()) {
-                sb.append(String.format("  {'game':%d, 'user': %s}%n", c.game.getGameId(), c.user));
+                sb.append(String.format("  {'game':%d, 'user': %s}%n", (c.game != null) ? c.game.getGameId() : null, c.user));
             }
             sb.append("]");
             return sb.toString();
@@ -170,7 +166,8 @@ public class WebSocketHandler {
     }
 
     private static <T> T readJson(String json, Class<T> classType) throws IOException {
-        T obj = new Gson().fromJson(json, classType);
+        Gson gson = ChessAdapter.getGson();
+        T obj = gson.fromJson(json, classType);
         if (obj == null) {
             throw new IOException("Invalid JSON");
         }
@@ -206,7 +203,18 @@ public class WebSocketHandler {
         if(player != null){
             String joinMessage = player + " joined game as " + joinPlayerCommand.getPlayerColor();
             Notification notificationMsg = new Notification(joinMessage);
-            connections.broadcast(joinPlayerCommand.getGameID(), "", notificationMsg.toString()); // TODO: sends message to everyone besides the user who joined
+            connections.broadcast(joinPlayerCommand.getGameID(), player, notificationMsg.toString());
+
+            if(connection.game.getWhiteUsername() == null || connection.game.getBlackUsername() == null) {
+                connection.game.setGameState(Game.State.pregame);
+            }
+            else {
+                connection.game.setGameState(Game.State.active);
+            }
+
+            // Send a load game message to everyone because the game state has to be updated
+            LoadGame loadGame = new LoadGame(connection.game, null);
+            connections.broadcast(joinPlayerCommand.getGameID(), "", loadGame.toString());
         }
     }
 
@@ -216,7 +224,11 @@ public class WebSocketHandler {
         if(player != null){
             String joinMessage = player + " joined game as an observer.";
             Notification notificationMsg = new Notification(joinMessage);
-            connections.broadcast(command.getGameID(), "", notificationMsg.toString()); // TODO: sends message to everyone besides the user who joined
+            connections.broadcast(command.getGameID(), player, notificationMsg.toString());
+
+            // only the observer needs to have their game loaded
+            LoadGame loadGame = new LoadGame(connection.game, null);
+            connection.send(loadGame.toString());
         }
     }
 
@@ -226,13 +238,52 @@ public class WebSocketHandler {
     }
 
     // LEAVE 	Integer gameID 	Tells the server you are leaving the game so it will stop sending you notifications.
-    private void leave(Connection connection, GameCommand command) {
+    private void leave(Connection connection, GameCommand command) throws Exception {
+        String player = connection.user.getUsername();
+        if(player != null){
+            String leaveMessage = player + " left the game.";
+            connection.game = null;
 
+            Notification notification = new Notification(leaveMessage);
+            connections.broadcast(command.getGameID(), player, notification.toString());
+
+            GameData game = database.findGameById(command.getGameID());
+            if(game.getBlackUsername() != null && game.getWhiteUsername() != null
+                    || (game.getBlackUsername() != null && !game.getBlackUsername().equals(player)
+                    || game.getWhiteUsername() != null && !game.getWhiteUsername().equals(player))) {
+                // they are an observer, nothing with the game needs to change except on their side
+                connection.send(new LoadGame(null, null).toString());
+                return;
+            }
+            if(game.getWhiteUsername() != null && game.getWhiteUsername().equals(player)){
+                game.setWhiteUsername(null);
+                game.setGameState(Game.State.pregame);
+                database.updateGame(game);
+            }
+            else if(game.getBlackUsername() != null && game.getBlackUsername().equals(player)){
+                game.setBlackUsername(null);
+                game.setGameState(Game.State.pregame);
+                database.updateGame(game);
+            }
+
+            // Send a load game message to everyone because the game state has to be updated
+            LoadGame loadGame = new LoadGame(game, null);
+            connections.broadcast(command.getGameID(), "", loadGame.toString());
+        }
     }
 
     // RESIGN 	Integer gameID 	Forfeits the match and ends the game (no more moves can be made).
-    private void resign(Connection connection, GameCommand command){
+    private void resign(Connection connection, GameCommand command) throws Exception {
+        String player = connection.user.getUsername();
+        if(player != null){
+            String leaveMessage = player + " resigned.";
+            Notification notification = new Notification(leaveMessage);
+            connections.broadcast(command.getGameID(), player, notification.toString());
 
+            GameData game = database.findGameById(command.getGameID());
+            game.setGameState(Game.State.finished);
+            database.updateGame(game);
+        }
     }
 
     // loadGame

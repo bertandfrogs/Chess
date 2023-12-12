@@ -9,6 +9,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="google.code.gson" level="project" />
+    <orderEntry type="library" scope="TEST" name="junit.jupiter.api" level="project" />
   </component>
   <component name="SonarLintModuleSettings">
     <option name="uniqueId" value="0b7b7987-6906-4f11-8895-e305faa3ea64" />

@@ -1,3 +1,4 @@
+import chess.adapters.ChessAdapter;
 import chess.interfaces.ChessGame;
 import com.google.gson.Gson;
 import service.*;
@@ -90,7 +91,8 @@ public class ServerFacade {
             InputStreamReader inputStreamReader = new InputStreamReader(respBody);
             if(http.getResponseCode() == 200){
                 if(classType != null) {
-                    return new Gson().fromJson(inputStreamReader, classType);
+                    Gson gson = ChessAdapter.getGson();
+                    return gson.fromJson(inputStreamReader, classType);
                 }
                 return null;
             }

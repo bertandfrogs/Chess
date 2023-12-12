@@ -1,5 +1,7 @@
 package chess;
 
+import com.google.gson.Gson;
+
 public class Position implements chess.interfaces.ChessPosition {
     int row;
     int column;
@@ -34,6 +36,11 @@ public class Position implements chess.interfaces.ChessPosition {
         return hashCode() == position.hashCode()
                 && row == position.row
                 && column == position.column;
+    }
+
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 
     @Override

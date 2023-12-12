@@ -1,35 +1,34 @@
 package chess;
 
-import chess.interfaces.ChessBoard;
-import chess.interfaces.ChessMove;
-import chess.interfaces.ChessPosition;
-import chess.interfaces.ChessPiece;
+import chess.adapters.ChessAdapter;
+import chess.interfaces.*;
 
 import static chess.interfaces.ChessGame.TeamColor.*;
 import static chess.interfaces.ChessPiece.PieceType.*;
 import chess.pieces.Piece;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+
 import java.util.*;
 
 // This class is the top-level management of the chess game.
 
 public class Game implements chess.interfaces.ChessGame {
-    private TeamColor teamTurn = TeamColor.WHITE;
-    private Board chessBoard = new Board();
+    private TeamColor teamTurn;
+    private Board chessBoard;
     public enum State {
         pregame,
         active,
         finished
     }
-    public static State stringToState(String str){
-        return switch (str) {
-            case "active" -> Game.State.active;
-            case "finished" -> Game.State.finished;
-            default -> Game.State.pregame;
-        };
-    }
+    private State gameState;
 
-    private State gameState = State.pregame;
+    public Game() {
+        teamTurn = TeamColor.WHITE;
+        chessBoard = new Board();
+        gameState = State.pregame;
+    }
 
     public void newGame() {
         chessBoard.resetBoard();
@@ -43,6 +42,14 @@ public class Game implements chess.interfaces.ChessGame {
 
     public void setState(State gameState) {
         this.gameState = gameState;
+    }
+
+    public static State stringToState(String str){
+        return switch (str) {
+            case "active" -> Game.State.active;
+            case "finished" -> Game.State.finished;
+            default -> Game.State.pregame;
+        };
     }
 
     @Override
@@ -339,30 +346,8 @@ public class Game implements chess.interfaces.ChessGame {
 
     @Override
     public String toString() {
-        // JSON output
-        return getJSON();
-    }
-
-    private String getJSON() {
-        Map<Object, Object> jsonMap = new HashMap<>();
-        Map<Object, Object> boardMap = new HashMap<>();
-
-        jsonMap.put("turn", teamTurn);
-
-        jsonMap.put("gameState", (gameState != null) ? gameState.name() : "");
-
-        if(chessBoard != null && !chessBoard.getPieces().isEmpty()) {
-            for(Map.Entry<Integer, Piece> entry : chessBoard.getPieces().entrySet()) {
-                Map<Object, Object> colorAndType = new HashMap<>();
-                colorAndType.put("color", entry.getValue().getTeamColor());
-                colorAndType.put("type", entry.getValue().getPieceType());
-                boardMap.put(entry.getKey(), colorAndType);
-            }
-        }
-
-        jsonMap.put("board", boardMap);
-
-        return new Gson().toJson(jsonMap);
+        Gson gson = ChessAdapter.getGson();
+        return gson.toJson(this);
     }
 
     public boolean equals(Object o) {
