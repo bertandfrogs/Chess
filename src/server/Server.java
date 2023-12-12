@@ -52,7 +52,7 @@ public class Server {
 
             // Exceptions
             Spark.exception(ServerException.class, this::exceptionHandler); // handles ServerException errors
-            Spark.exception(Exception.class, (e, req, res) -> exceptionHandler(new ServerException(500, e.getMessage()), req, res)); // handles Spark exceptions
+            Spark.exception(Exception.class, (e, req, res) -> exceptionHandler((new ServerException(500, e.getMessage())), req, res)); // handles Spark exceptions
             Spark.notFound((req, res) -> {
                 var msg = String.format("[%s] %s not found", req.requestMethod(), req.pathInfo());
                 return exceptionHandler(new ServerException(404, msg), req, res);

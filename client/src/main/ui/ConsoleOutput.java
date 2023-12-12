@@ -26,7 +26,7 @@ public class ConsoleOutput {
         return (THEME_PRIMARY + message + RESET_ALL_FORMATTING);
     }
 
-    public static void printMenu(ClientState clientState) {
+    public static void printMenu(ClientState clientState, Game.State gameState) {
         printFormatted("Valid Commands:", THEME_PRIMARY, SET_TEXT_ITALIC);
         if(clientState == ClientState.logged_in) {
             printMenuItem("create", "create a new game");
@@ -42,8 +42,16 @@ public class ConsoleOutput {
             printMenuItem("quit", "exit out of the console");
         }
         else if (clientState == ClientState.playing_game_white || clientState == ClientState.playing_game_black){
-            printMenuItem("leave", "leave current game");
-            // TODO: implement
+            if(gameState == Game.State.pregame){
+                printMenuItem("leave", "leave current game");
+                // TODO: implement
+            }
+            else if (gameState == Game.State.active) {
+                // print full game command menu
+            }
+            else if (gameState == Game.State.finished) {
+                //
+            }
         }
         else if (clientState == ClientState.observing_game){
             printMenuItem("leave", "leave current game");

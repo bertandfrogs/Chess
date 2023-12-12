@@ -39,7 +39,7 @@ public class Client implements ClientDisplay {
     public void run() throws Exception {
         try {
             ConsoleOutput.printFormatted("Welcome to Chess!", THEME_ACCENT_2, SET_TEXT_BOLD);
-            ConsoleOutput.printMenu(ClientState.logged_out);
+            ConsoleOutput.printMenu(ClientState.logged_out, null);
 
             // a loop that continuously gets input from the console
             while (activeConsole) {
@@ -93,7 +93,7 @@ public class Client implements ClientDisplay {
                     clientState = ClientState.logged_in;
                     activeUsername = username;
                     ConsoleOutput.printActionSuccess("Registered user " + username + "! You are now logged in.");
-                    ConsoleOutput.printMenu(clientState);
+                    ConsoleOutput.printMenu(clientState, null);
                 }
                 catch (Exception e) {
                     if(e.getMessage().contains("403")) {
@@ -119,7 +119,7 @@ public class Client implements ClientDisplay {
                     clientState = ClientState.logged_in;
                     activeUsername = username;
                     ConsoleOutput.printActionSuccess("Logged in user " + username + "!");
-                    ConsoleOutput.printMenu(clientState);
+                    ConsoleOutput.printMenu(clientState, null);
                 }
                 catch (ResponseException e) {
                     if(e.getMessage().contains("401")) {
@@ -134,7 +134,7 @@ public class Client implements ClientDisplay {
                 ConsoleOutput.printWarning("Not logged in. Enter \"help\" for valid commands.");
             }
             case "help" -> {
-                ConsoleOutput.printMenu(clientState);
+                ConsoleOutput.printMenu(clientState, null);
             }
             default -> {
                 ConsoleOutput.printWarning("Unknown command. Enter \"help\" for valid commands.");
@@ -213,7 +213,7 @@ public class Client implements ClientDisplay {
                     };
                     websocket.sendCommand(new JoinPlayer(authToken, gameID, color));
                     ConsoleOutput.printActionSuccess("Joined game " + gameID + " as " + color);
-                    ConsoleOutput.printMenu(clientState);
+//                    ConsoleOutput.printMenu(clientState, clientGame.getGameState());
                 }
                 catch (Exception e) {
                     if(e.getMessage().contains("400")) {
@@ -242,7 +242,7 @@ public class Client implements ClientDisplay {
                     websocket.sendCommand(new GameCommand(authToken, GameCommand.CommandType.JOIN_OBSERVER, gameID));
                     ConsoleOutput.printActionSuccess("Joined game " + gameID + " as observer");
                     clientState = ClientState.observing_game;
-                    ConsoleOutput.printMenu(ClientState.observing_game);
+                    ConsoleOutput.printMenu(ClientState.observing_game, null);
                 }
                 catch (Exception e) {
                     if(e.getMessage().contains("401")) {
@@ -271,7 +271,7 @@ public class Client implements ClientDisplay {
                 }
             }
             case "help" -> {
-                ConsoleOutput.printMenu(clientState);
+                ConsoleOutput.printMenu(clientState, null);
             }
             default -> {
                 ConsoleOutput.printWarning("Unknown command. Enter \"help\" for valid commands.");
@@ -280,23 +280,44 @@ public class Client implements ClientDisplay {
     }
 
     private static void parsePlayerCommands(String input) throws Exception {
-        switch(input) {
-            case "leave", "quit", "exit" ->  {
-                websocket.sendCommand(new GameCommand(authToken, GameCommand.CommandType.LEAVE, clientGame.getGameId()));
-                clientState = ClientState.logged_in;
-                clientGame = null;
-                ConsoleOutput.printActionSuccess("Exiting Game. Thanks for playing!");
-                ConsoleOutput.printMenu(clientState);
+        if(clientGame == null) {
+            ConsoleOutput.printError("Couldn't load game.");
+            clientState = ClientState.logged_in;
+        }
+        else if(clientGame.getGameState() == Game.State.pregame) {
+            ConsoleOutput.printWarning("Game is not started. Please wait for another player to join.");
+            switch(input) {
+                case "leave", "quit", "exit" ->  {
+                    websocket.sendCommand(new GameCommand(authToken, GameCommand.CommandType.LEAVE, clientGame.getGameId()));
+                    clientState = ClientState.logged_in;
+                    clientGame = null;
+                    ConsoleOutput.printActionSuccess("Exiting Game. Thanks for playing!");
+                    ConsoleOutput.printMenu(clientState, null);
+                }
+                case "help" -> {
+                    ConsoleOutput.printMenu(clientState, clientGame.getGameState());
+                }
+                default -> ConsoleOutput.printWarning("Unknown command. Enter \"help\" for valid commands.");
             }
-            case "help" -> {
-                ConsoleOutput.printMenu(clientState);
-            }
-            case "redraw" -> {
-                // gets from its own Game object
-                ConsoleOutput.printBoard(clientGame.getGame(), clientState);
-            }
-            case "move" -> {
-                // should check if it's valid with its own Game object, then call the server
+        }
+        else if (clientGame.getGameState() == Game.State.active) {
+            switch(input) {
+                case "leave", "quit", "exit" ->  {
+                    websocket.sendCommand(new GameCommand(authToken, GameCommand.CommandType.LEAVE, clientGame.getGameId()));
+                    clientState = ClientState.logged_in;
+                    clientGame = null;
+                    ConsoleOutput.printActionSuccess("Exiting Game. Thanks for playing!");
+                    ConsoleOutput.printMenu(clientState, null);
+                }
+                case "help" -> {
+                    ConsoleOutput.printMenu(clientState, clientGame.getGameState());
+                }
+                case "redraw" -> {
+                    // gets from its own Game object
+                    ConsoleOutput.printBoard(clientGame.getGame(), clientState);
+                }
+                case "move" -> {
+                    // should check if it's valid with its own Game object, then call the server
 
                 /* old code ------
                 // Position startPos, endPos;
@@ -349,36 +370,36 @@ public class Client implements ClientDisplay {
                 //                    }
 
                  */
-            }
-            case "resign" -> {
-                // calls the server
-            }
-            case "moves" -> {
-                // can get this from its own Game object
-                if(clientGame != null) {
-                    // TODO: show valid moves
                 }
-                else {
-                    ConsoleOutput.printError("Sorry, something went wrong.");
+                case "resign" -> {
+                    // calls the server
                 }
+                case "moves" -> {
+                    // can get this from its own Game object
+                    if(clientGame != null) {
+                        // TODO: show valid moves
+                    }
+                    else {
+                        ConsoleOutput.printError("Sorry, something went wrong.");
+                    }
+                }
+                default -> ConsoleOutput.printWarning("Unknown command. Enter \"help\" for valid commands.");
             }
-            default -> ConsoleOutput.printWarning("Unknown command. Enter \"help\" for valid commands.");
+        }
+        else if (clientGame.getGameState() == Game.State.finished) {
+            ConsoleOutput.printWarning("Game is finished.");
         }
     }
 
     private static void parseObserverCommands(String input) throws Exception {
-        Game testGame = new Game();
-        testGame.newGame();
-
         switch(input) {
             case "leave", "quit", "exit" ->  {
                 clientState = ClientState.logged_in;
                 ConsoleOutput.printActionSuccess("Exiting Game. Thanks for watching!");
-                ConsoleOutput.printMenu(clientState);
+                ConsoleOutput.printMenu(clientState, null);
             }
             case "help", "info" -> {
-                ConsoleOutput.printMenu(clientState);
-                ConsoleOutput.printBoard(testGame, clientState);
+                ConsoleOutput.printMenu(clientState, null);
             }
             default -> ConsoleOutput.printWarning("Unknown command. Enter \"help\" for valid commands.");
         }

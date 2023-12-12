@@ -1,7 +1,10 @@
 package server.handlers;
 
 import chess.Game;
+import chess.InvalidMoveException;
+import chess.Move;
 import chess.adapters.ChessAdapter;
+import chess.interfaces.ChessMove;
 import com.google.gson.Gson;
 import models.AuthToken;
 import models.GameData;
@@ -213,9 +216,13 @@ public class WebSocketHandler {
             }
             database.updateGame(connection.game);
 
-            // Send a load game message to everyone because the game state has to be updated
+            // only the new player needs to have their game loaded
             LoadGame loadGame = new LoadGame(connection.game, null);
-            connections.broadcast(joinPlayerCommand.getGameID(), "", loadGame.toString());
+            connection.send(loadGame.toString());
+
+            // Send a load game message to everyone because the game state has to be updated
+//            LoadGame loadGame = new LoadGame(connection.game, null);
+//            connections.broadcast(joinPlayerCommand.getGameID(), "", loadGame.toString());
         }
     }
 
@@ -234,8 +241,27 @@ public class WebSocketHandler {
     }
 
     // MAKE_MOVE 	Integer gameID, ChessMove move 	Used to request to make a move in a game.
-    private void makeMove(Connection connection, MakeMove makeMoveCommand){
-
+    private void makeMove(Connection connection, MakeMove makeMoveCommand) throws Exception {
+        String player = connection.user.getUsername();
+        Move move = makeMoveCommand.getMove();
+        // verify that the move can be made
+        Game serverSideGame = connection.game.getGame();
+        if(serverSideGame.validMoves(move.getStartPosition()).contains(move)){
+            try {
+                serverSideGame.makeMove(move);
+                Notification notification = new Notification(player + " made move " + move.toChessNotation());
+                LoadGame loadGame = new LoadGame(connection.game, move);
+                database.updateGame(connection.game);
+                connections.broadcast(makeMoveCommand.getGameID(), "", notification.toString());
+                connections.broadcast(makeMoveCommand.getGameID(), "", loadGame.toString());
+            }
+            catch (Exception e) {
+                connections.broadcast(makeMoveCommand.getGameID(), "", new ErrorMessage("Error: Couldn't make move.").toString());
+            }
+        }
+        else {
+            connections.broadcast(makeMoveCommand.getGameID(), "", new ErrorMessage("Error: Invalid move.").toString());
+        }
     }
 
     // LEAVE 	Integer gameID 	Tells the server you are leaving the game so it will stop sending you notifications.
@@ -249,19 +275,16 @@ public class WebSocketHandler {
             connections.broadcast(command.getGameID(), player, notification.toString());
 
             GameData game = database.findGameById(command.getGameID());
-            if(game.getBlackUsername() != null && game.getWhiteUsername() != null
-                    || (game.getBlackUsername() != null && !game.getBlackUsername().equals(player)
-                    || game.getWhiteUsername() != null && !game.getWhiteUsername().equals(player))) {
+            if(!player.equals(game.getBlackUsername()) && !player.equals(game.getWhiteUsername())) {
                 // they are an observer, nothing with the game needs to change except on their side
-                connection.send(new LoadGame(null, null).toString());
                 return;
             }
-            if(game.getWhiteUsername() != null && game.getWhiteUsername().equals(player)){
+            else if(player.equals(game.getWhiteUsername())){
                 game.setWhiteUsername(null);
                 game.setGameState(Game.State.pregame);
                 database.updateGame(game);
             }
-            else if(game.getBlackUsername() != null && game.getBlackUsername().equals(player)){
+            else if(player.equals(game.getBlackUsername())){
                 game.setBlackUsername(null);
                 game.setGameState(Game.State.pregame);
                 database.updateGame(game);

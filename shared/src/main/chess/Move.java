@@ -1,5 +1,6 @@
 package chess;
 
+import chess.adapters.ChessAdapter;
 import chess.interfaces.ChessPosition;
 import chess.interfaces.ChessPiece;
 
@@ -28,6 +29,15 @@ public class Move implements chess.interfaces.ChessMove {
     @Override
     public ChessPiece.PieceType getPromotionPiece() {
         return promotionPiece;
+    }
+
+    public String toChessNotation() {
+        return startPosition.toChessNotation() + " " + endPosition.toChessNotation();
+    }
+
+    @Override
+    public String toString() {
+        return ChessAdapter.getGson().toJson(this);
     }
 
     @Override

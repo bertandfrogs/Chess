@@ -186,24 +186,6 @@ public class Board implements chess.interfaces.ChessBoard {
         return (row*10) + col;
     }
 
-    public String hashToChessNotation(int hash) {
-        String str = String.valueOf(hash);
-        char row = str.charAt(0);
-        char col = str.charAt(1);
-        col = switch (col) {
-            case '1' -> 'a';
-            case '2' -> 'b';
-            case '3' -> 'c';
-            case '4' -> 'd';
-            case '5' -> 'e';
-            case '6' -> 'f';
-            case '7' -> 'g';
-            case '8' -> 'h';
-            default -> throw new IllegalStateException("Unexpected value: " + row);
-        };
-        return col + Character.toString(row);
-    }
-
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
