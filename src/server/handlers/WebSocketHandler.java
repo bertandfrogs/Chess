@@ -211,6 +211,7 @@ public class WebSocketHandler {
             else {
                 connection.game.setGameState(Game.State.active);
             }
+            database.updateGame(connection.game);
 
             // Send a load game message to everyone because the game state has to be updated
             LoadGame loadGame = new LoadGame(connection.game, null);
