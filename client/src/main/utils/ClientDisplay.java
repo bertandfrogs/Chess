@@ -1,11 +1,11 @@
 package utils;
 
-import chess.interfaces.ChessMove;
+import chess.Game;
 import models.GameData;
 
 public interface ClientDisplay {
     void showNotification(String message);
-    void updateGameData(GameData gameData);
-    void updateGameWithMove(ChessMove move);
+    void updateGameData(GameData gameData) throws InterruptedException;
+    void updateGameState(Game.State gameState);
     void showError(String error);
 }

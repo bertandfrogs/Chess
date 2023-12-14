@@ -1,5 +1,4 @@
 import chess.adapters.ChessAdapter;
-import chess.interfaces.ChessMove;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 
@@ -34,18 +33,14 @@ public class WebSocketClient extends Endpoint {
                     switch (serverMessage.getServerMessageType()) {
                         case LOAD_GAME -> {
                             LoadGame loadGame = gson.fromJson(message, LoadGame.class);
-                            if(loadGame.moveMade != null) {
-                                ChessMove move = loadGame.moveMade;
-                                client.updateGameWithMove(move);
-                            }
-                            else {
-                                client.updateGameData(loadGame.game);
-                            }
-                            client.showNotification("Server Message: Load Game");
+                            client.updateGameData(loadGame.game);
                         }
                         case NOTIFICATION -> {
                             Notification notification = gson.fromJson(message, Notification.class);
-                            client.showNotification(notification.message);
+                            client.showNotification(notification.getMessage());
+                            if(notification.getState() != null) {
+                                client.updateGameState(notification.getState());
+                            }
                         }
                         case ERROR -> {
                             ErrorMessage errorMessage = gson.fromJson(message, ErrorMessage.class);

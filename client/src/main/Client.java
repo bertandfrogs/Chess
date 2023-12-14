@@ -1,22 +1,26 @@
 import chess.Game;
 import chess.InvalidMoveException;
-import chess.interfaces.ChessGame;
-import chess.interfaces.ChessMove;
-import jakarta.websocket.DeploymentException;
+import chess.Move;
+import chess.Position;
+import chess.ChessGame;
+import chess.ChessPiece;
 import models.GameData;
 import service.*;
 import ui.ConsoleOutput;
 import utils.ClientDisplay;
-import utils.ClientState;
+import models.ClientState;
 import webSocketMessages.client.GameCommand;
 import webSocketMessages.client.JoinPlayer;
+import webSocketMessages.client.MakeMove;
 
 import java.io.Console;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
 import static ui.EscapeSequences.*;
+import static models.ClientState.*;
 
 public class Client implements ClientDisplay {
     // Class Variables
@@ -25,403 +29,513 @@ public class Client implements ClientDisplay {
     static String activeUsername = "";
     static String authToken;
     static GameData clientGame;
-    static final String urlHTTP = "http://localhost:8080";
-    static final String urlWS = "ws://localhost:8080/connect";
-    static ClientState clientState = ClientState.logged_out;
+    private static final String HTTP = "http://";
+    private static final String WS = "ws://";
+    private static final String addressLocalhost = "localhost:";
+    private static final String port = "8080";
+    private static final String wsEndpoint = "/connect";
+    static ClientState clientState;
     static WebSocketClient websocket;
     static ServerFacade server;
 
-    public Client() throws Exception {
-        server = new ServerFacade(urlHTTP);
-        websocket = new WebSocketClient(urlWS, this);
+    public Client(String ip) throws Exception {
+        String address = (ip != null) ? (ip + ":") : addressLocalhost;
+        server = new ServerFacade(HTTP + address + port);
+        websocket = new WebSocketClient(WS + address + port + wsEndpoint, this);
+        clientState = logged_out;
     }
 
-    public void run() throws Exception {
-        try {
-            ConsoleOutput.printFormatted("Welcome to Chess!", THEME_ACCENT_2, SET_TEXT_BOLD);
-            ConsoleOutput.printMenu(ClientState.logged_out, null);
+    public void run() {
+        ConsoleOutput.printFormatted("Welcome to Chess!", THEME_ACCENT_2, SET_TEXT_BOLD);
+        System.out.println(ConsoleOutput.getMenu(clientState));
 
-            // a loop that continuously gets input from the console
-            while (activeConsole) {
-                String userInput = consoleInput.readLine(ConsoleOutput.mainConsolePrompt(activeUsername));
-                if(userInput != null) {
-                    userInput = userInput.toLowerCase();
-
-                    switch (clientState) {
-                        case logged_out -> {
-                            parseLoggedOutCommands(userInput);
-                        }
-                        case logged_in -> {
-                            parseLoggedInCommands(userInput);
-                        }
-                        case playing_game_black, playing_game_white -> {
-                            parsePlayerCommands(userInput);
-                        }
-                        case observing_game -> {
-                            parseObserverCommands(userInput);
-                        }
-                    }
-                }
+        // a loop that continuously gets input from the console
+        while (activeConsole) {
+            String userInput = consoleInput.readLine(ConsoleOutput.mainConsolePrompt(activeUsername));
+            if(userInput != null) {
+                userInput = userInput.toLowerCase();
+                String response = switch(userInput) {
+                    case "help" -> help();
+                    case "quit", "leave", "exit" -> exit();
+                    case "register" -> register();
+                    case "login" -> login();
+                    case "create" -> create();
+                    case "list" -> list();
+                    case "join" -> join();
+                    case "observe" -> observe();
+                    case "logout" -> logout();
+                    case "redraw" -> redraw();
+                    case "move" -> move();
+                    case "resign" -> resign();
+                    case "moves" -> moves();
+                    case "chat" -> chat();
+                    default -> ConsoleOutput.getWarning("Unknown command. Enter \"help\" for valid commands.");
+                };
+                System.out.println(response);
             }
-        } catch (DeploymentException e) {
-            ConsoleOutput.printError("Could not connect to server, it may not be running.");
         }
     }
 
-    private static void parseLoggedOutCommands(String input) {
-        switch(input) {
-            case "quit", "leave", "exit" ->  {
+
+    private String help() {
+        return ConsoleOutput.getMenu(clientState);
+    }
+
+    private String exit() {
+        switch (clientState) {
+            case logged_out -> {
                 activeConsole = false;
-                ConsoleOutput.printActionSuccess("Exiting program. Bye!");
+                return ConsoleOutput.getActionSuccess("Exiting program. Bye!");
             }
-            case "register" -> {
-                // ask them for username, password, and email
-                ConsoleOutput.printFormatted("Register New User (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
-
-                String username = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter desired username: "));
-                if(checkIfCanceled(username, input)) return;
-
-                String password = String.valueOf(consoleInput.readPassword(ConsoleOutput.formatConsolePrompt("> Enter desired password: ")));
-                if(checkIfCanceled(password, input)) return;
-
-                String email = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter your email: "));
-                if(checkIfCanceled(email, input)) return;
-
+            case logged_in -> {
+                activeConsole = false;
                 try {
-                    LoginResponse response = server.registerUser(username, password, email);
-                    authToken = response.authToken;
-                    clientState = ClientState.logged_in;
-                    activeUsername = username;
-                    ConsoleOutput.printActionSuccess("Registered user " + username + "! You are now logged in.");
-                    ConsoleOutput.printMenu(clientState, null);
-                }
-                catch (Exception e) {
-                    if(e.getMessage().contains("403")) {
-                        ConsoleOutput.printError("Couldn't register user: Username is already taken.");
-                    }
-                    else {
-                        ConsoleOutput.printError("Couldn't register user. Error: " + e.getMessage());
-                    }
-                }
-            }
-            case "login" -> {
-                // ask them for username and password
-                ConsoleOutput.printFormatted("Login User (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
-                String username = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter username: "));
-                if(checkIfCanceled(username, input)) return;
-
-                String password = String.valueOf(consoleInput.readPassword(ConsoleOutput.formatConsolePrompt("> Enter password: ")));
-                if(checkIfCanceled(password, input)) return;
-
-                try {
-                    LoginResponse response = server.loginUser(username, password);
-                    authToken = response.authToken;
-                    clientState = ClientState.logged_in;
-                    activeUsername = username;
-                    ConsoleOutput.printActionSuccess("Logged in user " + username + "!");
-                    ConsoleOutput.printMenu(clientState, null);
+                    server.logoutUser(authToken);
+                    String response = ConsoleOutput.getActionSuccess("Logged out user " + activeUsername + ".");
+                    authToken = null;
+                    activeUsername = "";
+                    clientState = logged_out;
+                    return response + "\n" + ConsoleOutput.getActionSuccess("Exiting program. Bye!");
                 }
                 catch (ResponseException e) {
-                    if(e.getMessage().contains("401")) {
-                        ConsoleOutput.printError("Couldn't log in: Invalid username or password.");
-                    }
-                    else {
-                        ConsoleOutput.printError("Couldn't log in. Error: " + e.getMessage());
-                    }
+                    return ConsoleOutput.getError("Couldn't log out. Please try again.");
                 }
             }
-            case "create", "list", "join", "observe", "logout" -> {
-                ConsoleOutput.printWarning("Not logged in. Enter \"help\" for valid commands.");
-            }
-            case "help" -> {
-                ConsoleOutput.printMenu(clientState, null);
-            }
-            default -> {
-                ConsoleOutput.printWarning("Unknown command. Enter \"help\" for valid commands.");
+            case playing_game_black, playing_game_white, observing_game -> {
+                try {
+                    websocket.sendCommand(new GameCommand(authToken, GameCommand.CommandType.LEAVE, clientGame.getGameId()));
+                    clientGame = null;
+                    clientState = logged_in;
+                    return ConsoleOutput.getActionSuccess("Exiting Game. Thanks for playing!") + ConsoleOutput.getMenu(clientState);
+                } catch (IOException e) {
+                    return ConsoleOutput.getError("Couldn't send message to server: " + e.getMessage());
+                }
             }
         }
+        return null;
     }
 
-    private static void parseLoggedInCommands(String input) throws Exception {
-        switch(input) {
-            case "quit", "leave", "exit" ->  {
-                activeConsole = false;
-                server.logoutUser(authToken);
-                ConsoleOutput.printActionSuccess("Logged out user " + activeUsername + ".");
-                authToken = null;
-                activeUsername = "";
-                clientState = ClientState.logged_out;
-                ConsoleOutput.printActionSuccess("Exiting program. Bye!");
-            }
-            case "register" -> {
-                ConsoleOutput.printWarning("User " + activeUsername + " is already logged in. Please log out to register a different user.");
-            }
-            case "login" -> {
-                ConsoleOutput.printWarning("User " + activeUsername + " is already logged in.");
-            }
-            case "create" -> {
-                // get params: gameName
-                ConsoleOutput.printFormatted("Create Game (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
-                String gameName = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter game name: "));
-                if(checkIfCanceled(gameName, input)) return;
+    private String register(){
+        if (clientState == logged_out) {
+            // ask them for username, password, and email
+            ConsoleOutput.printFormatted("Register New User (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
 
-                try {
-                    CreateGameResponse response = server.createGame(authToken, gameName);
-                    ConsoleOutput.printActionSuccess("Created new game with gameID: " + response.gameID);
+            String username = consoleInput.readLine(ConsoleOutput.getConsolePrompt("> Enter desired username: "));
+            if(checkIfCanceled(username)) return ConsoleOutput.getActionSuccess("Canceled.");
+
+            String password = String.valueOf(consoleInput.readPassword(ConsoleOutput.getConsolePrompt("> Enter desired password: ")));
+            if(checkIfCanceled(password)) return ConsoleOutput.getActionSuccess("Canceled.");
+
+            String email = consoleInput.readLine(ConsoleOutput.getConsolePrompt("> Enter your email: "));
+            if(checkIfCanceled(email)) return ConsoleOutput.getActionSuccess("Canceled.");
+
+            try {
+                LoginResponse response = server.registerUser(username, password, email);
+                authToken = response.authToken;
+                clientState = logged_in;
+                activeUsername = username;
+                return ConsoleOutput.getActionSuccess("Registered user " + username + "! You are now logged in.");
+            }
+            catch (Exception e) {
+                if(e.getMessage().contains("403")) {
+                    return ConsoleOutput.getError("Couldn't register user: Username is already taken.");
                 }
-                catch (Exception e) {
-                    if(e.getMessage().contains("401")) {
-                        ConsoleOutput.printError("Couldn't create game: Unauthorized.");
-                    }
-                    else {
-                        ConsoleOutput.printError("Couldn't create game. Error: " + e.getMessage());
-                    }
+                else {
+                    return ConsoleOutput.getError("Couldn't register user. Error: " + e.getMessage());
                 }
             }
-            case "list" -> {
+        }
+        else {
+            return ConsoleOutput.getWarning("Can't register a new user right now. User " + activeUsername + " is already logged in.");
+        }
+    }
+    private String login(){
+        if (clientState == logged_out) {
+            // ask them for username and password
+            ConsoleOutput.printFormatted("Login User (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
+            String username = consoleInput.readLine(ConsoleOutput.getConsolePrompt("> Enter username: "));
+            if(checkIfCanceled(username)) return ConsoleOutput.getActionSuccess("Canceled.");
+
+            String password = String.valueOf(consoleInput.readPassword(ConsoleOutput.getConsolePrompt("> Enter password: ")));
+            if(checkIfCanceled(password)) return ConsoleOutput.getActionSuccess("Canceled.");
+
+            try {
+                LoginResponse response = server.loginUser(username, password);
+                authToken = response.authToken;
+                clientState = logged_in;
+                activeUsername = username;
+                return ConsoleOutput.getActionSuccess("Logged in user " + username + "!");
+            }
+            catch (ResponseException e) {
+                if(e.getMessage().contains("401")) {
+                    return ConsoleOutput.getError("Couldn't log in: Invalid username or password.");
+                }
+                else {
+                    return ConsoleOutput.getError("Couldn't log in. Error: " + e.getMessage());
+                }
+            }
+        }
+        else {
+            return ConsoleOutput.getWarning("Can't login right now. User " + activeUsername + " is already logged in.");
+        }
+    }
+    private String create(){
+        if (clientState == logged_in){
+            // get params: gameName
+            ConsoleOutput.printFormatted("Create Game (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
+            String gameName = consoleInput.readLine(ConsoleOutput.getConsolePrompt("> Enter game name: "));
+            if(checkIfCanceled(gameName)) return ConsoleOutput.getActionSuccess("Canceled.");
+
+            try {
+                CreateGameResponse response = server.createGame(authToken, gameName);
+                return ConsoleOutput.getActionSuccess("Created new game with gameID: " + response.gameID);
+            }
+            catch (Exception e) {
+                if(e.getMessage().contains("401")) {
+                    return ConsoleOutput.getError("Couldn't create game: Unauthorized.");
+                }
+                else {
+                    return ConsoleOutput.getError("Couldn't create game. Error: " + e.getMessage());
+                }
+            }
+        }
+        else if (clientState == logged_out) {
+            return ConsoleOutput.getWarning("Not logged in. Enter \"help\" for valid commands.");
+        }
+        else {
+            return ConsoleOutput.getWarning("Can't create a new game right now. Enter \"help\" for valid commands.");
+        }
+    }
+    private String list(){
+        if (clientState == logged_in){
+            try {
                 GameResponse[] games = server.listGames(authToken).games;
 
                 if(games.length == 0) {
-                    ConsoleOutput.printWarning("There are no games. Enter \"create\" to make one!");
+                    return ConsoleOutput.getWarning("There are no games. Enter \"create\" to make one!");
                 }
                 else {
                     ArrayList<GameResponse> gamesAsList = new ArrayList<>(Arrays.stream(games).toList());
                     gamesAsList.sort(Comparator.comparingInt(a -> a.gameID));
-                    ConsoleOutput.printGameList(gamesAsList);
+                    return ConsoleOutput.getGameList(gamesAsList);
+                }
+            } catch (ResponseException e) {
+                return ConsoleOutput.getError("Couldn't list games: " + e.getMessage());
+            }
+        }
+        else if (clientState == logged_out) {
+            return ConsoleOutput.getWarning("Not logged in. Enter \"help\" for valid commands.");
+        }
+        else {
+            return ConsoleOutput.getWarning("Can't list games right now. Enter \"help\" for valid commands.");
+        }
+    }
+    private String join(){
+        if (clientState == logged_in){
+            ConsoleOutput.printFormatted("Join Game (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
+
+            int gameID = getGameId();
+            if(gameID == -1) return ConsoleOutput.getActionSuccess("Canceled.");
+
+            String playerColorString = consoleInput.readLine(ConsoleOutput.getConsolePrompt("> Enter Desired Player Color (Black/White): "));
+            ChessGame.TeamColor color = getTeamColorFromString(playerColorString);
+            while (color == null) {
+                if (checkIfCanceled(playerColorString)) return ConsoleOutput.getActionSuccess("Canceled.");
+                ConsoleOutput.printWarning("Invalid input. Please enter \"black\" or \"white\"");
+                playerColorString = consoleInput.readLine(ConsoleOutput.getConsolePrompt("> Enter Desired Player Color (Black/White): "));
+                color = getTeamColorFromString(playerColorString);
+            }
+
+            try {
+                GameJoinResponse response = server.joinGame(authToken, gameID, color);
+                clientState = switch (color) {
+                    case WHITE -> ClientState.playing_game_white;
+                    case BLACK -> ClientState.playing_game_black;
+                };
+                websocket.sendCommand(new JoinPlayer(authToken, gameID, color));
+                return ConsoleOutput.getActionSuccess("Joined game " + gameID + " as " + color);
+            }
+            catch (Exception e) {
+                if(e.getMessage().contains("400")) {
+                    return ConsoleOutput.getError("Couldn't join game: Game ID not found");
+                }
+                if(e.getMessage().contains("401")) {
+                    return ConsoleOutput.getError("Couldn't join game: Unauthorized.");
+                }
+                else if(e.getMessage().contains("403")) {
+                    return ConsoleOutput.getError("Couldn't join game: Position already taken.");
+                }
+                else {
+                    return ConsoleOutput.getError("Couldn't join game. Error: " + e.getMessage());
                 }
             }
-            case "join" -> {
-                ConsoleOutput.printFormatted("Join Game (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
+        }
+        else if (clientState == logged_out) {
+            return ConsoleOutput.getWarning("Not logged in. Enter \"help\" for valid commands.");
+        }
+        else {
+            return ConsoleOutput.getWarning("Can't join another game right now. Enter \"help\" for valid commands.");
+        }
+    }
+    private String observe(){
+        if (clientState == logged_in){
+            ConsoleOutput.printFormatted("Observe Game (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
 
-                int gameID = getGameId(input);
-                if(gameID == -1) return;
-                
-                String playerColorString = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter Desired Player Color (Black/White): "));
-                ChessGame.TeamColor color = getTeamColorFromString(playerColorString);
-                while (color == null) {
-                    if (checkIfCanceled(playerColorString, input)) return;
-                    ConsoleOutput.printWarning("Invalid input. Please enter \"black\" or \"white\"");
-                    playerColorString = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter Desired Player Color (Black/White): "));
-                    color = getTeamColorFromString(playerColorString);
+            int gameID = getGameId();
+
+            if(gameID == -1) return ConsoleOutput.getActionSuccess("Canceled.");
+
+            try {
+                GameJoinResponse response = server.joinGame(authToken, gameID, null);
+                websocket.sendCommand(new GameCommand(authToken, GameCommand.CommandType.JOIN_OBSERVER, gameID));
+                clientState = ClientState.observing_game;
+                return ConsoleOutput.getActionSuccess("Joined game " + gameID + " as observer") + ConsoleOutput.getMenu(ClientState.observing_game);
+            }
+            catch (Exception e) {
+                if(e.getMessage().contains("401")) {
+                    return ConsoleOutput.getError("Couldn't join game: Unauthorized.");
                 }
-
+                else {
+                    return ConsoleOutput.getError("Couldn't join game. Error: " + e.getMessage());
+                }
+            }
+        }
+        else if (clientState == logged_out) {
+            return ConsoleOutput.getWarning("Not logged in. Enter \"help\" for valid commands.");
+        }
+        else {
+            return ConsoleOutput.getWarning("Can't observe a game right now. Enter \"help\" for valid commands.");
+        }
+    }
+    private String logout(){
+        if (clientState == logged_in){
+            try {
+                LogoutResponse response = server.logoutUser(authToken);
+                String logoutStr = ConsoleOutput.getActionSuccess("Logged out user " + activeUsername + ".");
+                authToken = null;
+                activeUsername = "";
+                clientState = logged_out;
+                return logoutStr;
+            }
+            catch (Exception e) {
+                if(e.getMessage().contains("401")) {
+                    return ConsoleOutput.getError("Couldn't log out: Invalid session token.");
+                }
+                else {
+                    return ConsoleOutput.getError("Couldn't log out. Error: " + e.getMessage());
+                }
+            }
+        }
+        else if (clientState == logged_out) {
+            return ConsoleOutput.getWarning("Not logged in. Enter \"help\" for valid commands.");
+        }
+        else {
+            return ConsoleOutput.getWarning("Can't log out right now. Enter \"leave\" to exit current game.");
+        }
+    }
+    private String redraw(){
+        if (clientState == logged_out || clientState == logged_in) {
+            return ConsoleOutput.getWarning("You're not currently in a game. Enter \"help\" for valid commands.");
+        }
+        else {
+            // gets from its own Game object
+            if(clientGame != null && clientGame.getGame() != null) {
+                return ConsoleOutput.getBoard(clientGame.getGame(), clientState, null);
+            }
+            else {
+                return ConsoleOutput.getError("Couldn't get game.");
+            }
+        }
+    }
+    private String move(){
+        if (clientState == logged_out || clientState == logged_in) {
+            return ConsoleOutput.getWarning("You're not currently in a game. Enter \"help\" for valid commands.");
+        }
+        else if (clientState == observing_game) {
+            return ConsoleOutput.getWarning("You're not currently playing. Enter \"help\" for valid commands.");
+        }
+        else {
+            if(clientGame.getGameState() == Game.State.pregame) {
+                return ConsoleOutput.getWarning("Can't make a move yet, the game is not started.");
+            }
+            else if (clientGame.getGameState() == Game.State.finished) {
+                return ConsoleOutput.getWarning("Can't make a move, the game is over.");
+            }
+            else if((clientState == playing_game_black && clientGame.getGame().getTeamTurn() != ChessGame.TeamColor.BLACK)
+                || (clientState == playing_game_white && clientGame.getGame().getTeamTurn() != ChessGame.TeamColor.WHITE)) {
+                return ConsoleOutput.getWarning("Can't make a move, it's not your turn.");
+            }
+            else {
                 try {
-                    GameJoinResponse response = server.joinGame(authToken, gameID, color);
-                    clientState = switch (color) {
-                        case WHITE -> ClientState.playing_game_white;
-                        case BLACK -> ClientState.playing_game_black;
-                    };
-                    websocket.sendCommand(new JoinPlayer(authToken, gameID, color));
-                    ConsoleOutput.printActionSuccess("Joined game " + gameID + " as " + color);
-//                    ConsoleOutput.printMenu(clientState, clientGame.getGameState());
-                }
-                catch (Exception e) {
-                    if(e.getMessage().contains("400")) {
-                        ConsoleOutput.printError("Couldn't join game: Game ID not found");
-                    }
-                    if(e.getMessage().contains("401")) {
-                        ConsoleOutput.printError("Couldn't join game: Unauthorized.");
-                    }
-                    else if(e.getMessage().contains("403")) {
-                        ConsoleOutput.printError("Couldn't join game: Position already taken.");
-                    }
-                    else {
-                        ConsoleOutput.printError("Couldn't join game. Error: " + e.getMessage());
-                    }
-                }
-            }
-            case "observe" -> {
-                ConsoleOutput.printFormatted("Observe Game (or enter \"cancel\")", THEME_ACCENT_1, SET_TEXT_BOLD);
+                    Move move = getMove();
+                    if (move == null) return ConsoleOutput.getActionSuccess("Canceled.");
+                    Game gameCopy = new Game(clientGame.getGame());
+                    gameCopy.makeMove(move); // will throw an exception if not valid, while keeping the client board in sync with the server.
 
-                int gameID = getGameId(input);
-
-                if(gameID == -1) return;
-
-                try {
-                    GameJoinResponse response = server.joinGame(authToken, gameID, null);
-                    websocket.sendCommand(new GameCommand(authToken, GameCommand.CommandType.JOIN_OBSERVER, gameID));
-                    ConsoleOutput.printActionSuccess("Joined game " + gameID + " as observer");
-                    clientState = ClientState.observing_game;
-                    ConsoleOutput.printMenu(ClientState.observing_game, null);
+                    websocket.sendCommand(new MakeMove(authToken, clientGame.getGameId(), move));
+                    return ConsoleOutput.getActionSuccess("Made move " + move.toChessNotation());
+                } catch (InvalidMoveException e) {
+                    return ConsoleOutput.getError("Invalid move: " + e.getMessage());
+                } catch (Exception e) {
+                    return ConsoleOutput.getError("Couldn't make move: " + e.getMessage());
                 }
-                catch (Exception e) {
-                    if(e.getMessage().contains("401")) {
-                        ConsoleOutput.printError("Couldn't join game: Unauthorized.");
-                    }
-                    else {
-                        ConsoleOutput.printError("Couldn't join game. Error: " + e.getMessage());
-                    }
-                }
-            }
-            case "logout" -> {
-                try {
-                    LogoutResponse response = server.logoutUser(authToken);
-                    ConsoleOutput.printActionSuccess("Logged out user " + activeUsername + ".");
-                    authToken = null;
-                    activeUsername = "";
-                    clientState = ClientState.logged_out;
-                }
-                catch (Exception e) {
-                    if(e.getMessage().contains("401")) {
-                        ConsoleOutput.printError("Couldn't log out: Invalid session token.");
-                    }
-                    else {
-                        ConsoleOutput.printError("Couldn't log out. Error: " + e.getMessage());
-                    }
-                }
-            }
-            case "help" -> {
-                ConsoleOutput.printMenu(clientState, null);
-            }
-            default -> {
-                ConsoleOutput.printWarning("Unknown command. Enter \"help\" for valid commands.");
             }
         }
     }
 
-    private static void parsePlayerCommands(String input) throws Exception {
-        if(clientGame == null) {
-            ConsoleOutput.printError("Couldn't load game.");
-            clientState = ClientState.logged_in;
+    private String resign(){
+        if (clientState == logged_out || clientState == logged_in) {
+            return ConsoleOutput.getWarning("You're not currently in a game. Enter \"help\" for valid commands.");
         }
-        else if(clientGame.getGameState() == Game.State.pregame) {
-            ConsoleOutput.printWarning("Game is not started. Please wait for another player to join.");
-            switch(input) {
-                case "leave", "quit", "exit" ->  {
-                    websocket.sendCommand(new GameCommand(authToken, GameCommand.CommandType.LEAVE, clientGame.getGameId()));
-                    clientState = ClientState.logged_in;
-                    clientGame = null;
-                    ConsoleOutput.printActionSuccess("Exiting Game. Thanks for playing!");
-                    ConsoleOutput.printMenu(clientState, null);
-                }
-                case "help" -> {
-                    ConsoleOutput.printMenu(clientState, clientGame.getGameState());
-                }
-                default -> ConsoleOutput.printWarning("Unknown command. Enter \"help\" for valid commands.");
+        else if (clientState == observing_game) {
+            return ConsoleOutput.getWarning("You're not currently playing. Enter \"help\" for valid commands.");
+        }
+        else {
+            if(clientGame.getGameState() == Game.State.finished) {
+                return ConsoleOutput.getWarning("Can't resign, game is already finished. Enter \"leave\" to leave the game.");
+            }
+            try {
+                websocket.sendCommand(new GameCommand(authToken, GameCommand.CommandType.RESIGN, clientGame.getGameId()));
+                clientGame.setGameState(Game.State.finished);
+                return ConsoleOutput.getActionSuccess("You resigned from the game.");
+            } catch (IOException e) {
+                return ConsoleOutput.getError("Couldn't send message to server: " + e.getMessage());
             }
         }
-        else if (clientGame.getGameState() == Game.State.active) {
-            switch(input) {
-                case "leave", "quit", "exit" ->  {
-                    websocket.sendCommand(new GameCommand(authToken, GameCommand.CommandType.LEAVE, clientGame.getGameId()));
-                    clientState = ClientState.logged_in;
-                    clientGame = null;
-                    ConsoleOutput.printActionSuccess("Exiting Game. Thanks for playing!");
-                    ConsoleOutput.printMenu(clientState, null);
-                }
-                case "help" -> {
-                    ConsoleOutput.printMenu(clientState, clientGame.getGameState());
-                }
-                case "redraw" -> {
-                    // gets from its own Game object
-                    ConsoleOutput.printBoard(clientGame.getGame(), clientState);
-                }
-                case "move" -> {
-                    // should check if it's valid with its own Game object, then call the server
-
-                /* old code ------
-                // Position startPos, endPos;
-                //                    ChessPiece.PieceType promotionPiece;
-                //
-                //                    // get first position from user input
-                //                    if(consoleCommand.length >= 2 && consoleCommand[1] != null){
-                //                        String strStartPos = consoleCommand[1];
-                //                        startPos = parsePosition(strStartPos);
-                //                        if(startPos == null) {
-                //                            System.out.println("Invalid syntax for start position. Positions are formatted like this: [column (a-h)][row (1-8)]");
-                //                            break;
-                //                        }
-                //                    }
-                //                    else {
-                //                        System.out.println("Enter movement in this format: \"move b1 c3\"");
-                //                        break;
-                //                    }
-                //
-                //                    // get second position from user input
-                //                    if(consoleCommand.length >= 3 && consoleCommand[2] != null){
-                //                        String strEndPos = consoleCommand[2];
-                //                        endPos = parsePosition(strEndPos);
-                //                        if(endPos == null) {
-                //                            System.out.println("Invalid syntax for end position. Positions are formatted like this: [column (a-h)][row (1-8)]");
-                //                            break;
-                //                        }
-                //                    }
-                //                    else {
-                //                        System.out.println("Enter movement in this format: \"move b1 c3\", or \"move d7 d8 queen\" (for pawn promotion)");
-                //                        break;
-                //                    }
-                //
-                //                    // get promotion piece, if necessary
-                //                    if(consoleCommand.length >= 4 && consoleCommand[3] != null){
-                //                        String strPromotion = consoleCommand[3];
-                //                        promotionPiece = parseType(strPromotion);
-                //                    }
-                //                    else {
-                //                        promotionPiece = null;
-                //                    }
-                //
-                //                    ChessMove move = new Move(startPos, endPos, promotionPiece);
-                //
-                //                    try {
-                //                        game.makeMove(move);
-                //                        printBoard();
-                //                    } catch (InvalidMoveException e) {
-                //                        System.out.println(e.getMessage());
-                //                    }
-
-                 */
-                }
-                case "resign" -> {
-                    // calls the server
-                }
-                case "moves" -> {
-                    // can get this from its own Game object
-                    if(clientGame != null) {
-                        // TODO: show valid moves
-                    }
-                    else {
-                        ConsoleOutput.printError("Sorry, something went wrong.");
-                    }
-                }
-                default -> ConsoleOutput.printWarning("Unknown command. Enter \"help\" for valid commands.");
-            }
+    }
+    private String moves(){
+        if (clientState == logged_out || clientState == logged_in) {
+            return ConsoleOutput.getWarning("You're not currently in a game. Enter \"help\" for valid commands.");
         }
-        else if (clientGame.getGameState() == Game.State.finished) {
-            ConsoleOutput.printWarning("Game is finished.");
+        else {
+            if(clientGame != null && clientGame.getGameState() != Game.State.finished) {
+                Position highlightPos = getPosition();
+                if(highlightPos == null) return ConsoleOutput.getActionSuccess("Canceled.");
+                return ConsoleOutput.getBoard(clientGame.getGame(), clientState, highlightPos);
+            }
+            return ConsoleOutput.getWarning("No more moves can be made.");
+        }
+    }
+    private String chat(){
+        if (clientState == logged_out || clientState == logged_in) {
+            return ConsoleOutput.getWarning("You're not currently in a game. Enter \"help\" for valid commands.");
+        }
+        else {
+            String message = consoleInput.readLine(ConsoleOutput.getConsolePrompt("> Enter message: "));
+            if(checkIfCanceled(message)) return ConsoleOutput.getActionSuccess("Canceled.");
+            return "";
         }
     }
 
-    private static void parseObserverCommands(String input) throws Exception {
-        switch(input) {
-            case "leave", "quit", "exit" ->  {
-                clientState = ClientState.logged_in;
-                ConsoleOutput.printActionSuccess("Exiting Game. Thanks for watching!");
-                ConsoleOutput.printMenu(clientState, null);
-            }
-            case "help", "info" -> {
-                ConsoleOutput.printMenu(clientState, null);
-            }
-            default -> ConsoleOutput.printWarning("Unknown command. Enter \"help\" for valid commands.");
-        }
-    }
-
-    private static int getGameId(String input){
-        String gameToJoin = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter Game ID: "));
+    private static int getGameId(){
+        String gameToJoin = consoleInput.readLine(ConsoleOutput.getConsolePrompt("> Enter Game ID: "));
         while(inputNotInteger(gameToJoin)) {
-            if(checkIfCanceled(gameToJoin, input)) return -1;
+            if(checkIfCanceled(gameToJoin)) return -1;
             ConsoleOutput.printWarning("Game ID must be a number.");
-            gameToJoin = consoleInput.readLine(ConsoleOutput.formatConsolePrompt("> Enter Game ID: "));
+            gameToJoin = consoleInput.readLine(ConsoleOutput.getConsolePrompt("> Enter Game ID: "));
         }
 
         return Integer.parseInt(gameToJoin);
     }
 
-    private static boolean checkIfCanceled(String input, String process) {
-        if(input.equalsIgnoreCase("cancel")) {
-            ConsoleOutput.printWarning("Canceled " + process + ".");
-            return true;
+    private static Move getMove() throws Exception {
+        String moveStr = consoleInput.readLine(ConsoleOutput.getConsolePrompt("> Enter Chess Move (enter \"help\" for info): "));
+        while (!isValidMove(moveStr) && clientGame.getGameState() == Game.State.active) {
+            if(checkIfCanceled(moveStr)) return null;
+            if(checkIfNeedHelp(moveStr)) {
+                System.out.println(ConsoleOutput.getChessMoveInfo());
+            }
+            else {
+                System.out.println(ConsoleOutput.getWarning("Invalid move syntax."));
+            }
+            moveStr = consoleInput.readLine(ConsoleOutput.getConsolePrompt("> Enter Chess Move (enter \"help\" for info): "));
         }
-        return false;
+        if (clientGame.getGameState() == Game.State.active) {
+            Move result = parseMove(moveStr);
+            if (result != null) {
+                return result;
+            }
+            else {
+                throw new IOException("Couldn't parse move.");
+            }
+        }
+        else {
+            throw new Exception(ConsoleOutput.getError("Game is no longer active."));
+        }
+    }
+
+    private static Position getPosition() {
+        String position = consoleInput.readLine(ConsoleOutput.getConsolePrompt("> Enter Chess Position (or \"cancel\"): "));
+        while (!isValidPosition(position)) {
+            if (checkIfCanceled(position)) return null;
+            position = consoleInput.readLine(ConsoleOutput.getConsolePrompt("> Enter Chess Position (or \"cancel\"): "));
+        }
+        return parsePosition(position);
+    }
+
+    private static boolean isValidMove(String input) {
+        input = input.toLowerCase();
+        return (input.matches("[a-h][1-8] [a-h][1-8].*")) && parseMove(input) != null;
+    }
+
+    private static boolean isValidPosition(String input) {
+        input = input.toLowerCase();
+        return (input.matches("[a-h][1-8]")) && parsePosition(input) != null;
+    }
+
+    private static Move parseMove(String input) {
+        input = input.toLowerCase();
+        String[] args = input.split(" ");
+        if(args.length < 2 || args.length > 3) {
+            return null;
+        }
+        Position startPos;
+        Position endPos;
+        startPos = parsePosition(args[0]);
+        endPos = parsePosition(args[1]);
+        ChessPiece.PieceType promotionPiece = null;
+        if(args.length == 3) {
+            try {
+                promotionPiece = getPromotionPiece(args[2]);
+            } catch (IllegalStateException e) {
+                return null;
+            }
+        }
+        if (startPos != null && endPos != null) {
+            return new Move(startPos, endPos, promotionPiece);
+        }
+        else {
+            return null;
+        }
+    }
+
+    private static ChessPiece.PieceType getPromotionPiece(String input) {
+        return switch (input) {
+            case "queen" -> ChessPiece.PieceType.QUEEN;
+            case "knight" -> ChessPiece.PieceType.KNIGHT;
+            case "rook" -> ChessPiece.PieceType.ROOK;
+            case "bishop" -> ChessPiece.PieceType.BISHOP;
+            default -> throw new IllegalStateException("Invalid promotion piece: " + input);
+        };
+    }
+
+    private static Position parsePosition(String input){
+        input = input.toLowerCase();
+        char[] chars = input.toCharArray();
+        if(chars.length != 2) {
+            return null;
+        }
+        int col = Character.getNumericValue(chars[0]) - 9; // uses the numeric value of the letter "a" in Unicode (10) and subtracts 9 to get a = column 1.
+        int row = Character.getNumericValue(chars[1]);
+        return new Position(row,col);
+    }
+
+    private static boolean checkIfCanceled(String input) {
+        return input.equalsIgnoreCase("cancel");
+    }
+
+    private static boolean checkIfNeedHelp(String input) {
+        return input.equalsIgnoreCase("help");
     }
 
     // returns the TeamColor object given a String input. Returns null if input is bad.
@@ -450,37 +564,24 @@ public class Client implements ClientDisplay {
     // From the utils.ClientDisplay interface
     @Override
     public void showNotification(String message) {
-        ConsoleOutput.printNotification(message);
-        printConsolePrompt();
+        System.out.println(ConsoleOutput.getNotification(message));
     }
 
     @Override
     public void showError(String error) {
-        ConsoleOutput.printWebSocketError(error);
-        printConsolePrompt();
+        System.out.println(ConsoleOutput.getWebSocketError(error));
     }
 
     @Override
-    public void updateGameData(GameData gameData) {
+    public void updateGameData(GameData gameData) throws InterruptedException {
         clientGame = gameData;
-        if(clientGame != null){
-            ConsoleOutput.printBoard(gameData.getGame(), clientState);
-            printConsolePrompt();
-        }
+        System.out.println(ConsoleOutput.getBoard(clientGame.getGame(), clientState, null));
+        printConsolePrompt();
     }
 
     @Override
-    public void updateGameWithMove(ChessMove move) {
-        try {
-            Game game = clientGame.getGame();
-            game.makeMove(move);
-            clientGame.setGame(game);
-            ConsoleOutput.printBoard(game, clientState);
-        }
-        catch (InvalidMoveException e) {
-            ConsoleOutput.printError("Something went wrong while updating your board.");
-        }
-        printConsolePrompt();
+    public void updateGameState(Game.State gameState) {
+        clientGame.setGameState(gameState);
     }
 
     public void printConsolePrompt() {

@@ -1,14 +1,14 @@
 package chess.pieces;
 
-import chess.interfaces.ChessBoard;
-import chess.interfaces.ChessGame;
-import chess.interfaces.ChessMove;
-import chess.interfaces.ChessPosition;
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static chess.interfaces.ChessPiece.PieceType.BISHOP;
+import static chess.ChessPiece.PieceType.BISHOP;
 
 public class Bishop extends Piece {
     public Bishop(ChessGame.TeamColor c) {

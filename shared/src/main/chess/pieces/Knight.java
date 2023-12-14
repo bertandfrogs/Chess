@@ -2,15 +2,15 @@ package chess.pieces;
 
 import chess.Move;
 import chess.Position;
-import chess.interfaces.ChessBoard;
-import chess.interfaces.ChessGame;
-import chess.interfaces.ChessMove;
-import chess.interfaces.ChessPosition;
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static chess.interfaces.ChessPiece.PieceType.KNIGHT;
+import static chess.ChessPiece.PieceType.KNIGHT;
 
 public class Knight extends Piece {
     public Knight(ChessGame.TeamColor c) {

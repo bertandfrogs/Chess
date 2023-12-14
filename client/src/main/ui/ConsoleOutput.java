@@ -1,13 +1,11 @@
 package ui;
 
-import chess.Board;
-import chess.Game;
-import chess.interfaces.ChessGame;
+import chess.*;
 import chess.pieces.Piece;
 import service.GameResponse;
-import utils.ClientState;
+import models.ClientState;
 
-import java.util.ArrayList;
+import java.util.*;
 
 import static ui.EscapeSequences.*;
 
@@ -22,61 +20,75 @@ public class ConsoleOutput {
                 + EscapeSequences.THEME_PRIMARY_LIGHT);
     }
 
-    public static String formatConsolePrompt(String message) {
+    public static String getConsolePrompt(String message) {
         return (THEME_PRIMARY + message + RESET_ALL_FORMATTING);
     }
 
-    public static void printMenu(ClientState clientState, Game.State gameState) {
-        printFormatted("Valid Commands:", THEME_PRIMARY, SET_TEXT_ITALIC);
-        if(clientState == ClientState.logged_in) {
-            printMenuItem("create", "create a new game");
-            printMenuItem("list", "show all games");
-            printMenuItem("join", "join an existing game as white or black");
-            printMenuItem("observe", "observe an existing game");
-            printMenuItem("logout", "log out user");
-            printMenuItem("quit", "exit out of the console");
-        }
-        else if (clientState == ClientState.logged_out){
-            printMenuItem("register", "create a new account");
-            printMenuItem("login", "log in as an existing user");
-            printMenuItem("quit", "exit out of the console");
-        }
-        else if (clientState == ClientState.playing_game_white || clientState == ClientState.playing_game_black){
-            if(gameState == Game.State.pregame){
-                printMenuItem("leave", "leave current game");
-                // TODO: implement
-            }
-            else if (gameState == Game.State.active) {
-                // print full game command menu
-            }
-            else if (gameState == Game.State.finished) {
-                //
-            }
-        }
-        else if (clientState == ClientState.observing_game){
-            printMenuItem("leave", "leave current game");
-            // TODO: implement
-        }
-
-        printMenuItem("help", "show this menu");
-        System.out.println();
+    public static String getMenu(ClientState clientState) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getFormatted("Valid Commands:\n", THEME_PRIMARY, SET_TEXT_ITALIC));
+        sb.append(switch (clientState) {
+            case logged_out -> getMenuLoggedOut();
+            case logged_in -> getMenuLoggedIn();
+            case playing_game_black, playing_game_white -> getMenuPlayingGame();
+            case observing_game -> getMenuObserver();
+        });
+        sb.append(getMenuItem("help", "show this menu"));
+        return sb.toString();
     }
 
-    public static void printBoard(Game game, ClientState clientState) {
-        System.out.println();
+    private static String getMenuLoggedOut(){
+        return getMenuItem("register", "create a new account") +
+                getMenuItem("login", "log in as an existing user") +
+                getMenuItem("quit", "exit out of the console");
+    }
+
+    private static String getMenuLoggedIn() {
+        return getMenuItem("create", "create a new game")
+            + getMenuItem("list", "show all games")
+            + getMenuItem("join", "join an existing game as white or black")
+            + getMenuItem("observe", "observe an existing game")
+            + getMenuItem("logout", "log out user")
+            + getMenuItem("quit", "exit out of the console");
+    }
+
+    private static String getMenuPlayingGame() {
+        return getMenuItem("move", "move a piece on the board") +
+            getMenuItem("redraw", "redraw the current game board") +
+            getMenuItem("chat", "send a message to others in the game") +
+            getMenuItem("moves", "show valid moves that can be made") +
+            getMenuItem("resign", "resign from the game") +
+            getMenuItem("leave", "leave current game");
+    }
+
+    private static String getMenuObserver() {
+        return getMenuItem("chat", "send a message to others in the game") +
+            getMenuItem("leave", "leave current game");
+    }
+
+    public static String getBoard(Game game, ClientState clientState, Position positionToHighlight) {
+        String output;
         if(clientState == ClientState.playing_game_white) {
-            System.out.print(getBoardAsString((Board)game.getBoard(), ChessGame.TeamColor.WHITE));
+            output = "\n" + getBoardAsString((Board)game.getBoard(), ChessGame.TeamColor.WHITE, positionToHighlight)
+                    + getActionSuccess("It is currently " + ((game.getTeamTurn() == ChessGame.TeamColor.WHITE) ? "your" : "BLACK's")  + " turn.\n");
         }
         else if(clientState == ClientState.playing_game_black) {
-            System.out.print(getBoardAsString((Board)game.getBoard(), ChessGame.TeamColor.BLACK));
+            output = "\n" + getBoardAsString((Board)game.getBoard(), ChessGame.TeamColor.BLACK, positionToHighlight)
+            + getActionSuccess("It is currently " + ((game.getTeamTurn() == ChessGame.TeamColor.BLACK) ? "your" : "WHITE's")  + " turn.\n");
         }
         else {
-            System.out.print(getBoardAsString((Board)game.getBoard(), ChessGame.TeamColor.WHITE));
+            output = "\n" + getBoardAsString((Board)game.getBoard(), ChessGame.TeamColor.WHITE, positionToHighlight)
+                    + getActionSuccess("It is currently " + ((game.getTeamTurn() == ChessGame.TeamColor.BLACK) ? "BLACK's" : "WHITE's")  + " turn.\n");
         }
+        return output;
     }
 
     public static void printFormatted(String message, String color, String style) {
         System.out.println("\n" + style + color + message + RESET_ALL_FORMATTING);
+    }
+
+    public static String getFormatted(String message, String color, String style) {
+        return "\n" + style + color + message + RESET_ALL_FORMATTING;
     }
 
     public static void printMenuItem(String command, String definition) {
@@ -84,45 +96,66 @@ public class ConsoleOutput {
                 + THEME_PRIMARY + " - " + definition + RESET_ALL_FORMATTING);
     }
 
-    public static void printGameList(ArrayList<GameResponse> games) {
-        System.out.println();
-        final String line = "--------------------------------------------------------------------%n";
-        printFormatted("Game List:", THEME_PRIMARY, SET_TEXT_ITALIC);
-        System.out.print(THEME_ACCENT_2);
-        System.out.printf(line);
-        System.out.printf("| %-4s | %-12s | %-12s | %-12s | %-12s |%n",
-                "ID", "Game Name", "White Player", "Black Player", "Game State");
-        System.out.printf(line);
+    public static String getMenuItem(String command, String definition) {
+        return "\t" + THEME_PRIMARY_LIGHT + command + " "
+                + THEME_PRIMARY + " - " + definition + RESET_ALL_FORMATTING + "\n";
+    }
+
+    public static String getGameList(ArrayList<GameResponse> games) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+        final String line = "--------------------------------------------------------------------\n";
+        sb.append(getFormatted("Game List:", THEME_PRIMARY, SET_TEXT_ITALIC)).append("\n");
+        sb.append(THEME_ACCENT_2).append(line);
+        sb.append(String.format("| %-4s | %-12s | %-12s | %-12s | %-12s |%n",
+                "ID", "Game Name", "White Player", "Black Player", "Game State"));
+        sb.append(line);
 
         for (GameResponse game : games){
-            System.out.printf("| %-4d | %-12s | %-12s | %-12s | %-12s |%n",
-                    game.gameID, game.gameName, (game.whiteUsername != null) ? game.whiteUsername : "", (game.blackUsername != null) ? game.blackUsername : "", (game.gameState != null) ? game.gameState : "");
+            sb.append(String.format("| %-4d | %-12s | %-12s | %-12s | %-12s |%n",
+                    game.gameID, game.gameName,
+                    (game.whiteUsername != null) ? game.whiteUsername : "",
+                    (game.blackUsername != null) ? game.blackUsername : "",
+                    (game.gameState != null) ? game.gameState : ""));
         }
-        System.out.printf(line);
-        System.out.println(RESET_ALL_FORMATTING);
+
+        sb.append(line).append(RESET_ALL_FORMATTING);
+        return sb.toString();
     }
 
-    public static void printNotification(String message){
-        printFormatted("**" + message + "**", THEME_WARNING, SET_TEXT_ITALIC);
+    public static String getNotification(String message){
+        return getFormatted("**" + message + "**", THEME_WARNING, SET_TEXT_ITALIC);
     }
 
-    public static void printWebSocketError(String message){
-        printFormatted("**" + message + "**", THEME_ERROR, SET_TEXT_ITALIC);
+    public static String getWebSocketError(String message){
+        return getFormatted("**" + message + "**", THEME_ERROR, SET_TEXT_ITALIC);
     }
 
     public static void printActionSuccess(String message) {
         System.out.println("\n" + SET_TEXT_ITALIC + THEME_ACCENT_1 + message + RESET_ALL_FORMATTING);
     }
 
+    public static String getActionSuccess(String message) {
+        return "\n" + SET_TEXT_ITALIC + THEME_ACCENT_1 + message + RESET_ALL_FORMATTING;
+    }
+
     public static void printWarning(String message) {
         printFormatted(message, THEME_WARNING, "");
+    }
+
+    public static String getWarning(String message) {
+        return getFormatted(message, THEME_WARNING, "");
     }
 
     public static void printError(String message) {
         printFormatted(message, THEME_ERROR, "");
     }
 
-    public static String getBoardAsString(Board board, ChessGame.TeamColor colorDown) {
+    public static String getError(String message) {
+        return getFormatted(message, THEME_ERROR, "");
+    }
+
+    public static String getBoardAsString(Board board, ChessGame.TeamColor colorDown, Position positionToHighlight) {
         StringBuilder output = new StringBuilder();
 
         // black on top, white on bottom
@@ -136,6 +169,31 @@ public class ConsoleOutput {
             cols = temp;
         }
 
+        String highlightMessage = null;
+        Set<Integer> highlightHashCodes = new HashSet<>();
+        int selectedPositionHash = -1;
+
+        // get the valid moves at that position, or return a message saying why it can't
+        if(positionToHighlight != null) {
+            selectedPositionHash = positionToHighlight.hashCode();
+            Piece selected = board.getPiece(positionToHighlight);
+            if (selected == null) {
+                highlightMessage = "There isn't a piece at " + positionToHighlight.toChessNotation() + ".";
+            }
+            else {
+                Collection<ChessMove> validMoves = selected.pieceMoves(board, positionToHighlight);
+                if(validMoves.isEmpty()) {
+                    highlightMessage = "There are no valid moves from " + positionToHighlight.toChessNotation() + ".";
+                }
+                else {
+                    for (ChessMove move : validMoves) {
+                        highlightHashCodes.add(move.getEndPosition().hashCode());
+                    }
+                    highlightMessage = "Showing valid moves from " + positionToHighlight.toChessNotation() + ".";
+                }
+            }
+        }
+
         // print the column markers
         output.append(EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY);
         output.append("   ");
@@ -147,12 +205,30 @@ public class ConsoleOutput {
             output.append(EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY).append(" ").append(row).append(" ");
 
             for(int col : cols) {
-                if(row % 2 != col % 2) {
-                    // color every other tile black
-                    output.append(EscapeSequences.SET_BG_COLOR_BLACK);
+                int currentHash = (row*10)+col;
+                if(currentHash != selectedPositionHash){
+                    if(row % 2 != col % 2) {
+                        // color every other tile black (dark green if highlighted)
+                        if(highlightHashCodes.contains(currentHash)){
+                            output.append(SET_BG_COLOR_DARK_GREEN);
+                        }
+                        else {
+                            output.append(EscapeSequences.SET_BG_COLOR_BLACK);
+                        }
+                    }
+                    else {
+                        // color every other tile gray (green if highlighted)
+                        if(highlightHashCodes.contains(currentHash)){
+                            output.append(SET_BG_COLOR_GREEN);
+                        }
+                        else {
+                            output.append(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+                        }
+                    }
                 }
                 else {
-                    output.append(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+                    // the selected position
+                    output.append(SET_BG_COLOR_YELLOW);
                 }
 
                 Piece current = board.getPiece(row, col);
@@ -175,6 +251,7 @@ public class ConsoleOutput {
         for(int col : cols) { output.append(EscapeSequences.SPACER).append(colToLetter(col)).append(" "); }
         output.append(EscapeSequences.RESET_ALL_FORMATTING);
         output.append("\n");
+        if(highlightMessage != null) output.append(highlightMessage);
 
         return output.toString();
     }
@@ -212,5 +289,13 @@ public class ConsoleOutput {
             case 8 -> "h";
             default -> "";
         };
+    }
+
+    public static String getChessMoveInfo() {
+        return getFormatted("How To Enter Chess Moves:", THEME_PRIMARY, SET_TEXT_ITALIC) +
+                getFormatted(" - Enter in the start position, a space, and the end position.", THEME_PRIMARY_LIGHT, "") +
+                getFormatted("    - Example: \"e2 e4\"", THEME_PRIMARY, "") +
+                getFormatted(" - If your pawn will get promoted, enter your move and the name of the promotion piece.", THEME_PRIMARY_LIGHT, "") +
+                getFormatted("    - Example: \"g2 g1 queen\"", THEME_PRIMARY, "");
     }
 }

@@ -1,16 +1,11 @@
 package chess.pieces;
 
-import chess.Board;
-import chess.Move;
-import chess.Position;
-import chess.interfaces.ChessBoard;
-import chess.interfaces.ChessGame;
-import chess.interfaces.ChessMove;
-import chess.interfaces.ChessPosition;
+import chess.*;
+import chess.ChessPosition;
 
 import java.util.Collection;
 
-public class Piece implements chess.interfaces.ChessPiece {
+public class Piece implements ChessPiece {
     // the Piece class is not meant to be used as it's just a base case, the specific Pawn, Rook, Bishop, etc. classes need to be instantiated
 
     ChessGame.TeamColor color;

@@ -1,4 +1,4 @@
-import chess.interfaces.ChessGame;
+import chess.ChessGame;
 import models.UserData;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;

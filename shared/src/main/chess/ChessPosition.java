@@ -1,4 +1,4 @@
-package chess.interfaces;
+package chess;
 
 /**
  * Represents a single square position on a chess board

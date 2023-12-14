@@ -1,17 +1,13 @@
 package chess;
 
-import chess.interfaces.ChessGame;
-import chess.interfaces.ChessMove;
-import chess.interfaces.ChessPosition;
-import chess.interfaces.ChessPiece;
 import chess.pieces.*;
 
 import java.util.*;
 
-import static chess.interfaces.ChessGame.TeamColor.WHITE;
-import static chess.interfaces.ChessPiece.PieceType.KING;
+import static chess.ChessGame.TeamColor.WHITE;
+import static chess.ChessPiece.PieceType.KING;
 
-public class Board implements chess.interfaces.ChessBoard {
+public class Board implements ChessBoard {
     public Board(){}
 
     // copy constructor

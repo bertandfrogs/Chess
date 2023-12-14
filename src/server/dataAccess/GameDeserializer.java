@@ -3,15 +3,15 @@ package server.dataAccess;
 import chess.Board;
 import chess.Game;
 import chess.Position;
-import chess.interfaces.ChessGame;
+import chess.ChessGame;
 import chess.pieces.*;
 import server.ServerException;
 
 import java.util.Objects;
 import java.util.Scanner;
 
-import static chess.interfaces.ChessGame.TeamColor.BLACK;
-import static chess.interfaces.ChessGame.TeamColor.WHITE;
+import static chess.ChessGame.TeamColor.BLACK;
+import static chess.ChessGame.TeamColor.WHITE;
 
 public class GameDeserializer {
     public Game deserialize(String json) throws ServerException {

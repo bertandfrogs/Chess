@@ -1,10 +1,6 @@
 package chess.adapters;
 
-import chess.Board;
-import chess.Game;
-import chess.Move;
-import chess.Position;
-import chess.interfaces.*;
+import chess.*;
 import chess.pieces.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

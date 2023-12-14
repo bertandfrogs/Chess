@@ -1,5 +1,5 @@
 import chess.adapters.ChessAdapter;
-import chess.interfaces.ChessGame;
+import chess.ChessGame;
 import com.google.gson.Gson;
 import service.*;
 

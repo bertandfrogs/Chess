@@ -1,13 +1,11 @@
 package chess.pieces;
 
-import chess.Move;
-import chess.Position;
-import chess.interfaces.*;
+import chess.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static chess.interfaces.ChessPiece.PieceType.*;
+import static chess.ChessPiece.PieceType.*;
 
 public class Pawn extends Piece {
     public Pawn(ChessGame.TeamColor c) {

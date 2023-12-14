@@ -1,12 +1,7 @@
 package passoffTests;
 
+import chess.*;
 import chess.pieces.*;
-import chess.interfaces.*;
-
-import chess.Board;
-import chess.Game;
-import chess.Move;
-import chess.Position;
 
 /**
  * Used for testing your code
@@ -19,11 +14,11 @@ public class TestFactory {
         return new Board();
     }
 
-    public static chess.interfaces.ChessGame getNewGame(){
+    public static ChessGame getNewGame(){
         return new Game();
     }
 
-    public static ChessPiece getNewPiece(chess.interfaces.ChessGame.TeamColor pieceColor, ChessPiece.PieceType type){
+    public static ChessPiece getNewPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type){
         return switch (type) {
             case PAWN -> new Pawn(pieceColor);
             case ROOK -> new Rook(pieceColor);
@@ -36,6 +31,15 @@ public class TestFactory {
 
     public static ChessPosition getNewPosition(Integer row, Integer col){
         return new Position(row, col);
+    }
+
+    public static ChessPosition getNewPositionFromChessNotation(char col, char row) {
+        if (Character.isDefined(col) && Character.isDefined(row)){
+            int colInt = Character.getNumericValue(col) - 9; // uses the numeric value of the letter "a" in Unicode (10) and subtracts 9 to get a = column 1.
+            int rowInt = Character.getNumericValue(row);
+            return new Position(colInt,rowInt);
+        }
+        return null;
     }
 
     public static ChessMove getNewMove(ChessPosition startPosition, ChessPosition endPosition, ChessPiece.PieceType promotionPiece){
@@ -61,7 +65,7 @@ public class TestFactory {
         just know increasing it can make tests take longer to run.
         (On the flip side, if you've got a good computer feel free to decrease it)
          */
-        return 3000L;
+        return 500L;
     }
     //------------------------------------------------------------------------------------------------------------------
 }

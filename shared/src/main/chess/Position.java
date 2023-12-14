@@ -2,7 +2,7 @@ package chess;
 
 import com.google.gson.Gson;
 
-public class Position implements chess.interfaces.ChessPosition {
+public class Position implements ChessPosition {
     int row;
     int column;
 

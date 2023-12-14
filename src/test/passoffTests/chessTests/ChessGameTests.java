@@ -1,11 +1,11 @@
 package passoffTests.chessTests;
 
 import chess.*;
-import chess.interfaces.ChessBoard;
-import chess.interfaces.ChessGame;
-import chess.interfaces.ChessMove;
-import chess.interfaces.ChessPosition;
-import chess.interfaces.ChessPiece;
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
+import chess.ChessPiece;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -542,6 +542,46 @@ public class ChessGameTests {
                 "Black is in check but isInCheck returned false");
         Assertions.assertFalse(game.isInCheck(ChessGame.TeamColor.WHITE),
                 "White is not in check but isInCheck returned true");
+    }
+
+    @Test
+    public void whiteInCheckEdgeCase() {
+        //black king
+        board.addPiece(TestFactory.getNewPositionFromChessNotation('e', '8'),
+                TestFactory.getNewPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
+
+        //white king
+        board.addPiece(TestFactory.getNewPositionFromChessNotation('e', '1'),
+                TestFactory.getNewPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
+
+        //threatening piece
+        board.addPiece(TestFactory.getNewPositionFromChessNotation('g', '1'),
+                TestFactory.getNewPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN));
+
+        // surrounding white pieces
+        board.addPiece(TestFactory.getNewPositionFromChessNotation('h', '1'),
+                TestFactory.getNewPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+
+        board.addPiece(TestFactory.getNewPositionFromChessNotation('f', '3'),
+                TestFactory.getNewPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
+
+        board.addPiece(TestFactory.getNewPositionFromChessNotation('f', '2'),
+                TestFactory.getNewPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+
+        board.addPiece(TestFactory.getNewPositionFromChessNotation('h', '2'),
+                TestFactory.getNewPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+
+        board.addPiece(TestFactory.getNewPositionFromChessNotation('e', '2'),
+                TestFactory.getNewPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+
+        //set up game
+        game = TestFactory.getNewGame();
+        game.setBoard(board);
+
+        Assertions.assertTrue(game.isInCheck(ChessGame.TeamColor.WHITE),
+                "White is in check but isInCheck returned false");
+        Assertions.assertFalse(game.isInCheckmate(ChessGame.TeamColor.WHITE),
+                "White is not in checkmate but isInCheck returned true");
     }
 
 

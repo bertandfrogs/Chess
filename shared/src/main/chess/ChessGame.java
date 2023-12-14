@@ -1,6 +1,5 @@
-package chess.interfaces;
+package chess;
 
-import chess.InvalidMoveException;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Collection;

@@ -1,8 +1,7 @@
 package server.services;
 
-import chess.interfaces.ChessGame;
+import chess.ChessGame;
 import server.ServerException;
-import server.dataAccess.DataAccess;
 import server.dataAccess.DatabaseSQL;
 import models.GameData;
 import service.GameResponse;

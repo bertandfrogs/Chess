@@ -1,25 +1,23 @@
 package chess;
 
 import chess.adapters.ChessAdapter;
-import chess.interfaces.*;
 
-import static chess.interfaces.ChessGame.TeamColor.*;
-import static chess.interfaces.ChessPiece.PieceType.*;
+import static chess.ChessGame.TeamColor.*;
+import static chess.ChessPiece.PieceType.*;
 import chess.pieces.Piece;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
 
 import java.util.*;
 
 // This class is the top-level management of the chess game.
 
-public class Game implements chess.interfaces.ChessGame {
+public class Game implements ChessGame {
     private TeamColor teamTurn;
     private Board chessBoard;
     public enum State {
         pregame,
         active,
+        paused,
         finished
     }
     private State gameState;
@@ -28,6 +26,13 @@ public class Game implements chess.interfaces.ChessGame {
         teamTurn = TeamColor.WHITE;
         chessBoard = new Board();
         gameState = State.pregame;
+    }
+
+    // copy constructor
+    public Game(Game copy) {
+        teamTurn = copy.getTeamTurn();
+        chessBoard = new Board(copy.chessBoard);
+        gameState = copy.getState();
     }
 
     public void newGame() {
@@ -46,9 +51,10 @@ public class Game implements chess.interfaces.ChessGame {
 
     public static State stringToState(String str){
         return switch (str) {
-            case "active" -> Game.State.active;
-            case "finished" -> Game.State.finished;
-            default -> Game.State.pregame;
+            case "active" -> State.active;
+            case "finished" -> State.finished;
+            case "paused" -> State.paused;
+            default -> State.pregame;
         };
     }
 

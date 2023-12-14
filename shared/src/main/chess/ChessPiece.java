@@ -1,4 +1,4 @@
-package chess.interfaces;
+package chess;
 
 import com.google.gson.annotations.SerializedName;
 

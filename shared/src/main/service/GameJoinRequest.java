@@ -1,6 +1,6 @@
 package service;
 
-import chess.interfaces.ChessGame;
+import chess.ChessGame;
 import com.google.gson.Gson;
 
 /**

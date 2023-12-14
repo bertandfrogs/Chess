@@ -1131,7 +1131,7 @@ public class WebSocketTests {
         //try to move pawn
         ChessPosition startingPosition = (ChessPosition) TestFactory.getNewPosition(2, 5);
         ChessPosition endingPosition = (ChessPosition) TestFactory.getNewPosition(4, 5);
-        ChessMove move = (ChessMove) TestFactory.getNewMove((chess.interfaces.ChessPosition) startingPosition, (chess.interfaces.ChessPosition) endingPosition, null);
+        ChessMove move = (ChessMove) TestFactory.getNewMove((ChessPosition) startingPosition, (ChessPosition) endingPosition, null);
 
         //create command
         TestModels.TestCommand moveCommand = new TestModels.TestCommand();
